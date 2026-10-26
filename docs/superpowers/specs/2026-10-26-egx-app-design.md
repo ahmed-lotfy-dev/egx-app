@@ -119,80 +119,95 @@ Rules:
 
 ```
 egx-app/
-  mobile/
-    src/
-      app/                 Expo Router routes
-      components/          shared UI
-      features/            market, stock, watchlist, news, ai, auth
-      lib/                 api client, auth client, i18n, format
-      stores/              zustand stores
-      constants/           design tokens
-      types/               DTOs mirrored from the API
-    assets/fonts/          IBM Plex Sans Arabic, Inter
-    app.json
-    eas.json
-    global.css
-  backend/
-    src/
-      config/              env, NIM, market calendar
-      db/
-        schema/            Drizzle tables
-        migrations/
-        seed/
-      providers/           tradingview, yahoo, rss
-      ingest/              universe, quotes, bars, news, scheduler
-      routes/              auth, market, instruments, watchlist, news, chat, status
-      services/            market, instruments, news, watchlist, ai, context
-      lib/                 logger, errors, rate limit, freshness
-      index.ts             API entrypoint
-      worker.ts            ingestion entrypoint
-    tests/
-      fixtures/            copied reference JSON and RSS samples
+  package.json             Bun workspaces root
+  bun.lock
+  apps/
+    mobile/
+      src/
+        app/               Expo Router routes
+        components/        shared UI
+        features/          market, stock, watchlist, news, ai, auth
+        lib/               api client, auth client, i18n, format
+        stores/            zustand stores
+        constants/         design tokens
+        types/             generated OpenAPI types
+      assets/fonts/        IBM Plex Sans Arabic, Inter
+      app.json
+      eas.json
+      global.css
+    api/
+      src/
+        config/            env, AI providers, market calendar
+        db/
+          schema/          Drizzle tables
+          migrations/
+          seed/
+        providers/         tradingview, yahoo, rss
+        ingest/            universe, quotes, bars, news, jobs
+        routes/            auth, market, instruments, watchlist, news, chat, status
+        services/          market, instruments, news, watchlist, ai, tools
+        lib/               logger, errors, rate limit, freshness
+        index.ts           API entrypoint
+        worker.ts          ingestion and job entrypoint
+      tests/
+        fixtures/          copied reference JSON and RSS samples
+      evals/               AI prompt set and runner
+  packages/
+    contracts/             Zod schemas and the OpenAPI document
   docs/
     discovery/             copied Phase 0 research
     PRODUCT.md
     DESIGN.md
     superpowers/specs/     this document and later specs
-  docker-compose.yml       Postgres and optional Redis for local development
+  docker-compose.yml       Postgres 18 for local development
   README.md
 ```
 
-No shared package in v1. The API is the contract, defined with Zod OpenAPI. The mobile app
-mirrors the DTOs in `mobile/src/types`. A generated client can replace the mirror later if
-drift becomes a problem.
+The workspace root uses Bun workspaces. `packages/contracts` is the single source of API
+truth: Zod request and response schemas plus the OpenAPI document. `openapi-typescript`
+generates `apps/mobile/src/types/api.d.ts` from that document, and the mobile app calls the
+API with `openapi-fetch`. A CI check regenerates the types and fails if the checked-in
+output is stale. No hand-mirrored DTOs.
 
 ## 8. Stack
 
 Mobile:
 
-- Expo SDK 58, React 19.3, React Native 0.88, TypeScript 6
-- expo-router
-- Uniwind 1.13 with Tailwind CSS 4 for styling
-- Zustand 5 for session, locale, and UI state
-- TanStack Query 5 for server state and polling
-- Better Auth Expo client with SecureStore
-- axios for REST, `expo/fetch` for SSE streaming
-- react-native-svg for charts, FlashList 2 for long lists
-- react-native-reanimated 4, gesture-handler, keyboard-controller
-- i18next and react-i18next, expo-localization
+- Expo SDK 58.0.19, React 19.3.1, React Native 0.88.0, TypeScript 6
+- expo-router 58.0.26 with typed routes
+- Uniwind 1.13.0 with Tailwind CSS 4 for styling
+- Zustand 5.0.16 for session, locale, and UI state
+- TanStack Query 5.105 for server state and polling
+- Better Auth Expo client 1.7.13 with SecureStore
+- `openapi-fetch` 0.17 against generated OpenAPI types
+- AI SDK 7 (`ai` 7.0.153, `@ai-sdk/react` 4.0.157) with `DefaultChatTransport`
+  over `expo/fetch`
+- Victory Native XL 43.0.1 with Skia 2.14 for detail charts, react-native-svg for
+  lightweight row sparklines
+- FlashList 2.3, Reanimated 4, gesture-handler, keyboard-controller
+- i18next 26 and react-i18next 17, expo-localization 58
 - expo-web-browser for article links, expo-font for bundled fonts
-- react-native-markdown-display for AI answers
+- react-native-markdown-display for AI answer text
 
 Backend:
 
-- Bun runtime, Hono 4
-- Zod 4, `@hono/zod-openapi`, Scalar API reference
-- Drizzle ORM and drizzle-kit, Postgres 16
-- Better Auth with the Drizzle adapter
+- Bun runtime, Hono 4.13.14
+- Zod 4.6.7, `@hono/zod-openapi`, Scalar API reference
+- Drizzle ORM 0.45.4 and drizzle-kit, Postgres 18
+- Better Auth 1.7.13 with the Drizzle adapter and the email OTP plugin
+- pg-boss 12.38 for durable jobs, cron schedules, retries, and backoff
+- AI SDK 7 with `@ai-sdk/openai-compatible` 3.0.78 for NVIDIA NIM and
+  `@ai-sdk/google` 4.0.105 for Gemini fallback
 - Pino for structured logs
-- NVIDIA NIM OpenAI-compatible chat completions
 - `fast-xml-parser` for RSS
-- Resend for verification email, with console logging of the verification link in dev
+- Resend for OTP and account email
+- `openapi-typescript` 7.13 in CI to generate the mobile client types
 
 Infrastructure:
 
-- Docker Compose for local Postgres
+- Docker Compose with `postgres:18-alpine`
 - Two processes in development and production: `api` and `worker`
+- pg-boss schedules and retries live in the worker. The API only reads the database.
 - EAS Build for Android first, iOS later
 
 ## 9. Data model
@@ -211,6 +226,8 @@ Numeric columns use `numeric`, not floats.
 | isin | text null | when known |
 | name_en | text not null | |
 | name_ar | text null | from TradingView |
+| search_name_en | text not null | lowercase, punctuation stripped |
+| search_name_ar | text null | Arabic-normalized |
 | sector | text null | |
 | industry | text null | |
 | logoid | text null | TradingView logo id |
@@ -219,8 +236,20 @@ Numeric columns use `numeric`, not floats.
 | is_active | boolean not null default true | |
 | created_at, updated_at | timestamptz not null | |
 
-Indexes: unique `ticker`, unique `tv_symbol`, GIN trigram on `name_en` and `name_ar` after
-enabling `pg_trgm`, btree on `sector`.
+`search_name_ar` is produced by a Postgres `normalize_arabic(text)` function that removes
+diacritics and tatweel, unifies alef variants to ا, ya variants to ي, and ta marbuta to ه.
+It is immutable and used by both backfill and query paths.
+
+Indexes: unique `ticker`, unique `tv_symbol`, GIN trigram on `search_name_en` and
+`search_name_ar` after enabling `pg_trgm`, btree on `sector`.
+
+### `instrument_aliases`
+
+`id`, `instrument_id`, `alias`, `lang` (`ar` or `en`), `normalized_alias`, `source`.
+Unique on `(instrument_id, normalized_alias)`. Examples: `CIB`, `COMI`,
+`التجارى الدولى`, `التجاري الدولي`, `Commercial International Bank`. Aliases feed search and
+AI ticker resolution. Seed from TradingView names, Egyptian exchange naming, and manual
+entries for the top 50 names.
 
 ### `latest_quotes`
 
@@ -291,8 +320,11 @@ integer for manual ordering. Unique on `(user_id, instrument_id)`.
 
 ### `chat_messages`
 
-`id uuid`, `thread_id`, `role` (`user`, `assistant`, `system`), `content`, `citations
-jsonb`, `model`, `token_usage jsonb`, `status` (`complete`, `failed`), `created_at`.
+`id uuid`, `thread_id`, `client_message_id` text, `role` (`user`, `assistant`, `system`),
+`content`, `parts jsonb`, `citations jsonb`, `provider`, `model`, `token_usage jsonb`,
+`status` (`complete`, `failed`), `created_at`. `parts` stores the AI SDK UI message parts,
+including tool calls and tool results, so a restored thread renders exactly as it did live.
+`client_message_id` makes retries idempotent.
 
 ### `ingest_runs`
 
@@ -327,21 +359,24 @@ TradingView scan adapter in v1.
 
 ### Schedules
 
-Timezone is `Africa/Cairo`. Trading days are Sunday to Thursday.
+Timezone is `Africa/Cairo`. Trading days are Sunday to Thursday. All jobs run through
+pg-boss with a retry limit of 3, exponential backoff, and a singleton key per job so two
+workers can never run the same job at once. Job state survives restarts and deployments.
 
 | Job | Schedule | Notes |
 |---|---|---|
-| Universe refresh | Daily 17:00, plus on worker boot | TradingView `/egypt/scan`, 296 instruments |
+| Universe refresh | Daily 17:00, plus on boot | TradingView `/egypt/scan`, 296 instruments |
 | Fundamentals refresh | Daily 17:10 | Same scan response, persisted per instrument |
-| Quotes | Every 5 minutes, 10:00 to 14:30 | Last run at 14:35 captures the close |
-| Daily bars | Daily 16:30, plus 60 day backfill on first boot | Yahoo `.CA` chart endpoint |
+| Quotes | Every 10 minutes with jitter, 10:00 to 14:30 | Last run at 14:35 captures the close |
+| Daily bars | Daily 16:30, plus 60 day backfill on boot | Yahoo `.CA` chart endpoint |
 | News | Every 20 minutes, all day | Publisher RSS, both languages |
 | Snapshot retention | Daily 03:00 | Delete snapshots older than 90 days |
 | Index refresh | Daily 17:15, plus on boot | See open question 3 |
 
 Schedules are configuration values, not hardcoded strings. The market calendar module
 returns `isTradingDay` and `sessionState` (`pre`, `open`, `closed`) and is the only place
-that knows EGX hours and holidays.
+that knows EGX hours and holidays. Jitter is plus or minus 60 seconds, so quote polls do
+not arrive on a fixed pattern.
 
 ### Source rules
 
@@ -355,6 +390,11 @@ that knows EGX hours and holidays.
 6. Every write records `source` and `as_of`.
 7. Raw universe, fundamentals, and failed-parse payloads go to `ingest_payloads` for 14
    days. Successful quote payloads are not retained in full.
+8. Outbound requests set a descriptive User-Agent, honor `Retry-After`, and back off
+   exponentially on 429 and 5xx responses. A provider that fails three consecutive runs
+   is marked degraded on the data status screen.
+9. Quote polling is 10 minutes with jitter, not a tight loop. This respects the unofficial
+   source and avoids patterns that look abusive.
 
 ### Failure behavior
 
@@ -420,7 +460,7 @@ Errors use:
 | POST | `/api/chat/threads` | Body `{ instrumentId? }` |
 | GET | `/api/chat/threads/:id` | Messages |
 | DELETE | `/api/chat/threads/:id` | Delete thread |
-| POST | `/api/chat/stream` | SSE, body `{ threadId, message, locale }` |
+| POST | `/api/chat` | AI SDK UI message stream, body `{ threadId, messages, locale }` |
 | GET | `/api/status/data` | Last successful run per job, staleness |
 | GET | `/health` | Process liveness |
 
@@ -462,7 +502,7 @@ It must:
 
 ### Context assembly
 
-Before calling the model, the backend builds a context bundle:
+The backend builds a base context bundle and exposes tools for deeper retrieval:
 
 - Instrument identity: ticker, names, sector, industry.
 - Latest quote with `asOf` and `stale`.
@@ -477,22 +517,63 @@ Ticker resolution is deterministic: exact ticker match, then normalized Arabic o
 name match using trigram search. If several instruments match, the context includes the top
 three candidates and the model asks which one the user means.
 
-### Model call
+### AI SDK integration
 
-- Provider: NVIDIA NIM, OpenAI-compatible endpoint.
-- Model: `meta/llama-3.3-70b-instruct`, configurable through `NIM_CHAT_MODEL`.
-- Request: server-side system prompt, last 6 messages, the context bundle, temperature 0.2,
-  max output 800 tokens, timeout 120 seconds.
-- Streaming: SSE events `token`, `citations`, `done`, `error`. The app uses `expo/fetch` to
-  read the stream and can abort.
-- Persistence: the user message is stored immediately. The assistant message is stored on
-  completion with citations, model name, and token usage. Aborted messages are stored with
-  status `failed` and a short error note.
-- Guardrail: the system prompt is versioned in `backend/src/services/ai/prompts.ts`.
+The backend uses AI SDK 7. `streamText` calls the selected provider with the system prompt,
+recent UI messages, and backend tools. The route returns `toUIMessageStreamResponse()`.
+The app uses `useChat` with `DefaultChatTransport({ api, fetch: expoFetch })` and renders
+text, tool calls, tool results, and citation data parts.
 
-Tool calling is not a dependency in v1. The context bundle covers the known questions. If
-the configured model reliably supports OpenAI tool calls, a second iteration can add
-`get_news`, `get_peers`, and `get_history` tools without changing the app contract.
+Tools are typed with Zod and execute against our Postgres read model:
+
+| Tool | Returns |
+|---|---|
+| `search_instruments` | Candidates from ticker, alias, Arabic and English name matches |
+| `get_quote` | Latest quote with as_of and stale |
+| `get_fundamentals` | Ratios, absolute EGP figures, as_of, missing fields |
+| `get_history` | Daily bars for a range with return and volatility |
+| `get_peers` | Same-sector peers and median ratios |
+| `get_news` | Recent linked articles with source, date, and summary |
+| `get_market_overview` | Indices, breadth, and top movers |
+| `get_watchlist` | The user's watchlist |
+
+Tools never call a third party. They read Postgres. Tool results carry `source` and
+`asOf`, and the system prompt requires them in the answer.
+
+Tool calling is mandatory in v1. The model must call at least one tool for any question
+that names a stock, sector, or price. If it answers without a tool, the turn is flagged in
+logs and the UI shows a lower-confidence label.
+
+### Model selection and fallback
+
+Primary provider: NVIDIA NIM through `@ai-sdk/openai-compatible`.
+
+Fallback provider: Google Gemini through `@ai-sdk/google`.
+
+Model ids come from environment variables, not source code:
+
+- `NIM_CHAT_MODEL`, benchmarked across DeepSeek V3.1 Terminus, GLM-5, and a Nemotron 3
+  model. NIM documents tool calling for DeepSeek V3.1 Terminus and GLM-5.
+- `GEMINI_MODEL`, a current Gemini Flash class model, chosen after the same benchmark.
+
+A fixed evaluation set of 10 Arabic finance prompts runs before a model is pinned. It
+scores numeric correctness against seeded fixtures, tool selection, citation completeness,
+Arabic fluency, and refusal behavior. The winner becomes the default in `.env.example`.
+No model is hardcoded.
+
+Fallback policy: if the primary provider fails with 429, 5xx, or a timeout before the first
+token, the request retries once on Gemini and logs an `ai_fallback` event with both
+providers. A failure after streaming starts is surfaced with a retry action and is never
+silently switched. The `provider` and `model` columns record what actually ran.
+
+### Streaming and persistence
+
+- `streamText` with temperature 0.2, max output 800 tokens, and a 120 second timeout.
+- UI message stream over `expo/fetch`, with a client abort controller and a stop button.
+- The user message is stored immediately with `client_message_id`. The assistant message is
+  stored in `onFinish` with parts, citations, provider, model, and token usage.
+- Aborted or failed turns are stored with status `failed` and a short error note.
+- The system prompt is versioned in `apps/api/src/services/ai/prompts.ts`.
 
 ### Citation format
 
@@ -506,11 +587,11 @@ the configured model reliably supports OpenAI tool calls, a second iteration can
 
 ### Cost and abuse control
 
-- 20 messages per hour per user.
-- Context capped at 12,000 tokens.
+- 20 messages per hour per user. One fallback call is part of the same user turn.
+- Context capped at 12,000 tokens and 8 tool calls per turn.
 - One in-flight stream per user.
-- Failed or timed-out calls do not retry automatically more than once.
-- Token usage stored per message for review.
+- Failed or timed-out calls retry at most once, and only on the fallback provider.
+- Token usage and provider stored per message for review.
 
 ## 13. Mobile application
 
@@ -520,8 +601,8 @@ the configured model reliably supports OpenAI tool calls, a second iteration can
 app/
   _layout.tsx                 providers, fonts, auth gate, RTL bootstrap
   (auth)/
-    sign-in.tsx
-    sign-up.tsx
+    sign-in.tsx              email entry and Google
+    otp.tsx                  six digit code entry
   (app)/
     (tabs)/
       _layout.tsx             5 tabs
@@ -537,6 +618,18 @@ app/
 
 Tabs: Markets, Watchlist, News, AI, Profile. Stock detail opens as a stack screen from
 lists, search, news, and AI citations.
+
+### Authentication
+
+- Email OTP and Google only. No passwords in v1.
+- The email screen calls `authClient.emailOtp.sendVerificationOtp`, then the code screen
+  calls `authClient.signIn.emailOtp` with the six digit code.
+- Codes expire after 10 minutes, allow 5 attempts, and are rate limited by email and IP.
+- A new user record is created on the first successful OTP or Google sign in. There is no
+  separate registration screen.
+- Google uses the Better Auth Expo client with the `egx://` callback scheme.
+- Apple sign in is required before an iOS App Store release and is added in M5.
+- Sign out clears the secure session and the query cache.
 
 ### Screens
 
@@ -560,7 +653,9 @@ Stock detail:
 
 - Header: logo, Arabic name, English name and ticker, price, change, as-of time and stale
   badge.
-- Chart: custom SVG area chart with 1W, 1M, 3M, 6M, 1Y ranges and a gradient fill.
+- Chart: Victory Native XL area chart with 1W, 1M, 3M, 6M, 1Y ranges, axes, crosshair,
+  and a scrub tooltip. Positive and negative ranges use green and red fills. Row
+  sparklines use a small react-native-svg path.
 - Key stats: market cap, P/E, P/B, EPS, ROE, dividend yield, debt to equity, 52 week range.
   Missing fields show "غير متاح" or "Not available".
 - Peers: same-sector names with P/E and dividend yield.
@@ -593,11 +688,18 @@ Profile:
 ### State and data fetching
 
 - TanStack Query for all server state. Query keys include the ticker and range.
+- REST calls go through a typed `openapi-fetch` client generated from
+  `packages/contracts`. Regenerating types is part of the API change workflow.
 - Polling: overview and watchlist every 60 seconds while foregrounded. Instrument detail
-  every 60 seconds during an open session.
+  every 60 seconds during an open session. Server-side quote polling is the slower 10
+  minute interval.
 - Optimistic watchlist add and remove with rollback on error.
 - Zustand for session, locale, and UI state. Locale persisted with AsyncStorage.
-- Chat streaming managed by a dedicated hook with an AbortController.
+- AI chat uses `useChat` with `DefaultChatTransport({ api, fetch: expoFetch })`. The screen
+  renders text parts, tool call status, tool results, citations, and errors. A stop button
+  aborts the stream.
+- The AI SDK Expo setup polyfills are imported once at app startup, before any transport is
+  created, following the official Expo guide.
 - Offline: previously fetched data stays in memory and a banner explains that updates are
   paused. No offline mutations in v1.
 
@@ -666,11 +768,13 @@ until a light theme is designed.
 
 ### Charts
 
-- Custom `react-native-svg` area chart with a gold line and low-opacity gradient fill.
-- Positive range uses green fill, negative range uses red fill, line stays gold.
-- Axis labels are muted, grid lines 1px border color.
-- Touch scrub shows a vertical rule and the close for that day.
-- No candlesticks in v1.
+- Detail chart: Victory Native XL (Skia). Gold line, low-opacity gradient fill, muted axis
+  labels, 1px grid lines, crosshair, and a scrub tooltip showing the date and close.
+- Positive range uses a green fill, negative range uses a red fill, the line stays gold.
+- Range selector: 1W, 1M, 3M, 6M, 1Y. Changing range refetches from the API.
+- Row sparklines: a lightweight react-native-svg path, no axes, no labels.
+- No candlesticks in v1. Victory Native XL can add them later without changing data
+  contracts.
 
 ## 15. Freshness, errors, and edge cases
 
@@ -691,9 +795,23 @@ until a light theme is designed.
 
 - All provider keys and model keys live on the backend. The mobile app has no secrets.
 - Better Auth handles sessions. Cookies and tokens are stored in SecureStore on device.
-- Passwords hashed by Better Auth. Email verification required in production. In local
-  development the verification link is written to the API log.
+- Authentication is email OTP and Google. No passwords are stored.
+- OTP codes are hashed at rest, expire after 10 minutes, allow 5 attempts, and are rate
+  limited by email and IP. Responses do not reveal whether an email exists.
+- Google OAuth verifies the token audience and redirects only to the `egx://` scheme.
 - Auth rate limiting and bot protection on the auth routes.
+- Provider fallback keys are separate environment variables with least-privilege scopes.
+
+Backend environment variables:
+
+`DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`,
+`GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`, `NVIDIA_API_KEY`, `NIM_CHAT_MODEL`,
+`GOOGLE_GENERATIVE_AI_API_KEY`, `GEMINI_MODEL`, `AI_PRIMARY`, `AI_FALLBACK`, `APP_SCHEME`,
+`CORS_ORIGINS`, `TZ`.
+
+Mobile environment variables:
+
+`EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_AUTH_SCHEME`.
 - All SQL through Drizzle. No string-built queries.
 - All request bodies and query parameters validated with Zod.
 - Chat content is private to the user and never used for training.
@@ -709,6 +827,9 @@ until a light theme is designed.
 
 - Pino JSON logs with request id, user id where authenticated, route, status, and latency.
 - One log line per ingestion run with job, source, status, rows, and duration.
+- One log line per AI turn with thread id, provider, model, tool names, token usage,
+  latency, and whether fallback ran. No prompt or answer text in logs by default.
+- `ai_fallback` events are counted so provider health is visible.
 - `/api/status/data` returns last success and last failure per job.
 - Worker heartbeat: the worker writes a row every minute. The API health check reports
   worker health as degraded if the heartbeat is older than 5 minutes.
@@ -724,15 +845,22 @@ Backend:
 - RSS parser tests with sample XML for each source, including malformed input.
 - Ticker resolver tests with Arabic names, English names, mixed case, and partial matches.
 - Freshness tests: open session, closed session, weekend, and stale thresholds.
-- API integration tests against a test Postgres database, covering auth, watchlist
+- Arabic normalization tests for alef, ya, ta marbuta, diacritics, and alias matching.
+- API integration tests against a test Postgres database, covering OTP auth, watchlist
   isolation between users, pagination, and error envelopes.
-- AI context builder tests with a mocked database. No live model calls in tests.
+- pg-boss job tests for cron registration, singleton behavior, retry, and backoff.
+- Contract drift test: regenerate OpenAPI types and fail if the checked-in output differs.
+- AI tool tests with a mocked database and seeded fixtures. No live model calls in CI.
+- A separate `bun run ai:eval` script runs the 10 prompt evaluation set against the
+  configured NIM and Gemini models. It is manual, not part of CI.
 
 Mobile:
 
 - Jest and React Native Testing Library for formatting, RTL text direction helpers, and
   watchlist optimistic updates.
-- Component tests for quote rows, stale badges, and empty states.
+- Component tests for quote rows, stale badges, empty states, and AI tool and citation
+  parts.
+- Maestro flows for OTP sign in, Arabic search and watchlist add, and one streamed AI turn.
 - Manual Android checklist: sign in, search in Arabic, add to watchlist, switch language,
   read news, stream an AI answer, kill the network and verify the offline banner.
 
@@ -746,17 +874,20 @@ Acceptance for data correctness:
 
 M1. Foundation
 
-- Monorepo folders, Expo app boots on Android, API boots with Postgres, migrations run.
-- Better Auth sign up, sign in, Google sign in, session gate in the app.
+- Bun workspace with `apps/mobile`, `apps/api`, and `packages/contracts`.
+- Expo app boots on Android, API boots with Postgres 18, migrations run.
+- Better Auth email OTP and Google sign in, session gate in the app.
+- Generated OpenAPI types are committed and the drift check runs.
 - Design tokens and base UI components.
-- Acceptance: a new user can sign up and reach an empty Markets screen.
+- Acceptance: a new user can request a code, verify it, and reach an empty Markets screen.
 
 M2. Ingestion and market API
 
 - TradingView universe and fundamentals, Yahoo bars, quotes polling, RSS news.
+- pg-boss schedules with retries, backoff, jitter, and singleton keys.
 - Instruments, overview, history, news, and status endpoints.
-- Acceptance: 296 instruments stored, quotes refresh on schedule, `/api/status/data` shows
-  successful runs, stale logic verified.
+- Acceptance: 296 instruments stored, quotes refresh on the 10 minute schedule,
+  `/api/status/data` shows successful runs, stale logic verified.
 
 M3. Core mobile experience
 
@@ -766,14 +897,18 @@ M3. Core mobile experience
 
 M4. AI assistant
 
-- Threads, context builder, streaming chat, citations, rate limit.
-- Acceptance: "قارن كومي واتصالات" returns a streamed answer citing both quotes and
-  fundamentals with dates and the disclaimer.
+- AI SDK 7 with `useChat`, typed tools, citations, persistence, and rate limits.
+- Model benchmark across NIM candidates and Gemini, then pin the defaults.
+- NIM primary with Gemini fallback and fallback logging.
+- Acceptance: "قارن كومي واتصالات" streams a grounded answer that calls tools, cites both
+  quotes and fundamentals with dates, shows the disclaimer, and survives a forced primary
+  provider failure by answering through Gemini.
 
 M5. Hardening
 
 - RTL polish, error and empty states, accessibility pass, reduced motion.
-- Data status screen, README, env example, EAS Android build profile.
+- Apple sign in for iOS, contract drift CI, data status screen, README, env example,
+  EAS Android build profile.
 - Acceptance: manual checklist passes on a physical Android device.
 
 ## 20. Risks and open questions
@@ -781,7 +916,8 @@ M5. Hardening
 1. TradingView and Yahoo terms. Both are unofficial and their terms may restrict
    commercial use. v1 is private. Resolve before any public launch.
 2. Delayed versus real-time TradingView data for EGX is unconfirmed. The UI must say
-   delayed and show as-of times.
+   delayed and show as-of times. The 10 minute poll cadence limits source abuse but also
+   means the app cannot promise tick-level freshness.
 3. Index symbols. Confirm EGX 30, EGX 70, and EGX 100 availability from TradingView or
    Yahoo. If unavailable, fall back to breadth and a market-cap weighted proxy.
 4. EGX holiday calendar. Source an official list and encode it in the market calendar.
@@ -789,8 +925,9 @@ M5. Hardening
    empty responses without overwriting data.
 5. Fundamentals coverage. Only 70 to 90 names have usable data. The UI must show coverage
    honestly.
-6. NIM model quality in Egyptian Arabic and structured output. Evaluate with a fixed prompt
-   set. If quality is insufficient, switch `NIM_CHAT_MODEL` to a stronger model.
+6. NIM model quality in Egyptian Arabic, tool calling, and structured output. Evaluate the
+   three candidates with the fixed prompt set. If quality is insufficient, the Gemini
+   fallback becomes primary through configuration, with no code change.
 7. RTL reload UX. The language switch requires a restart. This is acceptable for v1 but
    should be revisited.
 8. NTFS project storage. Metro and file watching on NTFS can be slower. If it becomes a
@@ -798,6 +935,14 @@ M5. Hardening
 9. News licensing. Headline, summary, and link only. Full text requires a licence.
 10. Private app security. Accounts are required, but there is no admin role. If the app is
     shared, add per-user rate limits and monitoring before opening sign ups.
+11. Gemini key availability and cost. The fallback is dormant without a Google AI Studio
+    key. The app must fail gracefully with a retry action, not a broken chat screen.
+12. Resend deliverability. OTP email needs a verified sending domain. Until then, codes go
+    to the owner's verified address only and the API logs the code in local development.
+13. pg-boss on Bun and Postgres 18. Validate the worker, cron, and retry behavior in M2
+    before relying on it. Fallback is a scheduler with Postgres advisory locks.
+14. Typed client drift. The OpenAPI document and generated types can diverge if the CI
+    drift check is skipped. Treat regeneration as part of every API change.
 
 ## 21. Decision log
 
@@ -811,3 +956,12 @@ M5. Hardening
 | 2026-10-26 | AI as grounded research assistant | Data limits and advice responsibility |
 | 2026-10-26 | New project on HDD | Home partition has 2.1 GB free |
 | 2026-10-26 | No Sharia engine in v1 | No licensed methodology or structured statements yet |
+| 2026-10-26 | AI SDK 7 as the AI layer | Standard tools, streaming, transport and persistence |
+| 2026-10-26 | NIM primary, Gemini fallback | Free primary with a quality and outage fallback |
+| 2026-10-26 | Email OTP plus Google auth | Modern mobile sign in without password flows |
+| 2026-10-26 | Bun workspace with typed client | One contract, no DTO drift, no axios |
+| 2026-10-26 | Victory Native XL charts | Skia performance and finance-grade interaction |
+| 2026-10-26 | pg-boss durable jobs | Retries and singleton runs without extra infrastructure |
+| 2026-10-26 | 10 minute quote polling with jitter | Respects an unofficial source and avoids abuse patterns |
+| 2026-10-26 | Arabic normalization and aliases | Trigrams alone fail real Arabic search |
+| 2026-10-26 | Postgres 18 | Current stable image, same Drizzle stack |
