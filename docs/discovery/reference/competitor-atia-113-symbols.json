@@ -1,0 +1,1553 @@
+[
+ {
+  "sym": "COMI",
+  "name": "التجاري الدولي",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx30",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "QNBA",
+  "name": "قطر الوطني الأهلي",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx30"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ADIB",
+  "name": "مصرف أبوظبي الإسلامي",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CIEB",
+  "name": "كريدي أجريكول مصر",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx30"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "FAIT",
+  "name": "بنك فيصل الإسلامي",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SAUD",
+  "name": "بنك البركة مصر",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EXPA",
+  "name": "المصري لتنمية الصادرات",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "HDBK",
+  "name": "بنك التعمير والإسكان",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EGBE",
+  "name": "البنك المصري الخليجي",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CANA",
+  "name": "بنك قناة السويس",
+  "groups": [
+   "banks"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "HRHO",
+  "name": "إي إف چي هيرميس القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx30",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "FWRY",
+  "name": "فوري للمدفوعات",
+  "groups": [
+   "finance",
+   "telecom"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EFIH",
+  "name": "إي فاينانس للاستثمارات المالية والرقمية",
+  "groups": [
+   "finance",
+   "telecom"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CNFN",
+  "name": "كونتكت المالية القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "BTFH",
+  "name": "بلتون المالية القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx30"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CCAP",
+  "name": "القلعة للاستشارات المالية",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx30"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "PRMH",
+  "name": "برايم القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "PIOH",
+  "name": "بايونيرز القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ATLC",
+  "name": "التوفيق للتأجير التمويلي",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "OFH",
+  "name": "أوراسكوم المالية القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "BINP",
+  "name": "بي إنفستمنتس القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CICH",
+  "name": "سي آي كابيتال القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "FHEC",
+  "name": "فيصل الإسلامي للاستثمار",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": true,
+  "nodata": true
+ },
+ {
+  "sym": "MOIN",
+  "name": "المهندس للتأمين",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EKHO",
+  "name": "القابضة المصرية الكويتية",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx30"
+  ],
+  "currency": "USD",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EKHOA",
+  "name": "القابضة المصرية الكويتية (بالجنيه)",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "AIVC",
+  "name": "العربية للاستثمارات القابضة",
+  "groups": [
+   "finance"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": true,
+  "nodata": true
+ },
+ {
+  "sym": "TMGH",
+  "name": "طلعت مصطفى القابضة",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MASR",
+  "name": "مدينة مصر للإسكان والتعمير",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "PHDC",
+  "name": "بالم هيلز للتعمير",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "HELI",
+  "name": "مصر الجديدة للإسكان والتعمير",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ORHD",
+  "name": "أوراسكوم للتنمية مصر",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "OCDI",
+  "name": "سوديك",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EMFD",
+  "name": "إعمار مصر للتنمية",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ARAB",
+  "name": "المطورون العرب القابضة",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ELSH",
+  "name": "الشمس للإسكان والتعمير",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ZMID",
+  "name": "زهراء المعادي للاستثمار والتعمير",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "UNIT",
+  "name": "المتحدة للإسكان والتعمير",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "AMER",
+  "name": "عامر جروب القابضة",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MENA",
+  "name": "مينا للاستثمار السياحي والعقاري",
+  "groups": [
+   "realestate",
+   "tourism"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EGTS",
+  "name": "المصرية للمنتجعات السياحية",
+  "groups": [
+   "realestate",
+   "tourism"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EIUD",
+  "name": "المصريين للاستثمار والتنمية العمرانية",
+  "groups": [
+   "realestate"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ABUK",
+  "name": "أبو قير للأسمدة",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MFPC",
+  "name": "موبكو للأسمدة",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ESRS",
+  "name": "حديد عز",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SKPC",
+  "name": "سيدي كرير للبتروكيماويات",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "AMOC",
+  "name": "أموك للزيوت المعدنية",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EGAL",
+  "name": "مصر للألومنيوم",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MICH",
+  "name": "مصر للصناعات الكيماوية",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EGCH",
+  "name": "كيما للصناعات الكيماوية",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SMFR",
+  "name": "سماد مصر (إيچيفرت)",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EFIC",
+  "name": "المالية والصناعية المصرية",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "PACH",
+  "name": "باكين للدهانات",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "KZPC",
+  "name": "كفر الزيات للمبيدات",
+  "groups": [
+   "resources"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SWDY",
+  "name": "السويدي إليكتريك",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ORAS",
+  "name": "أوراسكوم كونستراكشون",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ELEC",
+  "name": "إليكتروكابل مصر",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SCEM",
+  "name": "أسمنت سيناء",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SUCE",
+  "name": "أسمنت السويس",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MCQE",
+  "name": "مصر للأسمنت قنا",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ARCC",
+  "name": "أسمنت المنطقة العربية",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CEMX",
+  "name": "أسمنت بورتلاند طرة",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": true,
+  "nodata": true
+ },
+ {
+  "sym": "SVCE",
+  "name": "جنوب الوادي للأسمنت",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "DCRC",
+  "name": "الدلتا للإنشاء والتعمير",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": true,
+  "nodata": true
+ },
+ {
+  "sym": "GGCC",
+  "name": "الجيزة العامة للمقاولات",
+  "groups": [
+   "construction"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EAST",
+  "name": "الشرقية إيسترن كومباني",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx30",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "JUFO",
+  "name": "جهينة للصناعات الغذائية",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "EFID",
+  "name": "إيديتا للصناعات الغذائية",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "DOMT",
+  "name": "دومتي للأغذية",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "OLFI",
+  "name": "عبور لاند للأغذية",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SUGR",
+  "name": "الدلتا للسكر",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MILS",
+  "name": "المصريين للمطاحن",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "POUL",
+  "name": "القاهرة للدواجن",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MPCO",
+  "name": "المنصورة للدواجن",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ISMA",
+  "name": "الإسماعيلية مصر للدواجن",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ADCI",
+  "name": "عرب دايري (باندا)",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "AJWA",
+  "name": "أجواء للصناعات الغذائية",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ZEOT",
+  "name": "المستخلصات الطبيعية والزيوت",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "LONI",
+  "name": "لوتس للتنمية والاستثمار",
+  "groups": [
+   "food"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": true,
+  "nodata": true
+ },
+ {
+  "sym": "ISPH",
+  "name": "ابن سينا فارما",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CLHO",
+  "name": "مستشفيات كليوباترا",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx30",
+   "shariah",
+   "watchlist"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "RMDA",
+  "name": "راميدا للأدوية",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "PHAR",
+  "name": "إيبيكو للأدوية",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "NIPH",
+  "name": "النيل للأدوية",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MIPH",
+  "name": "مينا فارم للأدوية",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MCRO",
+  "name": "ماكرو جروب للأدوية",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "BIOC",
+  "name": "جلاكسو سميثكلاين",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SPMD",
+  "name": "سبيد ميديكال",
+  "groups": [
+   "health"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ETEL",
+  "name": "المصرية للاتصالات",
+  "groups": [
+   "telecom"
+  ],
+  "flags": [
+   "egx30"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "MTIE",
+  "name": "إم إم چروب",
+  "groups": [
+   "telecom"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "RAYA",
+  "name": "راية القابضة",
+  "groups": [
+   "telecom"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "RACC",
+  "name": "راية لمراكز الاتصال",
+  "groups": [
+   "telecom"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "OIH",
+  "name": "أوراسكوم للاستثمار القابضة",
+  "groups": [
+   "telecom"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "DGTZ",
+  "name": "ديچيتايز لنظم المعلومات",
+  "groups": [
+   "telecom"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "GBCO",
+  "name": "جي بي كورب (جي بي أوتو سابقا&#1611;)",
+  "groups": [
+   "industrial"
+  ],
+  "flags": [
+   "egx30",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "AIFI",
+  "name": "العربية للصناعات الهندسية",
+  "groups": [
+   "industrial"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "RKRE",
+  "name": "راكتا للورق",
+  "groups": [
+   "industrial"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "DTPP",
+  "name": "الدلتا للطباعة والتغليف",
+  "groups": [
+   "industrial"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CCRS",
+  "name": "الخليجية الكندية للاستثمار",
+  "groups": [
+   "industrial"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ORWE",
+  "name": "النساجون الشرقيون",
+  "groups": [
+   "textiles"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "DSCW",
+  "name": "دايس للملابس الجاهزة",
+  "groups": [
+   "textiles"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "KABO",
+  "name": "كابو للملابس",
+  "groups": [
+   "textiles"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ACGC",
+  "name": "العربية لحليج الأقطان",
+  "groups": [
+   "textiles"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SPIN",
+  "name": "الإسكندرية للغزل والنسيج",
+  "groups": [
+   "textiles"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ALCN",
+  "name": "الإسكندرية لتداول الحاويات",
+  "groups": [
+   "logistics"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CSAG",
+  "name": "القناة للتوكيلات الملاحية",
+  "groups": [
+   "logistics"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "UASG",
+  "name": "العربية للشحن والتفريغ",
+  "groups": [
+   "logistics"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "TRTO",
+  "name": "عبر المحيطات",
+  "groups": [
+   "logistics"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "USD",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "SDTI",
+  "name": "شرم دريمز للاستثمار السياحي",
+  "groups": [
+   "tourism"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "RTVC",
+  "name": "رمكو للقرى السياحية",
+  "groups": [
+   "tourism"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "ROTO",
+  "name": "رواد السياحة",
+  "groups": [
+   "tourism"
+  ],
+  "flags": [
+   "egx70"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "CIRA",
+  "name": "سيرا للتعليم",
+  "groups": [
+   "education"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ },
+ {
+  "sym": "TALM",
+  "name": "تعليم لخدمات الإدارة",
+  "groups": [
+   "education"
+  ],
+  "flags": [
+   "egx70",
+   "shariah"
+  ],
+  "currency": "EGP",
+  "verify": false,
+  "nodata": false
+ }
+]

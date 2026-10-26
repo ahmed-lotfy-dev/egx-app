@@ -1,0 +1,4442 @@
+[
+ {
+  "tv": "EGX:COMI",
+  "d": [
+   "COMI",
+   "البنك التجاري الدولي",
+   131.5,
+   -1.2317860898302437,
+   7168416,
+   "commercial-international-bank-egypt",
+   "EGP",
+   453360128190,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SWDY",
+  "d": [
+   "SWDY",
+   "السويدي اليكتريك",
+   125.59,
+   0.12756118950808945,
+   84171,
+   "elswedy-electric",
+   "EGP",
+   268339387721,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ETEL",
+  "d": [
+   "ETEL",
+   "المصرية للاتصالات",
+   137.5,
+   2.382725241995524,
+   3292584,
+   "telecom-egypt",
+   "EGP",
+   229259728513,
+   "Communications",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TMGH",
+  "d": [
+   "TMGH",
+   "طلعت مصطفى",
+   94.27,
+   0.394036208732684,
+   1673989,
+   "t-m-g",
+   "EGP",
+   193495395771,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGAL",
+  "d": [
+   "EGAL",
+   "مصر للالومنيوم",
+   366,
+   -0.5380727213435562,
+   78756,
+   "egypt-aluminum",
+   "EGP",
+   151791754532,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MFPC",
+  "d": [
+   "MFPC",
+   "موبكو",
+   48.99,
+   -1.2298387096774182,
+   1427003,
+   "misr-fretilizers-production-company-mopco",
+   "EGP",
+   142259746405,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:QNBE",
+  "d": [
+   "QNBE",
+   "بنك قطر الوطني الاهلي",
+   61.73,
+   2.9863196529863183,
+   440813,
+   "qatar-national-bank-alahly",
+   "EGP",
+   129160087544,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:HDBK",
+  "d": [
+   "HDBK",
+   "بنك التعمير والاسكان",
+   117.63,
+   -0.7676733592036534,
+   88246,
+   "housing-and-development-bank",
+   "EGP",
+   125960602079,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ABUK",
+  "d": [
+   "ABUK",
+   "ابوقير للاسمدة",
+   93.7,
+   -0.3191489361702098,
+   1037712,
+   "abou-kir-fertilizers",
+   "EGP",
+   118616318848,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ALCN",
+  "d": [
+   "ALCN",
+   "الاسكندرية لتداول الحاويات",
+   34.02,
+   0.2357100766057908,
+   1248790,
+   "alexandria-containers-and-goods",
+   "EGP",
+   101124457920,
+   "Transportation",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ORAS",
+  "d": [
+   "ORAS",
+   "اوراسكوم كونستراكشون ليميتد",
+   841,
+   0.718562874251497,
+   119343,
+   "orascom-construction-plc",
+   "EGP",
+   99459067526.49338,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EAST",
+  "d": [
+   "EAST",
+   "ايسترن كومباني",
+   31.78,
+   -0.5320813771517939,
+   558377,
+   "eastern-company",
+   "EGP",
+   95850002289,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EFIH",
+  "d": [
+   "EFIH",
+   "e-finance for Digital and Financial Investments S.A.E.",
+   22.97,
+   0.3056768558951978,
+   2741083,
+   "e-finance-for-digital-and-financial-investments",
+   "EGP",
+   79386667208,
+   "Technology Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ADIB",
+  "d": [
+   "ADIB",
+   "مصرف أبو ظبي الإسلامي",
+   52.45,
+   0.8459911555470194,
+   862724,
+   "abu-dhabi-islamic-bank-egypt",
+   "EGP",
+   78014997482,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EMFD",
+  "d": [
+   "EMFD",
+   "إعمار مصر",
+   13.48,
+   0.5970149253731348,
+   3004215,
+   "emaar-misr-for-development",
+   "EGP",
+   72988855735,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FWRY",
+  "d": [
+   "FWRY",
+   "Fawry For Banking Technology And Electronic Payment",
+   18.93,
+   0.2117522498676503,
+   2666299,
+   "fawry-for-banking-technology-and-electronic-payment",
+   "EGP",
+   64349221043,
+   "Technology Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SCTS",
+  "d": [
+   "SCTS",
+   "قناة السويس لتوطين التكنولوجيا",
+   581.8,
+   -0.034364261168392696,
+   2230,
+   "sues-canal-company-for-technology-settling",
+   "EGP",
+   52331131988,
+   "Commercial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ORHD",
+  "d": [
+   "ORHD",
+   "اوراسكوم للتنمية مصر",
+   41.92,
+   0.143334925943627,
+   7533159,
+   "orascom-development-egypt",
+   "EGP",
+   47321621850,
+   "Consumer Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CANA",
+  "d": [
+   "CANA",
+   "بنك قناة السويس",
+   46.8,
+   -0.9314140558848536,
+   166196,
+   "suez-canal-bank-sae",
+   "EGP",
+   47240001678,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GPPL",
+  "d": [
+   "GPPL",
+   "جولدن بيراميدز بلازا",
+   1.4,
+   0,
+   0,
+   "golden-pyramids-plaza",
+   "USD",
+   42898032141.1058,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EFID",
+  "d": [
+   "EFID",
+   "ايديتا",
+   30.63,
+   0.39331366764994247,
+   859952,
+   "edita-food-industries-sae",
+   "EGP",
+   42714830854,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:JUFO",
+  "d": [
+   "JUFO",
+   "جهينة",
+   27.01,
+   -0.8807339449541226,
+   545357,
+   "juhayna-food-industries",
+   "EGP",
+   40083266418,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:OCDI",
+  "d": [
+   "OCDI",
+   "سوديك",
+   29.19,
+   -1.0508474576271143,
+   1346161,
+   "six-of-october-development-and-investment-sodic",
+   "EGP",
+   38034160583,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PHDC",
+  "d": [
+   "PHDC",
+   "بالم هيلز",
+   13.44,
+   1.81818181818182,
+   6665459,
+   "palm-hills-development-company",
+   "EGP",
+   37750868302,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:HRHO",
+  "d": [
+   "HRHO",
+   "هيرميس",
+   24.6,
+   -1.2841091492776897,
+   5818602,
+   "egyptian-financial-hermes-company",
+   "EGP",
+   35782452282,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GBCO",
+  "d": [
+   "GBCO",
+   "جي بي اوتو",
+   31.11,
+   1.2036434612882272,
+   5317315,
+   "gb-auto",
+   "EGP",
+   33368269752,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:HELI",
+  "d": [
+   "HELI",
+   "مصر الجديدة للاسكان",
+   8.2,
+   2.11706102117061,
+   12495035,
+   "heliopolis-housing",
+   "EGP",
+   32162201521,
+   "Consumer Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FERC",
+  "d": [
+   "FERC",
+   "فيركيم",
+   78.22,
+   -1.7336683417085372,
+   57032,
+   "ferchem-misr-co-for-fertillizers-and-chemicals",
+   "EGP",
+   31839999390,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:BTFH",
+  "d": [
+   "BTFH",
+   "بلتون المالية",
+   2.92,
+   -1.6835016835016925,
+   25408582,
+   "belton-financial",
+   "EGP",
+   31832779350,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FAITA",
+  "d": [
+   "FAITA",
+   "بنك فيصل الإسلامي المصري",
+   0.987,
+   0.203045685279188,
+   748,
+   "faisal-islamic-bank-of-egypt-in-egp",
+   "USD",
+   31702541305.91584,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FAIT",
+  "d": [
+   "FAIT",
+   "بنك فيصل الإسلامي المصري",
+   47.08,
+   0.40520366815951747,
+   31604,
+   "faisal-islamic-bank-of-egypt-in-egp",
+   "EGP",
+   31702541233,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CIEB",
+  "d": [
+   "CIEB",
+   "كريدي أجريكول",
+   24.79,
+   -1.548848292295475,
+   255941,
+   "credit-agricole-egypt",
+   "EGP",
+   31475000381,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EXPA",
+  "d": [
+   "EXPA",
+   "البنك المصري لتنمية الصادرات",
+   21.9,
+   -0.3186162949476572,
+   1632574,
+   "export-development-bank-of-egypt-edbe",
+   "EGP",
+   29879199066,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RAYA",
+  "d": [
+   "RAYA",
+   "راية",
+   7,
+   0.43041606886657463,
+   2163461,
+   "raya-for-financial-investments",
+   "EGP",
+   29840647169,
+   "Technology Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:VLMR",
+  "d": [
+   "VLMR",
+   "القابضة المصرية الكويتية",
+   0.659,
+   0,
+   193329,
+   "egyptian-kuwaiti",
+   "USD",
+   29046353488.557278,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:VLMRA",
+  "d": [
+   "VLMRA",
+   "Valmore Holding",
+   31.8,
+   0.8563273073263544,
+   559919,
+   "egyptian-kuwaiti",
+   "EGP",
+   29046353421.750668,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGCH",
+  "d": [
+   "EGCH",
+   "كيما",
+   13.92,
+   -0.713266761768899,
+   3721794,
+   "egyptian-chemical-industries-kima",
+   "EGP",
+   27851838202,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:IRON",
+  "d": [
+   "IRON",
+   "الحديد والصلب المصرية",
+   27.17,
+   -1.2718023255813875,
+   110431,
+   "egyptian-iron-and-steel",
+   "EGP",
+   26883524861,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ARCC",
+  "d": [
+   "ARCC",
+   "العربية للأسمنت",
+   70.52,
+   -0.11331444759206558,
+   158217,
+   "arabian-cement-company",
+   "EGP",
+   26465640102,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:IRAX",
+  "d": [
+   "IRAX",
+   "El Ezz Aldekhela Steel-Alexandria",
+   1250,
+   0,
+   0,
+   "ezz-steel",
+   "EGP",
+   24448582708,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CIRA",
+  "d": [
+   "CIRA",
+   "Cairo For Investment And Real Estate Developments -CIRA Education",
+   40.35,
+   -1.585365853658533,
+   418988,
+   "cairo-for-investment-and-real-estate-development",
+   "EGP",
+   23894401611,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SCEM",
+  "d": [
+   "SCEM",
+   "اسمنت سيناء",
+   86,
+   -3.3707865168539324,
+   500272,
+   "sinai-cement",
+   "EGP",
+   23212309784,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CCAP",
+  "d": [
+   "CCAP",
+   "القلعة للاستشارات المالية",
+   7.21,
+   1.1220196353436196,
+   101494363,
+   "citadel-capital-common-shares",
+   "EGP",
+   22933450407,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CLHO",
+  "d": [
+   "CLHO",
+   "مستشفى كليوباترا",
+   15.83,
+   0.25332488917036683,
+   1517939,
+   "cleopatra-hospital-company",
+   "EGP",
+   22886816601,
+   "Health Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:VALU",
+  "d": [
+   "VALU",
+   "U Consumer Finance S.A.E",
+   10.65,
+   -1.2059369202226253,
+   1233930,
+   "u-consumer-finance",
+   "EGP",
+   22706521918,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:BIOC",
+  "d": [
+   "BIOC",
+   "جلاكسو سميثكلاين",
+   271.12,
+   3.122741622608489,
+   200298,
+   "glaxosmithkline",
+   "EGP",
+   21956720188,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TAQA",
+  "d": [
+   "TAQA",
+   "TAQA Arabia",
+   15,
+   -1.0554089709762544,
+   1045055,
+   "taqa-arabia",
+   "EGP",
+   20501682792,
+   "Utilities",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SKPC",
+  "d": [
+   "SKPC",
+   "سيدي كرير للبتروكيماويات",
+   18,
+   0,
+   3144419,
+   "sidi-kerir-petrochemicals-sidpec",
+   "EGP",
+   20412000000,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MCQE",
+  "d": [
+   "MCQE",
+   "مصر للأسمنت - قنا",
+   206.96,
+   -0.9760765550239195,
+   117110,
+   "misr-cement-qena",
+   "EGP",
+   20064000000,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MBSC",
+  "d": [
+   "MBSC",
+   "مصر بنى سويف للأسمنت",
+   341,
+   -2.571428571428571,
+   61346,
+   "misr-beni-suef-cement",
+   "EGP",
+   19257814598,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PHAR",
+  "d": [
+   "PHAR",
+   "ايبيكو",
+   115.5,
+   1.3157894736842104,
+   843440,
+   "egyptian-international-pharmaceuticals-eipico",
+   "EGP",
+   19238155792,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MTIE",
+  "d": [
+   "MTIE",
+   "إم تي أي",
+   8.17,
+   -0.48721071863582116,
+   1145675,
+   "mm-for-industry-and-international-trade",
+   "EGP",
+   18603286830,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SAUD",
+  "d": [
+   "SAUD",
+   "بنك البركة",
+   25.6,
+   0.3921568627451036,
+   702391,
+   "al-baraka-bank-egypt",
+   "EGP",
+   18542047028,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EFIC",
+  "d": [
+   "EFIC",
+   "المالية والصناعية المصرية",
+   185.1,
+   -0.1348799568384138,
+   120448,
+   "egyptian-financial-and-industrial",
+   "EGP",
+   18535000610,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:POUL",
+  "d": [
+   "POUL",
+   "القاهرة للدواجن",
+   38.2,
+   0,
+   0,
+   "cairo-poultry",
+   "EGP",
+   18297860986,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ORWE",
+  "d": [
+   "ORWE",
+   "النساجون الشرقيون",
+   27.78,
+   2.057310800881713,
+   1145935,
+   "oriental-weavers",
+   "EGP",
+   18104218583,
+   "Consumer Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGSA",
+  "d": [
+   "EGSA",
+   "نايل سات",
+   9,
+   0.671140939597321,
+   510,
+   "egyptian-satellites-nilesat",
+   "USD",
+   17820948051.59826,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AMOC",
+  "d": [
+   "AMOC",
+   "أموك",
+   13.5,
+   -1.746724890829696,
+   4404434,
+   "alexandria-mineral-oils-company",
+   "EGP",
+   17745209704,
+   "Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGTS",
+  "d": [
+   "EGTS",
+   "المصرية للمنتجعات السياحية",
+   18.71,
+   10.710059171597647,
+   6294091,
+   "egyptian-for-tourism-resorts",
+   "EGP",
+   17744999599,
+   "Utilities",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:UBEE",
+  "d": [
+   "UBEE",
+   "United Bank SAE",
+   16,
+   -0.062460961898823,
+   101718,
+   "the-united-bank",
+   "EGP",
+   17611000252,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MOIL",
+  "d": [
+   "MOIL",
+   "ماريدايف",
+   0.699,
+   -0.142857142857143,
+   406813,
+   "maridive-and-oil-services",
+   "USD",
+   17463077546.79638,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ATQA",
+  "d": [
+   "ATQA",
+   "عتاقة",
+   13.05,
+   -3.831982313927779,
+   6162032,
+   "misr-national-steel-ataqa",
+   "EGP",
+   16283999634,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MASR",
+  "d": [
+   "MASR",
+   "مدينة نصر للاسكان",
+   7.68,
+   2.263648468708388,
+   5395067,
+   "medinet-nasr-housing",
+   "EGP",
+   16033850489,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TALM",
+  "d": [
+   "TALM",
+   "Taaleem Management Services S.A.E",
+   20.86,
+   -0.8083689966714299,
+   1584934,
+   "taaleem-management-services",
+   "EGP",
+   15436802198,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NIPH",
+  "d": [
+   "NIPH",
+   "النيل للادوية",
+   342,
+   11.37888360580994,
+   1230984,
+   "el-nile-co-for-pharmaceuticals-and-chemical-industries",
+   "EGP",
+   15352999878,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGBE",
+  "d": [
+   "EGBE",
+   "البنك المصري الخليجي",
+   0.519,
+   2.5691699604743103,
+   153731,
+   "egyptian-gulf-bank",
+   "USD",
+   13957747989.662502,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MHOT",
+  "d": [
+   "MHOT",
+   "مصر للفنادق",
+   17.9,
+   2.873563218390805,
+   453630,
+   "misr-hotels",
+   "EGP",
+   13780799698,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ISPH",
+  "d": [
+   "ISPH",
+   "ابن سينا فارما",
+   12.2,
+   0.8264462809917326,
+   2419870,
+   "ibnsina-pharma",
+   "EGP",
+   13552000427,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CICH",
+  "d": [
+   "CICH",
+   "سي اي كابيتال القابضة",
+   12.61,
+   -3.074558032282862,
+   681976,
+   "ci-capital-for-financial-investments",
+   "EGP",
+   13010000229,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AMES",
+  "d": [
+   "AMES",
+   "المركز الطبي الجديد - الإسكندرية",
+   51,
+   -3.8098830629951017,
+   1544746,
+   "alexandria-new-medical-center",
+   "EGP",
+   12967715947,
+   "Health Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:BINV",
+  "d": [
+   "BINV",
+   "بى بى اى القابضة",
+   56.7,
+   -4.352226720647771,
+   372204,
+   "b-investments",
+   "EGP",
+   12944545196,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RMDA",
+  "d": [
+   "RMDA",
+   "Tenth of Ramadan Pharmaceutical Industries & Diagnostic-Rameda",
+   6.06,
+   1.1686143572620935,
+   2454586,
+   "tenth-of-ramadan-pharmaceutical-industriesanddiagnostic-rameda",
+   "EGP",
+   12176575658,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CSAG",
+  "d": [
+   "CSAG",
+   "القناة للتوكيلات الملاحية",
+   38.39,
+   -0.28571428571428426,
+   93596,
+   "canal-shipping-agencies",
+   "EGP",
+   11550000000,
+   "Transportation",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:OIH",
+  "d": [
+   "OIH",
+   "اوراسكوم للاتصالات والاعلام والتكنولوجيا",
+   2.14,
+   -0.9259259259259267,
+   28808612,
+   "orascom-investment",
+   "EGP",
+   11330691778,
+   "Communications",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CPME",
+  "d": [
+   "CPME",
+   "Catalyst Partners Middle East",
+   35.78,
+   -2.639455782312922,
+   144075,
+   "catalyst-parteners-middle-east-cpme",
+   "EGP",
+   11122067838,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SVCE",
+  "d": [
+   "SVCE",
+   "جنوب الوادي للاسمنت",
+   11.21,
+   -1.2334801762114431,
+   5969866,
+   "south-valley-cement",
+   "EGP",
+   10947230544,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MIPH",
+  "d": [
+   "MIPH",
+   "مينا فارم للأدوية",
+   879.95,
+   -6.490760124544375,
+   21364,
+   "minapharm-pharmaceuticals",
+   "EGP",
+   10603940655,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:IFAP",
+  "d": [
+   "IFAP",
+   "الدولية للمحاصيل الزراعية",
+   20.59,
+   2.8471528471528487,
+   287221,
+   "international-agricultural-products",
+   "EGP",
+   9955713207,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AMIA",
+  "d": [
+   "AMIA",
+   "الملتقى العربي للاستثمارات",
+   18.49,
+   0.489130434782608,
+   1282891,
+   "arab-moltaka-investments-co",
+   "EGP",
+   9394498047,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MOIN",
+  "d": [
+   "MOIN",
+   "المهندس للتأمين",
+   35.69,
+   0.8476970895733177,
+   193554,
+   "mohandes-insurance",
+   "EGP",
+   9201399841,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:OLFI",
+  "d": [
+   "OLFI",
+   "عبور لاند للصناعات الغذائية",
+   22.92,
+   1.5057573073516537,
+   304968,
+   "obour-land-for-food-industries",
+   "EGP",
+   9031999969,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GTHE",
+  "d": [
+   "GTHE",
+   "Global Telecom Holding S.A.E.",
+   4.99,
+   -0.19999999999999576,
+   28601,
+   "global-telecom-sae",
+   "EGP",
+   8828498294,
+   "Communications",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PHTV",
+  "d": [
+   "PHTV",
+   "بيراميزا",
+   335.17,
+   -5.048301651604859,
+   2552,
+   "pyramisa-hotels",
+   "EGP",
+   8792647787,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MPCI",
+  "d": [
+   "MPCI",
+   "ممفيس للادوية",
+   393.11,
+   2.505867014341594,
+   425245,
+   "memphis-pharmaceuticals",
+   "EGP",
+   8724625000,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ISMQ",
+  "d": [
+   "ISMQ",
+   "Iron & Steel for Mines & Quarries",
+   8.73,
+   -1.3559322033898218,
+   1261714,
+   "iron-and-steel-for-mines-and-quarries",
+   "EGP",
+   8645319815,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ZMID",
+  "d": [
+   "ZMID",
+   "زهراء المعادي",
+   8.3,
+   -1.1904761904761862,
+   11131750,
+   "zahraa-maadi-investment-and-development",
+   "EGP",
+   8399999619,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CPCI",
+  "d": [
+   "CPCI",
+   "القاهرة للادوية",
+   564.43,
+   0.8324847705307481,
+   4851,
+   "cairo-pharmaceuticals",
+   "EGP",
+   8347867050.000001,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:BONY",
+  "d": [
+   "BONY",
+   "Bonyan for Development and Trade",
+   4.37,
+   -1.1312217194570096,
+   4369862,
+   "bonyan-for-development-and-trade",
+   "EGP",
+   8286808439,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AXPH",
+  "d": [
+   "AXPH",
+   "الاسكندرية للادوية",
+   1691.79,
+   2.5097402400673836,
+   5977,
+   "alexandria-pharmaceuticals",
+   "EGP",
+   8251849975.999999,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SUGR",
+  "d": [
+   "SUGR",
+   "الدلتا للسكر",
+   59.42,
+   3.447075208913656,
+   127503,
+   "delta-sugar",
+   "EGP",
+   8167857195,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGAS",
+  "d": [
+   "EGAS",
+   "غاز مصر",
+   56.55,
+   0.4976008530300231,
+   108767,
+   "natural-gas-and-mining-project-egypt-gas",
+   "EGP",
+   8121160787,
+   "Utilities",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PRDC",
+  "d": [
+   "PRDC",
+   "Pioneers Properties for Urban Development",
+   7.55,
+   -0.657894736842103,
+   2015594,
+   "pioneers-properties-for-urban-development-predco",
+   "EGP",
+   7698179713,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DOMT",
+  "d": [
+   "DOMT",
+   "دومتي",
+   26.47,
+   3.358063256540412,
+   90423,
+   "arabian-food-industries-domty",
+   "EGP",
+   7237609072,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MPRC",
+  "d": [
+   "MPRC",
+   "مدينة الانتاج الاعلامى",
+   38.21,
+   0.2623983206507516,
+   176609,
+   "egyptian-media-production-city",
+   "EGP",
+   7226799602,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ELEC",
+  "d": [
+   "ELEC",
+   "الكابلات الكهربائية المصرية",
+   1.97,
+   0,
+   21604346,
+   "electro-cable-egypt",
+   "EGP",
+   6527674453,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GOUR",
+  "d": [
+   "GOUR",
+   "Gourmet Egypt.Com Foods",
+   16.5,
+   2.103960396039603,
+   4015021,
+   "gourmet-egyptcom-foods",
+   "EGP",
+   6464000000,
+   "Retail Trade",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SUCE",
+  "d": [
+   "SUCE",
+   "Suez Cement Co.",
+   145,
+   -3.3333333333333335,
+   11678,
+   "suez-cement-co",
+   "EGP",
+   6364978256,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ACAP",
+  "d": [
+   "ACAP",
+   "A Capital Holding",
+   8.64,
+   -0.5753739930954999,
+   236351,
+   "a-capital",
+   "EGP",
+   6354647056,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SPHT",
+  "d": [
+   "SPHT",
+   "الشمس بيراميدز",
+   1.42,
+   22.413793103448278,
+   0,
+   "el-shams-pyramids-for-hotelsand-touristic-projects",
+   "USD",
+   6338248237.389642,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ENGC",
+  "d": [
+   "ENGC",
+   "ايكون",
+   41.4,
+   -2.7027027027026995,
+   524264,
+   "engineering-industries-icon",
+   "EGP",
+   6191024889,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NINH",
+  "d": [
+   "NINH",
+   "مستشفى النزهه الدولي",
+   20.41,
+   -0.8742107819329757,
+   375138,
+   "nozha-international-hospital",
+   "EGP",
+   6177000046,
+   "Health Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SPIN",
+  "d": [
+   "SPIN",
+   "سبينالكس",
+   17.3,
+   1.9446081319976538,
+   226253,
+   "alexandria-spinning-and-weaving-spinalex",
+   "EGP",
+   6121433710,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NBKE",
+  "d": [
+   "NBKE",
+   "National Bank of Kuwait - Egypt",
+   39,
+   0.025647601949212645,
+   853,
+   "national-bank-of-kuwait",
+   "EGP",
+   6009999495,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ARAB",
+  "d": [
+   "ARAB",
+   "بورتو جروب",
+   0.242,
+   -1.2244897959183685,
+   187941924,
+   "arab-developers",
+   "EGP",
+   5856226501,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS3E071C013-EGP",
+  "d": [
+   "EGS3E071C013-EGP",
+   "Acrow Misr",
+   104.95,
+   0,
+   0,
+   "acrow-misr",
+   "EGP",
+   5777989285,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:OCPH",
+  "d": [
+   "OCPH",
+   "اكتوبر فارما",
+   240.64,
+   1.9661016949152486,
+   24251,
+   "october-pharma",
+   "EGP",
+   5659920044,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MCRO",
+  "d": [
+   "MCRO",
+   "Macro Group Pharmaceutical S.A.E.",
+   1.68,
+   3.703703703703693,
+   79510884,
+   "macro-pharmaceuticals-macro-capital",
+   "EGP",
+   5529284665,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CNFN",
+  "d": [
+   "CNFN",
+   "Contact Financial Holding SAE",
+   4.51,
+   -0.87912087912088,
+   1548949,
+   "contact-financial",
+   "EGP",
+   5446231924,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GSSC",
+  "d": [
+   "GSSC",
+   "العامة للصوامع والتخزين",
+   304.9,
+   -0.1146601146601221,
+   10483,
+   "general-silos-and-storage",
+   "EGP",
+   5354650192,
+   "Retail Trade",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:WCDF",
+  "d": [
+   "WCDF",
+   "مطاحن وسط وغرب الدلتا",
+   706.22,
+   -0.5323943661971793,
+   2894,
+   "middle-and-west-delta-flour-mills",
+   "EGP",
+   5321925201,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MICH",
+  "d": [
+   "MICH",
+   "مصر لصناعة الكيماويات",
+   47.53,
+   -0.7724425887265083,
+   213587,
+   "misr-chemical-industries",
+   "EGP",
+   5236481434,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AFMC",
+  "d": [
+   "AFMC",
+   "مطاحن ومخابز الإسكندرية",
+   159.58,
+   0.37740596301422996,
+   44523,
+   "alexandria-flour-mills",
+   "EGP",
+   5229134573,
+   "Retail Trade",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:KABO",
+  "d": [
+   "KABO",
+   "كابو",
+   9.27,
+   2.205071664829099,
+   2053377,
+   "el-nasr-clothes-and-textiles-kabo",
+   "EGP",
+   5121772472,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ALEX",
+  "d": [
+   "ALEX",
+   "Alexandria Cement Co.",
+   22,
+   3.7735849056603805,
+   3464,
+   "alexandria-cement-co",
+   "EGP",
+   5038324280,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DSCW",
+  "d": [
+   "DSCW",
+   "دايس",
+   1.79,
+   -0.555555555555556,
+   5662313,
+   "dice-sport-and-casual-wear",
+   "EGP",
+   4823940985,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AMER",
+  "d": [
+   "AMER",
+   "عامر جروب",
+   5.2,
+   0.7751937984496131,
+   7877788,
+   "amer",
+   "EGP",
+   4658395204,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MFSC",
+  "d": [
+   "MFSC",
+   "مصر للاسواق الحرة",
+   49.64,
+   1.0792099368764023,
+   20273,
+   "misr-duty-free-shops",
+   "EGP",
+   4589999914,
+   "Retail Trade",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:OFH",
+  "d": [
+   "OFH",
+   "O B Financial Holding",
+   1.09,
+   5.825242718446607,
+   229116985,
+   "orascom-financial",
+   "EGP",
+   4587070673,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SAIB",
+  "d": [
+   "SAIB",
+   "بنك الشركة المصرفية العربية الدولية",
+   2.53,
+   0,
+   0,
+   "societe-arabe-internationale-de-banque-saib",
+   "USD",
+   4442935076.531748,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CRST",
+  "d": [
+   "CRST",
+   "ليفت سلاب مصر",
+   3.74,
+   -3.3591731266149845,
+   71979451,
+   "the-egyptian-company-for-construction-development-lift-slab",
+   "EGP",
+   4344119278,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:UNIT",
+  "d": [
+   "UNIT",
+   "المتحدة للاسكان",
+   18.13,
+   -0.6030701754385934,
+   110262,
+   "united-housing-and-development",
+   "EGP",
+   4294126675.0000005,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SDTI",
+  "d": [
+   "SDTI",
+   "شارم دريمز",
+   78.07,
+   0.6316060840422724,
+   431724,
+   "sharm-dreams-co-for-tourism-investment",
+   "EGP",
+   4110612253.9999995,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GDWA",
+  "d": [
+   "GDWA",
+   "Gadwa For Industrial Development",
+   0.751,
+   -0.661375661375662,
+   22682277,
+   "gadwa-for-industrial-development",
+   "EGP",
+   4046685919,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ACGC",
+  "d": [
+   "ACGC",
+   "العربية لحليج الأقطان",
+   14.12,
+   0.713266761768899,
+   472632,
+   "arab-cotton-ginning",
+   "EGP",
+   4009736389,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:KZPC",
+  "d": [
+   "KZPC",
+   "كفر الزيات للمبيدات والكيماويات",
+   13.69,
+   0.4402054292002841,
+   237963,
+   "kafr-el-zayat-pesticides",
+   "EGP",
+   3926902113,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AJWA",
+  "d": [
+   "AJWA",
+   "اجواء",
+   180,
+   0.00555586421467354,
+   31433,
+   "ajwa-for-food-industries-company-egypt",
+   "EGP",
+   3598666482,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ACTF",
+  "d": [
+   "ACTF",
+   "Act Financial",
+   2.95,
+   -2.3178807947019817,
+   36306009,
+   "act-financial",
+   "EGP",
+   3450565271,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:UEFM",
+  "d": [
+   "UEFM",
+   "مطاحن مصر العليا",
+   480.2,
+   -1.396303901437374,
+   5335,
+   "upper-egypt-flour-mills",
+   "EGP",
+   3422089966,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ADCI",
+  "d": [
+   "ADCI",
+   "أدكو",
+   283.19,
+   1.215197112119796,
+   10895,
+   "arab-pharmaceuticals",
+   "EGP",
+   3326640015,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ASCM",
+  "d": [
+   "ASCM",
+   "اسيك للتعدين",
+   58.86,
+   -0.6079027355623091,
+   95150,
+   "asek-company-for-mining-ascom",
+   "EGP",
+   3257100067,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GTWL",
+  "d": [
+   "GTWL",
+   "جولدن تكس",
+   237.45,
+   4.359864633235172,
+   400522,
+   "golden-textiles-and-clothes-wool",
+   "EGP",
+   3249893644,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ELKA",
+  "d": [
+   "ELKA",
+   "القاهرة للاسكان",
+   1.67,
+   0,
+   3764398,
+   "el-kahera-housing",
+   "EGP",
+   3100796901,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CFGH",
+  "d": [
+   "CFGH",
+   "العرفة القابضة",
+   0.115,
+   -2.542372881355923,
+   66921,
+   "al-arafa-for-investment-and-consultancies",
+   "USD",
+   2943740059.821,
+   "Retail Trade",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ELSH",
+  "d": [
+   "ELSH",
+   "الشمس للاسكان",
+   12.7,
+   -0.7036747458952296,
+   713393,
+   "el-shams-housing-and-urbanization",
+   "EGP",
+   2901731241,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MPCO",
+  "d": [
+   "MPCO",
+   "المنصورة للدواجن",
+   2.75,
+   -3.8461538461538423,
+   38310288,
+   "mansourah-poultry",
+   "EGP",
+   2860000134,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ATLC",
+  "d": [
+   "ATLC",
+   "ايه تي ليس",
+   7.01,
+   0,
+   616252,
+   "rights-issue-of-al-tawfeek-leasing-company-atlease-1",
+   "EGP",
+   2804000092,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:LCSW",
+  "d": [
+   "LCSW",
+   "ليسيكو",
+   33,
+   0.30395136778115933,
+   612955,
+   "lecico-egypt",
+   "EGP",
+   2741666877,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ACAMD",
+  "d": [
+   "ACAMD",
+   "العربية لإدارة وتطوير الأصول",
+   2,
+   -2.9126213592233037,
+   12032303,
+   "arab-co-for-asset-management-and-development",
+   "EGP",
+   2727603376,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ICFC",
+  "d": [
+   "ICFC",
+   "الدولية للأسمدة",
+   22.89,
+   -0.47826086956521496,
+   436302,
+   "international-company-for-fertilizers-and-chemicals",
+   "EGP",
+   2685825035,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NCGC",
+  "d": [
+   "NCGC",
+   "Nile Cotton Ginning",
+   50,
+   0,
+   1280,
+   "nile-cotton-ginning",
+   "EGP",
+   2649625015,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DAPH",
+  "d": [
+   "DAPH",
+   "التعمير والاستشارات الهندسية",
+   111,
+   -1.3333333333333335,
+   158257,
+   "development-and-engineering-consultants",
+   "EGP",
+   2646269989,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ISMA",
+  "d": [
+   "ISMA",
+   "الاسماعيلية مصر للدواجن",
+   30.47,
+   3.8160136286200936,
+   177243,
+   "ismailia-misr-poultry",
+   "EGP",
+   2637288048,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ZEOT",
+  "d": [
+   "ZEOT",
+   "الزيوت المستخلصة",
+   13.06,
+   -0.6844106463878316,
+   158293,
+   "extracted-oils",
+   "EGP",
+   2629999924,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AIFI",
+  "d": [
+   "AIFI",
+   "اطلس لاستصلاح الاراضى",
+   2.31,
+   1.7621145374449354,
+   2002127,
+   "atlas-for-investment-and-food-industries",
+   "EGP",
+   2613417837,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GPIM",
+  "d": [
+   "GPIM",
+   "المصريين للاستثمار",
+   1.57,
+   -1.2578616352201268,
+   5470094,
+   "egyptians-for-investment-and-urban-development",
+   "EGP",
+   2601818059,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:INFI",
+  "d": [
+   "INFI",
+   "فوديكو",
+   126.94,
+   -0.25145371680025724,
+   53858,
+   "ismailia-national-food-industries",
+   "EGP",
+   2591840942,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NAHO",
+  "d": [
+   "NAHO",
+   "النعيم القابضة",
+   0.13,
+   -3.703703703703707,
+   714449,
+   "naeem",
+   "USD",
+   2499932525.643744,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ETRS",
+  "d": [
+   "ETRS",
+   "إيجيترانس",
+   10.8,
+   0.18552875695734092,
+   269258,
+   "egyptian-transport-egytrans",
+   "EGP",
+   2424958933,
+   "Transportation",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EDFM",
+  "d": [
+   "EDFM",
+   "مطاحن شرق الدلتا",
+   400.02,
+   0.6263678212965083,
+   1677,
+   "east-delta-flour-mills",
+   "EGP",
+   2385179993,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NARE",
+  "d": [
+   "NARE",
+   "ريكاب",
+   17.5,
+   0,
+   290994,
+   "reacap-financial-investments",
+   "EGP",
+   2235538349,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SMFR",
+  "d": [
+   "SMFR",
+   "ايجيفرت",
+   232.05,
+   0.1943005181347224,
+   7307,
+   "samad-misr-egyfert",
+   "EGP",
+   2223360147,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CEFM",
+  "d": [
+   "CEFM",
+   "مطاحن مصر الوسطى",
+   143.19,
+   0.838028169014083,
+   6745,
+   "middle-egypt-flour-mills",
+   "EGP",
+   2090656731,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MILS",
+  "d": [
+   "MILS",
+   "مطاحن شمال القاهرة",
+   191.26,
+   0.6154979220369233,
+   38074,
+   "north-cairo-mills",
+   "EGP",
+   2033962925,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:IDRE",
+  "d": [
+   "IDRE",
+   "الاسماعيلية الجديدة للتطوير",
+   54.24,
+   -1.1661807580174937,
+   109273,
+   "ismailia-development-and-real-estate-co",
+   "EGP",
+   2021682946,
+   "Consumer Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RACC",
+  "d": [
+   "RACC",
+   "راية لخدمات مراكز الاتصالات",
+   9.69,
+   0.5186721991701133,
+   165685,
+   "raya-contact-center",
+   "EGP",
+   1920347907,
+   "Commercial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ADPC",
+  "d": [
+   "ADPC",
+   "آراب ديري-باندا",
+   3.97,
+   1.7948717948718023,
+   7893521,
+   "the-arab-dairy-products-co-arab-dairy-panda",
+   "EGP",
+   1918293028,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EALR",
+  "d": [
+   "EALR",
+   "العربية لاستصلاح الاراضي",
+   369.73,
+   1.0191256830601143,
+   20798,
+   "el-arabia-for-land-reclamation",
+   "EGP",
+   1903303873,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NCCW",
+  "d": [
+   "NCCW",
+   "النصر للأعمال المدنية",
+   7.21,
+   -4.12234042553191,
+   7457605,
+   "nasr-company-for-civil-works",
+   "EGP",
+   1895039995,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AALR",
+  "d": [
+   "AALR",
+   "العامة لاستصلاح الأراضي",
+   290,
+   -0.3333677011375837,
+   50643,
+   "general-company-for-land-reclamationdevelopment-and-reconstru",
+   "EGP",
+   1894214775,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:WKOL",
+  "d": [
+   "WKOL",
+   "وادي كوم امبو",
+   334.07,
+   -0.032916392363401055,
+   11725,
+   "wadi-kom-ombo-land-reclamation",
+   "EGP",
+   1871407927,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SNFC",
+  "d": [
+   "SNFC",
+   "الشرقية الوطنية للامن الغذائي",
+   11.54,
+   1.7636684303350907,
+   1189127,
+   "sharkia-national-food",
+   "EGP",
+   1857294303,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MAAL",
+  "d": [
+   "MAAL",
+   "مرسيليا",
+   9.14,
+   5.542725173210167,
+   2216518,
+   "marseille-almasreia-alkhalegeya-for-investment",
+   "EGP",
+   1852178610,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DTPP",
+  "d": [
+   "DTPP",
+   "دلتا للطباعة والتغليف",
+   336.5,
+   2.0036982024311176,
+   398485,
+   "delta-for-printing-and-packaging",
+   "EGP",
+   1847384051,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GGCC",
+  "d": [
+   "GGCC",
+   "الجيزة العامة للمقاولات",
+   0.811,
+   -3.681710213776712,
+   24038047,
+   "giza-general-contracting",
+   "EGP",
+   1822147014,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MOSC",
+  "d": [
+   "MOSC",
+   "مصر للزيوت والصابون",
+   299.38,
+   -0.8675496688741737,
+   3529,
+   "misr-oils-and-soap",
+   "EGP",
+   1795200073,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:KRDI",
+  "d": [
+   "KRDI",
+   "Al Khair River for Development Agriculture Investment and Environmental Services",
+   0.435,
+   -2.684563758389264,
+   115293153,
+   "al-khair-river-for-development-agricultural-investmentandenvir",
+   "EGP",
+   1743299988,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ICID",
+  "d": [
+   "ICID",
+   "العالمية للاستثمار والتنمية",
+   17.1,
+   -0.05844535359437762,
+   158586,
+   "international-co-for-investment-and-development",
+   "EGP",
+   1712000084,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ECAP",
+  "d": [
+   "ECAP",
+   "الجوهرة",
+   31.89,
+   1.0456273764258612,
+   355732,
+   "el-ezz-porcelain-gemma",
+   "EGP",
+   1683489715,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ASPI",
+  "d": [
+   "ASPI",
+   "بايونيرز القابضة",
+   0.426,
+   -0.9302325581395358,
+   88561000,
+   "aspire-capital-for-financial-investments",
+   "EGP",
+   1677000028,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ODIN",
+  "d": [
+   "ODIN",
+   "المصريين في الخارج للاستثمار والتنمية",
+   2.83,
+   2.1660649819494604,
+   8598402,
+   "odin-investments",
+   "EGP",
+   1644000006,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SCFM",
+  "d": [
+   "SCFM",
+   "مطاحن جنوب القاهرة والجيزة",
+   270.3,
+   0.54307394732928,
+   3865,
+   "south-cairo-and-giza-mills-and-bakeries",
+   "EGP",
+   1603079956,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MENA",
+  "d": [
+   "MENA",
+   "مينا للاستثمار السياحي",
+   6.72,
+   1.972685887708648,
+   85319,
+   "mena-touristic-and-real-estate-investment",
+   "EGP",
+   1596682841,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PRCL",
+  "d": [
+   "PRCL",
+   "شينى",
+   30.95,
+   -2.335121489428848,
+   182629,
+   "ceramic-and-porcelain",
+   "EGP",
+   1596095339,
+   "Retail Trade",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CAED",
+  "d": [
+   "CAED",
+   "القاهرة للخدمات التعليمية",
+   124.46,
+   -1.5737445630684137,
+   36977,
+   "cairo-educational-services",
+   "EGP",
+   1501679993,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NDRL",
+  "d": [
+   "NDRL",
+   "الحفر الوطنية",
+   4.69,
+   0,
+   0,
+   "national-drilling",
+   "USD",
+   1490716130.749602,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CERA",
+  "d": [
+   "CERA",
+   "ريماس",
+   1.39,
+   1.4598540145985253,
+   55241681,
+   "the-arab-ceramic-co-ceramica-remas",
+   "EGP",
+   1477031255,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DEIN",
+  "d": [
+   "DEIN",
+   "الدلتا للتأمين",
+   10.35,
+   0,
+   0,
+   "delta-insurance",
+   "EGP",
+   1423125052,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MBEG",
+  "d": [
+   "MBEG",
+   "إم بي",
+   7.03,
+   1.4430014430014508,
+   106541,
+   "mb-engineering",
+   "EGP",
+   1403631410,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SIPC",
+  "d": [
+   "SIPC",
+   "سبأ",
+   5.45,
+   0.5535055350553552,
+   5700963,
+   "sabaa-international-company-for-pharmaceutical-and-chemical",
+   "EGP",
+   1355000019,
+   "Health Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:UEGC",
+  "d": [
+   "UEGC",
+   "الصعيد العامة للمقاولات",
+   1.69,
+   -4.51977401129944,
+   39943407,
+   "elsaeed-contractingand-real-estate-investment-company-sccd",
+   "EGP",
+   1292216337,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MEPA",
+  "d": [
+   "MEPA",
+   "العبوات الطبية",
+   1.9,
+   0.5291005291005296,
+   4907920,
+   "medical-packaging-company",
+   "EGP",
+   1237949991,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:IEEC",
+  "d": [
+   "IEEC",
+   "Industrial & Engineering Enterprises Co.",
+   0.891,
+   5.945303210463739,
+   271211344,
+   "industrial-and-engineering-enterprises-co",
+   "EGP",
+   1226178000,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SMPP",
+  "d": [
+   "SMPP",
+   "Modern Shorouk Printing & Packaging",
+   106,
+   0,
+   785,
+   "modern-shorouk-printing-and-packaging",
+   "EGP",
+   1206602065,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:OBRI",
+  "d": [
+   "OBRI",
+   "العبور للاستثمار العقارى",
+   30.1,
+   -0.13271400132713718,
+   222127,
+   "el-obour-real-estate-investment",
+   "EGP",
+   1205599976,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NHPS",
+  "d": [
+   "NHPS",
+   "الوطنية للاسكان",
+   73.25,
+   -0.5970959424616606,
+   37864,
+   "national-housing-for-professional-syndicates",
+   "EGP",
+   1179040039,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AIH",
+  "d": [
+   "AIH",
+   "العربية للاستثمارات",
+   0.747,
+   -0.6648936170212773,
+   28348247,
+   "arabia-investments",
+   "EGP",
+   1171712806,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AMII",
+  "d": [
+   "AMII",
+   "العربية للمحابس",
+   14.88,
+   -3.3138401559454174,
+   1601361,
+   "arab-valves-company",
+   "EGP",
+   1153369403,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:COSG",
+  "d": [
+   "COSG",
+   "القاهرة للزيوت والصابون",
+   1.77,
+   -1.1173184357541908,
+   7538842,
+   "cairo-oils-and-soap",
+   "EGP",
+   1116959976,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ALUM",
+  "d": [
+   "ALUM",
+   "الالومنيوم العربية",
+   25.5,
+   -0.03920031360251495,
+   116731,
+   "arab-aluminum",
+   "EGP",
+   1081376582,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RREI",
+  "d": [
+   "RREI",
+   "اليكو",
+   4.21,
+   -0.7075471698113266,
+   1011381,
+   "arab-real-estate-investment-co-alico",
+   "EGP",
+   1044735918.0000001,
+   "Consumer Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EBSC",
+  "d": [
+   "EBSC",
+   "اصول إى إس بى للوساطة في الاوراق المالية",
+   2,
+   2.040816326530614,
+   1063957,
+   "osool-esb-securities-brokerage",
+   "EGP",
+   1024420625,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TANM",
+  "d": [
+   "TANM",
+   "Tanmiya for Real Estate Investment",
+   7,
+   1.0101010101010142,
+   4599123,
+   "tanmiya-for-real-estate-investment",
+   "EGP",
+   1008314975,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PACH",
+  "d": [
+   "PACH",
+   "Paints & Chemical Industries Co.",
+   81,
+   -11.889481126944421,
+   1212,
+   "paints-and-chemical-industries-company-sae-gdr-repr-1-3-shr-144a",
+   "EGP",
+   955199982,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RTVC",
+  "d": [
+   "RTVC",
+   "رمكو",
+   3.86,
+   0.25974025974025416,
+   272644,
+   "remco-for-touristic-villages-construction",
+   "EGP",
+   950171529,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MEGM",
+  "d": [
+   "MEGM",
+   "الشرق الأوسط لصناعة الزجاج",
+   12.54,
+   0,
+   0,
+   "middle-east-glass-manufacturing",
+   "EGP",
+   941924978,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AFDI",
+  "d": [
+   "AFDI",
+   "الاهلي للتنمية والاستثمار",
+   52.77,
+   1.2665515256188902,
+   103996,
+   "el-ahli-investment-and-development",
+   "EGP",
+   937980011,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RUBX",
+  "d": [
+   "RUBX",
+   "روبكس",
+   14.12,
+   -5.8038692461641155,
+   6222944,
+   "rubex-international-for-plastic-and-acrylic-manufacturing",
+   "EGP",
+   922183763,
+   "Consumer Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:KWIN",
+  "d": [
+   "KWIN",
+   "القاهرة الوطنية للاستثمار والاوراق المالية",
+   86.14,
+   -1.170261587884346,
+   45408,
+   "el-kahera-el-watania-investment",
+   "EGP",
+   915180038,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PRMH",
+  "d": [
+   "PRMH",
+   "برايم القابضة",
+   2.59,
+   -0.38461538461539346,
+   1353717,
+   "prime",
+   "EGP",
+   909999967,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:UNIP",
+  "d": [
+   "UNIP",
+   "يونيباك",
+   0.371,
+   -0.5361930294906171,
+   21166038,
+   "universal-for-paper-and-packaging-materials-unipack",
+   "EGP",
+   854708000,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FCMD",
+  "d": [
+   "FCMD",
+   "ايكمي",
+   7.33,
+   0.41095890410959246,
+   2521358,
+   "international-company-for-medical-industries-icmi",
+   "EGP",
+   840754153,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ICLE",
+  "d": [
+   "ICLE",
+   "انكوليس",
+   15.76,
+   0,
+   0,
+   "international-company-for-leasing-incolease",
+   "EGP",
+   788000011,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EASB",
+  "d": [
+   "EASB",
+   "ثمار",
+   7.66,
+   -1.794871794871791,
+   435686,
+   "egyptian-arabian-themar-comp-for-securitiesandbonds-brok-eac",
+   "EGP",
+   780000019,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:APSW",
+  "d": [
+   "APSW",
+   "يونيراب",
+   8.22,
+   -1.6746411483253443,
+   54866,
+   "arab-polvara-spinning-and-weaving-co",
+   "EGP",
+   777598479,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:COPR",
+  "d": [
+   "COPR",
+   "العقارية للبنوك الوطنية للتنمية",
+   0.487,
+   -0.8146639511201638,
+   22217033,
+   "national-real-estate-bank-for-development",
+   "EGP",
+   774131381,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MOED",
+  "d": [
+   "MOED",
+   "المصرية لنظم التعليم الحديثة",
+   0.715,
+   -2.85326086956522,
+   27276524,
+   "the-egyptian-modern-education-systems",
+   "EGP",
+   739680001,
+   "Commercial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SPMD",
+  "d": [
+   "SPMD",
+   "Speed Medical SAE",
+   0.413,
+   -1.1961722488038289,
+   37011330,
+   "speed-medical",
+   "EGP",
+   695433642,
+   "Health Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ROTO",
+  "d": [
+   "ROTO",
+   "الرواد",
+   40.7,
+   1.750000000000007,
+   164962,
+   "rowad-tourism-al-rowad",
+   "EGP",
+   692472000,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TYCN",
+  "d": [
+   "TYCN",
+   "الاسكندرية الوطنية للاستثمارات المالية",
+   12.7,
+   -1.167315175097279,
+   175327,
+   "alexandria-national-company-for-financial-investment",
+   "EGP",
+   676114978,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RAKT",
+  "d": [
+   "RAKT",
+   "راكتا",
+   22.08,
+   0.3636363636363559,
+   12627,
+   "rakta-paper-manufacturing",
+   "EGP",
+   662399998,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EEII",
+  "d": [
+   "EEII",
+   "العربية للصناعات الهندسية",
+   2.25,
+   0.896860986547086,
+   2718739,
+   "el-arabia-engineering-industries",
+   "EGP",
+   597640005,
+   "Electronic Technology",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SEIGA",
+  "d": [
+   "SEIGA",
+   "السعودية المصرية للاستثمار والتمويل",
+   0.95,
+   0,
+   0,
+   "saudi-egyptian-investment-and-finance",
+   "USD",
+   573300019.3185902,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SEIG",
+  "d": [
+   "SEIG",
+   "السعودية المصرية للاستثمار والتمويل",
+   239.4,
+   4.541484716157208,
+   17284,
+   "saudi-egyptian-investment-and-finance",
+   "EGP",
+   573300018,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CCRS",
+  "d": [
+   "CCRS",
+   "الخليجية الكندية للاستثمار العقاري العربي",
+   2.57,
+   -4.814814814814827,
+   2964313,
+   "gulf-canadian-real-estate-investment-co",
+   "EGP",
+   567000010,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AREH",
+  "d": [
+   "AREH",
+   "المجموعة المصرية العقارية",
+   1.4,
+   -0.7092198581560291,
+   2463351,
+   "egyptian-real-estate",
+   "EGP",
+   563999987,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:LKGP",
+  "d": [
+   "LKGP",
+   "The Holding Company for Financial Investment - The Lakah Group",
+   3.2,
+   -1.538461538461533,
+   207328,
+   "the-company-for-financial-investment-the-lakah",
+   "EGP",
+   479961628,
+   "Health Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EPCO",
+  "d": [
+   "EPCO",
+   "إجيبكو",
+   10.77,
+   -0.4621072088724649,
+   519064,
+   "egypt-for-poultry",
+   "EGP",
+   460607384,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGREF",
+  "d": [
+   "EGREF",
+   "وثائق شركة صندوق استثمار المصريين للاستثمار العقاري",
+   24.31,
+   1.3761467889908185,
+   816022,
+   "egyptians-real-estate-fund-certificates",
+   "EGP",
+   431729227,
+   "Miscellaneous",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DCRC",
+  "d": [
+   "DCRC",
+   "Delta Construction & Rebuilding Co.",
+   50,
+   0,
+   0,
+   "delta-construction-and-rebuilding",
+   "EGP",
+   425382175,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GRCA",
+  "d": [
+   "GRCA",
+   "جراند انفستمنت القابضة للاستثمارات المالية",
+   39.53,
+   -0.8527715073990376,
+   140788,
+   "grand-investment-capital",
+   "EGP",
+   414647974,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GIHD",
+  "d": [
+   "GIHD",
+   "الغربية الاسلامية للتنمية العمرانية",
+   72.44,
+   0.4715672676837773,
+   61906,
+   "gharbia-islamic-housing-development",
+   "EGP",
+   405562491,
+   "Consumer Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:UTOP",
+  "d": [
+   "UTOP",
+   "يوتوبيا",
+   106.96,
+   -5.720581754076694,
+   8417,
+   "utopia",
+   "EGP",
+   332700005,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:IBCT",
+  "d": [
+   "IBCT",
+   "انترناشيونال بزنيس كوربوريشن",
+   12.9,
+   0,
+   80522,
+   "international-business-for-trading-and-agencies",
+   "EGP",
+   313985993,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TRTO",
+  "d": [
+   "TRTO",
+   "عبر المحيطات للسياحة",
+   0.058,
+   -1.694915254237278,
+   40305,
+   "transoceans-tours",
+   "USD",
+   307692308.40000004,
+   "Commercial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ELWA",
+  "d": [
+   "ELWA",
+   "الوادى",
+   1.69,
+   1.8072289156626522,
+   486785,
+   "el-wadi-for-international-and-investement-development",
+   "EGP",
+   305760012,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ELNA",
+  "d": [
+   "ELNA",
+   "النصر لتصنيع الحاصلات الزراعية",
+   35.22,
+   -1.7299107142857268,
+   8099,
+   "el-nasr-for-manufacturing-agricultural-crops",
+   "EGP",
+   277020400,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FNAR",
+  "d": [
+   "FNAR",
+   "الفنار للمقاولات",
+   14.27,
+   -4.163868368032243,
+   290350,
+   "al-fanar-contracting-construction-trade-import-and-export-co",
+   "EGP",
+   238240005,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MMAT",
+  "d": [
+   "MMAT",
+   "مرسى مرسى علم",
+   4.07,
+   -4.683840749414504,
+   43,
+   "marsa-marsa-alam-for-tourism-development",
+   "EGP",
+   203500009,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NEDA",
+  "d": [
+   "NEDA",
+   "نيوداب",
+   2.75,
+   -0.7220216606498201,
+   2681603,
+   "northern-upper-egypt-development-and-agricultural-production",
+   "EGP",
+   175885446,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:VERT",
+  "d": [
+   "VERT",
+   "فرتيكا",
+   5.78,
+   -1.1965811965811863,
+   78441,
+   "vertika-for-industry-and-trade",
+   "EGP",
+   150828235,
+   "Technology Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RKAZ",
+  "d": [
+   "RKAZ",
+   "بورسعيد للتنمية الزراعية و المقاولات",
+   5.26,
+   1.1538461538461462,
+   226852,
+   "port-saied-for-agricultural-development-and-construction",
+   "EGP",
+   103999996,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS30AJ1C016-EGP",
+  "d": [
+   "EGS30AJ1C016-EGP",
+   "International Dry Ice Co.",
+   13.8,
+   -1.1461318051575942,
+   2469,
+   "international-dry-ice-co",
+   "EGP",
+   96600001,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:BIGP",
+  "d": [
+   "BIGP",
+   "بى اى جى للتجارة والاستثمار",
+   0.255,
+   -0.7782101167315182,
+   4146105,
+   "barbary-investment-big",
+   "EGP",
+   84311756,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AMPI",
+  "d": [
+   "AMPI",
+   "المؤشر",
+   2.79,
+   -0.7117437722419936,
+   115628,
+   "al-moasher-for-programming-and-information-dissemination",
+   "EGP",
+   84086513,
+   "Technology Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EPPK",
+  "d": [
+   "EPPK",
+   "الاهرام للطباعة والتغليف",
+   9.78,
+   0,
+   0,
+   "el-ahram-co-for-printing-and-packing",
+   "EGP",
+   81369595,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GMCI",
+  "d": [
+   "GMCI",
+   "جى إم سى",
+   1.76,
+   0.571428571428572,
+   105380,
+   "gmc-for-industrial-commercial-and-financial-investments",
+   "EGP",
+   73244746,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FIRE",
+  "d": [
+   "FIRE",
+   "الأولى للاستثمار",
+   4.46,
+   -1.3274336283185755,
+   68490,
+   "first-investment-company-and-real-estate-development",
+   "EGP",
+   62150000,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MISR",
+  "d": [
+   "MISR",
+   "ايجى ستون",
+   5.51,
+   0,
+   0,
+   "misr-intercontinental-for-granite-and-marble-egy-ston",
+   "EGP",
+   49997000,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:BIDI",
+  "d": [
+   "BIDI",
+   "البدر للبلاستيك",
+   2.12,
+   0,
+   0,
+   "el-badr-investment-and-development-bid",
+   "EGP",
+   48653999,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EOSB",
+  "d": [
+   "EOSB",
+   "العروبة للسمسرة فى الأوراق المالية",
+   1.57,
+   -4.26829268292682,
+   43021,
+   "el-orouba-securities-brokerage",
+   "EGP",
+   38464998,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:APPC",
+  "d": [
+   "APPC",
+   "Advanced Pharmaceutical Packaging Co.",
+   1.65,
+   -2.3668639053254457,
+   55433,
+   "advanced-pharmaceutical-packaging-co",
+   "EGP",
+   19043202,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS659O1C015",
+  "d": [
+   "EGS659O1C015",
+   "المصرية الكويتية للاستثمار والتجارة",
+   0.81,
+   0,
+   14888,
+   "misr-kuwait-investment-and-trading-co",
+   "EGP",
+   16200000,
+   "Distribution Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:WATP",
+  "d": [
+   "WATP",
+   "Modern Co. for Water Proofing",
+   23,
+   0,
+   290,
+   "modern-co-for-water-proofing",
+   "EGP",
+   null,
+   "Process Industries",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGWA",
+  "d": [
+   "EGWA",
+   "General Warehouses of Egypt",
+   5,
+   0,
+   0,
+   "general-warehouses-of-egypt",
+   "EGP",
+   null,
+   "Transportation",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ALXD",
+  "d": [
+   "ALXD",
+   "Alexandria For Investment and Urban Development",
+   5,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SNFI",
+  "d": [
+   "SNFI",
+   "Souhag National Food Industries",
+   10.98,
+   -3.6842105263157885,
+   10510,
+   "souhag-national-food-industries",
+   "EGP",
+   null,
+   "Consumer Non-Durables",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ANCC",
+  "d": [
+   "ANCC",
+   "ALNAHDA Industrial Co.",
+   10,
+   0,
+   0,
+   "alnahda-industrial-co",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ADRI",
+  "d": [
+   "ADRI",
+   "أراب للتنمية و الاستثمار العقاري",
+   12.15,
+   -2.566158781074581,
+   2964370,
+   "arab-development-and-real-estate-investment",
+   "EGP",
+   null,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SINA",
+  "d": [
+   "SINA",
+   "Sinai Manganese Company",
+   15,
+   0,
+   0,
+   "sinai-manganese-company",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS65621C012",
+  "d": [
+   "EGS65621C012",
+   "El Nasr Housing & Egp5",
+   5,
+   0,
+   0,
+   "el-nasr-housing-and-egp5",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MLIC",
+  "d": [
+   "MLIC",
+   "Misr Life Insurance",
+   10,
+   0,
+   0,
+   "misr-life-insurance",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:CID",
+  "d": [
+   "CID",
+   "Chemical Development Industries (CID)",
+   10,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ACFR",
+  "d": [
+   "ACFR",
+   "Alexandria Company For Refractories",
+   10,
+   0,
+   0,
+   "alexandria-company-for-refractories",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS72L31C011",
+  "d": [
+   "EGS72L31C011",
+   "SOLARSOL For Energy",
+   0.1,
+   0,
+   0,
+   "solarsol-for-energy",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EITP",
+  "d": [
+   "EITP",
+   "Egyptian International Tourism Projects",
+   8.11,
+   -1.0975609756097544,
+   1289,
+   "egyptian-international-tourism-projects",
+   "EGP",
+   null,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:INEG",
+  "d": [
+   "INEG",
+   "المجموعة المتكاملة للاعمال الهندسية",
+   0.701,
+   1.4471780028943573,
+   37465661,
+   "integrated-engineering-sae",
+   "EGP",
+   null,
+   "Producer Manufacturing",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ELAB",
+  "d": [
+   "ELAB",
+   "Egyptian Linear Alkyl Benzene Company",
+   0.1,
+   0,
+   0,
+   "",
+   "USD",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:ENPI",
+  "d": [
+   "ENPI",
+   "Engineering for the Petroleum and Process Industries",
+   0.125,
+   0,
+   0,
+   "",
+   "USD",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EFAC",
+  "d": [
+   "EFAC",
+   "Egyptian Ferro All Egp10",
+   10,
+   0,
+   0,
+   "egyptian-ferro-all-egp10",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NFCI",
+  "d": [
+   "NFCI",
+   "ELNASR Co For Fertilizers And Chemical Industries",
+   10,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:HBCO",
+  "d": [
+   "HBCO",
+   "Heibco Npv",
+   12.79,
+   -9.99296270232232,
+   3308091,
+   "heibco-for-commercial-investments-and-real-estate-development",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GTEX",
+  "d": [
+   "GTEX",
+   "G-TEX for Commercial and Industrial Investments S.A.E",
+   0.042,
+   -2.325581395348823,
+   156564,
+   "gtex-for-commercial-and-industrial",
+   "USD",
+   null,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS65101C015",
+  "d": [
+   "EGS65101C015",
+   "National Investment & Reconstruction",
+   5,
+   0,
+   0,
+   "national-investment-and-reconstruction",
+   "EGP",
+   null,
+   "Industrial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS370O1C013",
+  "d": [
+   "EGS370O1C013",
+   "National Printing",
+   48.01,
+   17.097560975609753,
+   2034827,
+   "national-printing",
+   "EGP",
+   null,
+   "Commercial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MITR",
+  "d": [
+   "MITR",
+   "Misr Travel&Touris Egp6",
+   6,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NAMI",
+  "d": [
+   "NAMI",
+   "National Asset Management And Investment",
+   5,
+   0,
+   0,
+   "national-asset-management-and-investment",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NMIN",
+  "d": [
+   "NMIN",
+   "El Nasr Mining Co Egp10",
+   10,
+   0,
+   0,
+   "el-nasr-mining-co-egp10",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GEOS",
+  "d": [
+   "GEOS",
+   "Geos for trading and contracting",
+   1,
+   0,
+   0,
+   "geos-for-trading-and-contracting",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GGRN",
+  "d": [
+   "GGRN",
+   "Gogreen for Agricultural Investment and Development Company",
+   1.39,
+   0,
+   2717649,
+   "gogreen-for-agricultural-investment",
+   "EGP",
+   null,
+   "Commercial Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TOUR",
+  "d": [
+   "TOUR",
+   "Tourism Urbanization",
+   10,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:KORA",
+  "d": [
+   "KORA",
+   "KORRA",
+   6.79,
+   3.6641221374045836,
+   124766054,
+   "korra",
+   "EGP",
+   null,
+   "Utilities",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:HALN",
+  "d": [
+   "HALN",
+   "MNT Tech Holding For Financial Investments",
+   0.1,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:SIEG",
+  "d": [
+   "SIEG",
+   "Egyptian Company for Pipes and Cement Products -Siegwart",
+   10,
+   0,
+   0,
+   "egyptian-company-for-pipes-and-cement-products-siegwart",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TORA",
+  "d": [
+   "TORA",
+   "Tourah Cement Co",
+   61.77,
+   1.0469491248159668,
+   17017,
+   "tourah-cement-co",
+   "EGP",
+   null,
+   "Non-Energy Minerals",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:TWSA",
+  "d": [
+   "TWSA",
+   "Tawasoa Factoring",
+   7.28,
+   1.5341701534170198,
+   616748,
+   "tawasoa-for-factoring",
+   "EGP",
+   null,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS48271C018-EGP",
+  "d": [
+   "EGS48271C018-EGP",
+   "Egypt - South Africa for Communication",
+   0.15,
+   0,
+   443575,
+   "egypt-south-africa-for-communication",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:OCAP",
+  "d": [
+   "OCAP",
+   "OG Capital For Investments SPAC",
+   1,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:GROV",
+  "d": [
+   "GROV",
+   "Grova Special Purpose Acquisition Company",
+   1,
+   0,
+   0,
+   "hassan-allam-investment-and-venture-capital",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGS65861C014",
+  "d": [
+   "EGS65861C014",
+   "Egyptian Contracting Co.-AL- ABD",
+   5,
+   0,
+   0,
+   "egyptian-contracting-co-al-abd",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EEP",
+  "d": [
+   "EEP",
+   "Egypt Education Platform - EEP",
+   1,
+   0,
+   0,
+   "egypt-education-platform-eep",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:FTNS",
+  "d": [
+   "FTNS",
+   "Fitness Prime",
+   1.25,
+   -0.7936507936507943,
+   82159,
+   "fitness-prime",
+   "EGP",
+   null,
+   "Technology Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:KNGC",
+  "d": [
+   "KNGC",
+   "EL- Nasr Glass And Crystal",
+   10,
+   0,
+   0,
+   "el-nasr-glass-and-crystal",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:UPMS",
+  "d": [
+   "UPMS",
+   "الاتحاد الصيدلى",
+   10.42,
+   -0.6673021925643497,
+   14982,
+   "union-pharmacist-company-for-medical-services-and-investment",
+   "EGP",
+   null,
+   "Health Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DCCC",
+  "d": [
+   "DCCC",
+   "Damietta Container and Cargo Handling",
+   10,
+   0,
+   0,
+   "damietta-container-and-cargo-handling",
+   "EGP",
+   null,
+   "Transportation",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:MMHC",
+  "d": [
+   "MMHC",
+   "El Mamoura Company For Construction & Tourism Development",
+   10,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:AIDC",
+  "d": [
+   "AIDC",
+   "Arabia for Investment and Development",
+   0.722,
+   -0.41379310344827624,
+   19940600,
+   "arabia-for-investment-and-development",
+   "EGP",
+   null,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PMSC",
+  "d": [
+   "PMSC",
+   "Petroleum Marine Services Company",
+   10,
+   0,
+   0,
+   "",
+   "USD",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:PHGC",
+  "d": [
+   "PHGC",
+   "Premium Healthcare Group",
+   0.086,
+   -1.1494252873563229,
+   76835592,
+   "rights-issue-of-premium-healthcare-1",
+   "EGP",
+   null,
+   "Health Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:NBCC",
+  "d": [
+   "NBCC",
+   "ALNASR For Building And Construction Company",
+   5,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:LUTS",
+  "d": [
+   "LUTS",
+   "Lotus For Agricultural Investments And Development",
+   0.892,
+   -0.3351955307262573,
+   38014504,
+   "lotus-for-agricultural-investments-and-development",
+   "EGP",
+   null,
+   "Finance",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:EGOTH",
+  "d": [
+   "EGOTH",
+   "El Masreyah Touris Egp100",
+   100,
+   0,
+   0,
+   "",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:RMTV",
+  "d": [
+   "RMTV",
+   "Rowad Misr Tourism Investment",
+   100,
+   null,
+   0,
+   "rowad-tourism-al-rowad",
+   "EGP",
+   null,
+   "Consumer Services",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:POCO",
+  "d": [
+   "POCO",
+   "Port Said Container And Cargo Handling",
+   5,
+   0,
+   0,
+   "port-said-containers-and-cargo-handling-co",
+   "EGP",
+   null,
+   "Transportation",
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:HDST",
+  "d": [
+   "HDST",
+   "HEDGESTONE INVESTMENT",
+   0.1,
+   0,
+   0,
+   "hedgestone-investment",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:YAYT",
+  "d": [
+   "YAYT",
+   "Spring & Transportation Needs Manufacturing Co.",
+   10,
+   0,
+   0,
+   "spring-and-transportation-needs-manufacturing-co",
+   "EGP",
+   null,
+   null,
+   "stock"
+  ]
+ },
+ {
+  "tv": "EGX:DGTZ",
+  "d": [
+   "DGTZ",
+   "Digitize for Investment And Technology",
+   2.43,
+   -0.8163265306122455,
+   380172,
+   "digitize-for-investment-and-technology",
+   "EGP",
+   null,
+   "Technology Services",
+   "stock"
+  ]
+ }
+]
