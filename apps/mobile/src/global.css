@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@theme {
+  --color-canvas: #0f1115;
+  --color-surface: #161a20;
+  --color-surface-elevated: #1d222b;
+  --color-border: #2a303b;
+  --color-gold: #c9a227;
+  --color-gold-soft: #e0b84a;
+  --color-warning: #f59e0b;
+  --color-warning-surface: rgba(245, 158, 11, 0.1);
+  --color-up: #22c55e;
+  --color-down: #ef4444;
+  --color-text: #f5f1e8;
+  --color-text-secondary: #a8adb8;
+  --color-text-muted: #6e7480;
+
+  --font-body: "IBMPlexSansArabic_400Regular";
+  --font-title: "IBMPlexSansArabic_600SemiBold";
+  --font-display: "IBMPlexSansArabic_700Bold";
+  --font-label: "Inter_600SemiBold";
+}
+
+:root {
+  color-scheme: dark;
+  background-color: #0f1115;
+}

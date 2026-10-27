@@ -1,0 +1,81 @@
+{
+  "common": {
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "loading": "One moment…",
+    "back": "Back",
+    "comingSoon": "Coming soon",
+    "notFound": "Page not found",
+    "goHome": "Go home"
+  },
+  "auth": {
+    "kicker": "Egyptian Exchange",
+    "signInTitle": "Welcome",
+    "signInSubtitle": "Follow the market, your holdings, and company news in one place.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "name@example.com",
+    "emailInvalid": "Enter a valid email address.",
+    "sendCode": "Send me a sign-in code",
+    "sendingCode": "Preparing your code…",
+    "google": "Continue with Google",
+    "otpTitle": "Enter your code",
+    "otpSubtitle": "We sent it to {{email}}. It expires in 10 minutes.",
+    "verify": "Sign in",
+    "verifying": "Checking…",
+    "invalidCode": "That code is wrong or expired. Try again.",
+    "resend": "Send again",
+    "resendIn": "Resend in {{seconds}}s",
+    "changeEmail": "Change email",
+    "errorGeneric": "Something went wrong. Try again.",
+    "emailSent": "If the address is available, the code is on its way."
+  },
+  "tabs": {
+    "markets": "Markets",
+    "stocks": "My Stocks",
+    "news": "News",
+    "ai": "Assistant",
+    "profile": "Profile"
+  },
+  "markets": {
+    "kicker": "EGX",
+    "title": "Egyptian Exchange",
+    "bell": "Alerts",
+    "emptyTitle": "The market, in your pocket",
+    "emptyBody": "Indices and stock data will appear here once ingestion starts.",
+    "emptyBadge": "Waiting for the first update"
+  },
+  "stocks": {
+    "title": "My Stocks",
+    "emptyTitle": "No stocks yet",
+    "emptyBody": "Your watchlist and positions will appear here."
+  },
+  "news": {
+    "title": "News",
+    "emptyTitle": "No news yet",
+    "emptyBody": "Company and market headlines will collect here."
+  },
+  "ai": {
+    "title": "Assistant",
+    "emptyTitle": "Ask about any stock",
+    "emptyBody": "The assistant answers from market data and its sources."
+  },
+  "profile": {
+    "title": "Profile",
+    "account": "Account",
+    "language": "Language",
+    "arabic": "العربية",
+    "english": "English",
+    "service": "Service status",
+    "connected": "Connected",
+    "disconnected": "Offline",
+    "checking": "Checking…",
+    "signOut": "Sign out",
+    "signOutTitle": "Sign out?",
+    "signOutBody": "You will return to sign in and the session will be removed from this device.",
+    "version": "Version {{version}}",
+    "restartTitle": "Restart required",
+    "restartBody": "Close and reopen the app to apply the interface direction.",
+    "languageNote": "Changing language requires a restart."
+  }
+}

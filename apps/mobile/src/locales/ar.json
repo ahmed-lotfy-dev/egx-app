@@ -1,0 +1,81 @@
+{
+  "common": {
+    "continue": "متابعة",
+    "cancel": "إلغاء",
+    "retry": "حاول تاني",
+    "loading": "لحظة…",
+    "back": "رجوع",
+    "comingSoon": "قريبًا",
+    "notFound": "الصفحة غير موجودة",
+    "goHome": "العودة للرئيسية"
+  },
+  "auth": {
+    "kicker": "البورصة المصرية",
+    "signInTitle": "أهلاً بيك",
+    "signInSubtitle": "تابع السوق، أسهمك، وأخبار الشركات في مكان واحد.",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "name@example.com",
+    "emailInvalid": "اكتب بريد إلكتروني صحيح.",
+    "sendCode": "ابعتلي كود الدخول",
+    "sendingCode": "بنجهز الكود…",
+    "google": "الدخول بجوجل",
+    "otpTitle": "اكتب كود الدخول",
+    "otpSubtitle": "بعتناه على {{email}}. الكود صالح 10 دقايق.",
+    "verify": "دخول",
+    "verifying": "بنتحقق…",
+    "invalidCode": "الكود غلط أو انتهت صلاحيته. جرّب تاني.",
+    "resend": "ابعته تاني",
+    "resendIn": "إعادة الإرسال بعد {{seconds}} ث",
+    "changeEmail": "تغيير البريد",
+    "errorGeneric": "حصلت مشكلة. حاول تاني.",
+    "emailSent": "لو البريد متاح، الكود في السكة."
+  },
+  "tabs": {
+    "markets": "السوق",
+    "stocks": "أسهمي",
+    "news": "الأخبار",
+    "ai": "المساعد",
+    "profile": "حسابي"
+  },
+  "markets": {
+    "kicker": "EGX",
+    "title": "البورصة المصرية",
+    "bell": "التنبيهات",
+    "emptyTitle": "السوق بين إيديك",
+    "emptyBody": "بيانات المؤشرات والأسهم هتظهر هنا أول ما المزامنة تبدأ.",
+    "emptyBadge": "بانتظار أول تحديث"
+  },
+  "stocks": {
+    "title": "أسهمي",
+    "emptyTitle": "لسه مفيش أسهم",
+    "emptyBody": "قائمة المتابعة والمراكز هتظهر هنا."
+  },
+  "news": {
+    "title": "الأخبار",
+    "emptyTitle": "مفيش أخبار لسه",
+    "emptyBody": "عناوين الشركات والسوق هتتجمع هنا."
+  },
+  "ai": {
+    "title": "المساعد",
+    "emptyTitle": "اسأل عن أي سهم",
+    "emptyBody": "المساعد هيجاوب من بيانات السوق ومصادرها."
+  },
+  "profile": {
+    "title": "حسابي",
+    "account": "الحساب",
+    "language": "اللغة",
+    "arabic": "العربية",
+    "english": "English",
+    "service": "حالة الخدمة",
+    "connected": "متصل",
+    "disconnected": "غير متصل",
+    "checking": "بنتحقق…",
+    "signOut": "تسجيل الخروج",
+    "signOutTitle": "تسجيل الخروج؟",
+    "signOutBody": "هترجع لشاشة الدخول، وهنمسح الجلسة من الجهاز.",
+    "version": "الإصدار {{version}}",
+    "restartTitle": "إعادة تشغيل مطلوبة",
+    "restartBody": "علشان اتجاه الواجهة يتغيّر، اقفل التطبيق وافتحه تاني.",
+    "languageNote": "تغيير اللغة يحتاج إعادة تشغيل."
+  }
+}

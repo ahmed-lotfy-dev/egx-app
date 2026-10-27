@@ -1,0 +1,22 @@
+{
+  "name": "egx-app",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "bun run --cwd apps/api dev",
+    "dev:mobile": "bun run --cwd apps/mobile start",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:generate": "bun run --cwd apps/api db:generate",
+    "db:migrate": "bun run --cwd apps/api db:migrate",
+    "contracts:generate": "bun run --cwd apps/api openapi:generate && bun run --cwd apps/mobile types:generate",
+    "contracts:check": "bun run --cwd apps/api openapi:check && bun run --cwd apps/mobile types:check",
+    "typecheck": "bun run --cwd apps/api typecheck && bun run --cwd apps/mobile typecheck"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}
