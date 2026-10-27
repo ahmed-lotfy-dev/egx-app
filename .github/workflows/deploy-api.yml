@@ -2,7 +2,7 @@ name: Deploy EGX API
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/**]
     paths:
       - 'apps/api/**'
       - 'packages/**'
