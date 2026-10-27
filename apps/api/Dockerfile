@@ -12,7 +12,7 @@ COPY apps/api/package.json ./apps/api/
 COPY packages/contracts/package.json ./packages/contracts/
 
 # Install dependencies with hoisted linker
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy source code
 COPY apps/api/src ./apps/api/src
