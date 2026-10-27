@@ -1,3 +1,4 @@
+import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
@@ -39,6 +40,9 @@ export const auth = betterAuth({
     max: 10,
   },
   plugins: [
+    // Required for OAuth in Expo Go: proxies the provider redirect back to the
+    // app and trusts the exp:// development origins.
+    expo(),
     emailOTP({
       otpLength: 6,
       expiresIn: 60 * 10,

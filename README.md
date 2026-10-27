@@ -81,8 +81,20 @@ bun run --cwd apps/mobile uniwind:generate
 | `bun run contracts:check` | Verify generated artifacts are current |
 | `bun run typecheck` | Typecheck both apps |
 
+## Development builds
+
+Expo Go is enough for M1 (email OTP and the empty Markets screen). Push
+notifications, custom native modules, and release builds need a development build
+(`npx expo run:android` or EAS Build); Expo Go cannot load those native modules.
+
 ## Google sign in
 
-Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` on the API, and add
-`EXPO_PUBLIC_GOOGLE_AUTH_ENABLED=true` to `apps/mobile/.env`. Without them the Google
-button is hidden and email OTP remains available.
+Create a **Web application** OAuth client in Google Cloud Console and register
+`http://localhost:3000/api/auth/callback/google` as an authorized redirect URI. Then set
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the root `.env`, and set
+`EXPO_PUBLIC_GOOGLE_AUTH_ENABLED=true` in `apps/mobile/.env`. Without the credentials the
+Google button is hidden and email OTP remains available.
+
+The callback is built from `BETTER_AUTH_URL`, so keep it at `http://localhost:3000` in
+development. On the Android emulator, run `adb reverse tcp:3000 tcp:3000` once per boot so
+the browser can reach the API at `localhost:3000`.

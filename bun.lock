@@ -12,6 +12,7 @@
       "name": "@egx/api",
       "version": "0.1.0",
       "dependencies": {
+        "@better-auth/expo": "^1.7.13",
         "@egx/contracts": "workspace:*",
         "@hono/zod-openapi": "^1.6.3",
         "better-auth": "^1.7.13",
