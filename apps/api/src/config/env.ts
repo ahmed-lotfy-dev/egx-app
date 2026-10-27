@@ -6,7 +6,7 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
-  TRUSTED_ORIGINS: z.string().default("egx://,http://localhost:8081"),
+  TRUSTED_ORIGINS: z.string().default("ahmedlotfy-egx-app://,http://localhost:8081"),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),

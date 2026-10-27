@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
@@ -13,6 +14,11 @@ import { authClient } from "@/lib/auth-client";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const googleEnabled = process.env.EXPO_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
+
+// Expo Go cannot handle the app's custom scheme, so send it back through the
+// exp:// deep link. Development and release builds use the ahmedlotfy-egx-app:// scheme.
+const expoGoHost = Constants.expoGoConfig?.debuggerHost;
+const googleCallbackURL = expoGoHost ? `exp://${expoGoHost}/--/` : "/";
 
 export default function SignInScreen() {
   const { t } = useTranslation();
@@ -55,7 +61,7 @@ export default function SignInScreen() {
 
     const { error: requestError } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/",
+      callbackURL: googleCallbackURL,
     });
 
     setGoogleLoading(false);

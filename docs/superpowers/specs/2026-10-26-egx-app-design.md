@@ -854,7 +854,7 @@ Errors use:
 - Rate limits: auth 10 requests per minute per IP, AI 20 messages per hour per user,
   general API 300 requests per minute per user.
 - CORS allows the Expo dev origins and the production app origin only.
-- Better Auth trusted origins include the app scheme `egx://`.
+- Better Auth trusted origins include the app scheme `ahmedlotfy-egx-app://`.
 
 ## 12. AI assistant
 
@@ -1025,7 +1025,7 @@ news, AI citations, alerts, and push notifications.
 - Codes expire after 10 minutes, allow 5 attempts, and are rate limited by email and IP.
 - A new user record is created on the first successful OTP or Google sign in. There is no
   separate registration screen.
-- Google uses the Better Auth Expo client with the `egx://` callback scheme.
+- Google uses the Better Auth Expo client with the `ahmedlotfy-egx-app://` callback scheme.
 - Apple sign in is required before an iOS App Store release and is added in M6.
 - Sign out clears the secure session, the query cache, and the push token for this device.
 
@@ -1141,7 +1141,7 @@ Push handling:
   Informational warnings use a default-importance channel.
 - A foreground push invalidates the unread count and inbox queries and shows a small toast,
   not a duplicate banner.
-- Taps deep link to `egx://stock/COMI` for price alerts and `egx://alerts/<id>` for
+- Taps deep link to `ahmedlotfy-egx-app://stock/COMI` for price alerts and `ahmedlotfy-egx-app://alerts/<id>` for
   warnings. Cold starts are handled with `getLastNotificationResponseAsync`.
 - A notification whose event was deleted falls back to the inbox.
 - Push text is already localized at send time. The detail screen renders structured `data`
@@ -1320,7 +1320,7 @@ until a light theme is designed.
 - Authentication is email OTP and Google. No passwords are stored.
 - OTP codes are hashed at rest, expire after 10 minutes, allow 5 attempts, and are rate
   limited by email and IP. Responses do not reveal whether an email exists.
-- Google OAuth verifies the token audience and redirects only to the `egx://` scheme.
+- Google OAuth verifies the token audience and redirects only to the `ahmedlotfy-egx-app://` scheme.
 - Auth rate limiting and bot protection on the auth routes.
 - Provider fallback keys are separate environment variables with least-privilege scopes.
 

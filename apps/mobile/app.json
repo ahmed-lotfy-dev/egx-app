@@ -2,7 +2,7 @@
   "expo": {
     "name": "EGX",
     "slug": "egx",
-    "scheme": "egx",
+    "scheme": "ahmedlotfy-egx-app",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
