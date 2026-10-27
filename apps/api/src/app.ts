@@ -6,6 +6,9 @@ import { env } from "./config/env";
 import { auth } from "./lib/auth";
 import { logger } from "./lib/logger";
 import { OPENAPI_CONFIG } from "./openapi";
+import { dataStatusRoutes } from "./routes/data-status";
+import { instrumentRoutes } from "./routes/instruments";
+import { marketRoutes } from "./routes/market";
 import { statusRoutes } from "./routes/status";
 
 export const app = new OpenAPIHono();
@@ -46,6 +49,9 @@ app.use(
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.route("/", statusRoutes);
+app.route("/", dataStatusRoutes);
+app.route("/", instrumentRoutes);
+app.route("/", marketRoutes);
 
 app.doc31("/openapi.json", OPENAPI_CONFIG);
 

@@ -12,9 +12,14 @@
     "db:down": "docker compose down",
     "db:generate": "bun run --cwd apps/api db:generate",
     "db:migrate": "bun run --cwd apps/api db:migrate",
+    "sync:universe": "bun run --cwd apps/worker sync:universe",
+    "sync:quotes": "bun run --cwd apps/worker sync:quotes",
+    "sync:bars": "bun run --cwd apps/worker sync:bars",
+    "sync:symbols": "bun run --cwd apps/worker sync:symbols",
+    "sync:all": "bun run --cwd apps/worker sync:all",
     "contracts:generate": "bun run --cwd apps/api openapi:generate && bun run --cwd apps/mobile types:generate",
     "contracts:check": "bun run --cwd apps/api openapi:check && bun run --cwd apps/mobile types:check",
-    "typecheck": "bun run --cwd apps/api typecheck && bun run --cwd apps/mobile typecheck"
+    "typecheck": "bun run --cwd apps/api typecheck && bun run --cwd apps/worker typecheck && bun run --cwd apps/mobile typecheck"
   },
   "devDependencies": {
     "typescript": "6.0.3"

@@ -72,6 +72,18 @@
         "typescript": "~6.0.3",
       },
     },
+    "apps/worker": {
+      "name": "@egx/worker",
+      "version": "0.1.0",
+      "dependencies": {
+        "@egx/api": "workspace:*",
+        "drizzle-orm": "^0.45.4",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.4.4",
+        "typescript": "~6.0.3",
+      },
+    },
     "packages/contracts": {
       "name": "@egx/contracts",
       "version": "0.1.0",
@@ -259,6 +271,8 @@
     "@egx/contracts": ["@egx/contracts@workspace:packages/contracts"],
 
     "@egx/mobile": ["@egx/mobile@workspace:apps/mobile"],
+
+    "@egx/worker": ["@egx/worker@workspace:apps/worker"],
 
     "@esbuild-kit/core-utils": ["@esbuild-kit/core-utils@3.3.2", "", { "dependencies": { "esbuild": "~0.18.20", "source-map-support": "^0.5.21" } }, "sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ=="],
 

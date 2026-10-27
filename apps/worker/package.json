@@ -1,0 +1,22 @@
+{
+  "name": "@egx/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:universe": "bun --env-file=../../.env src/cli.ts universe",
+    "sync:quotes": "bun --env-file=../../.env src/cli.ts quotes",
+    "sync:bars": "bun --env-file=../../.env src/cli.ts bars",
+    "sync:symbols": "bun --env-file=../../.env src/cli.ts symbols",
+    "sync:all": "bun --env-file=../../.env src/cli.ts all",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@egx/api": "workspace:*",
+    "drizzle-orm": "^0.45.4"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "typescript": "~6.0.3"
+  }
+}

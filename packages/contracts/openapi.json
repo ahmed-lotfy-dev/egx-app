@@ -87,6 +87,1032 @@
           }
         }
       }
+    },
+    "/api/status/data": {
+      "get": {
+        "tags": [
+          "status"
+        ],
+        "summary": "Last ingest run per job and stored row counts",
+        "responses": {
+          "200": {
+            "description": "Data pipeline status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "jobs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "job": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "running",
+                                  "success",
+                                  "partial",
+                                  "failed"
+                                ]
+                              },
+                              "provider": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "startedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "finishedAt": {
+                                "type": "string",
+                                "nullable": true,
+                                "format": "date-time"
+                              },
+                              "itemsOk": {
+                                "type": "integer"
+                              },
+                              "itemsFailed": {
+                                "type": "integer"
+                              },
+                              "error": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "stale": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "job",
+                              "status",
+                              "provider",
+                              "startedAt",
+                              "finishedAt",
+                              "itemsOk",
+                              "itemsFailed",
+                              "error",
+                              "stale"
+                            ]
+                          }
+                        },
+                        "counts": {
+                          "type": "object",
+                          "properties": {
+                            "instruments": {
+                              "type": "integer"
+                            },
+                            "stocks": {
+                              "type": "integer"
+                            },
+                            "indices": {
+                              "type": "integer"
+                            },
+                            "quotes": {
+                              "type": "integer"
+                            },
+                            "dailyBars": {
+                              "type": "integer"
+                            },
+                            "barInstruments": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "instruments",
+                            "stocks",
+                            "indices",
+                            "quotes",
+                            "dailyBars",
+                            "barInstruments"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "jobs",
+                        "counts"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "stale": {
+                          "type": "boolean"
+                        },
+                        "universeAsOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "asOf",
+                        "source",
+                        "stale"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/instruments": {
+      "get": {
+        "tags": [
+          "market"
+        ],
+        "summary": "List and search instruments",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "required": false,
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "required": false,
+            "name": "sector",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "stock",
+                "index"
+              ]
+            },
+            "required": false,
+            "name": "kind",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instrument page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "ticker": {
+                            "type": "string"
+                          },
+                          "nameEn": {
+                            "type": "string"
+                          },
+                          "nameAr": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "sector": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "industry": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "stock",
+                              "index"
+                            ]
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "quote": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "price": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "change": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "changePct": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "volume": {
+                                "type": "integer",
+                                "nullable": true
+                              },
+                              "marketCap": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "currency": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "asOf": {
+                                "type": "string",
+                                "nullable": true,
+                                "format": "date-time"
+                              },
+                              "source": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "stale": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "price",
+                              "change",
+                              "changePct",
+                              "volume",
+                              "marketCap",
+                              "currency",
+                              "asOf",
+                              "source",
+                              "stale"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "ticker",
+                          "nameEn",
+                          "nameAr",
+                          "sector",
+                          "industry",
+                          "kind",
+                          "currency",
+                          "quote"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "stale": {
+                          "type": "boolean"
+                        },
+                        "universeAsOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "asOf",
+                        "source",
+                        "stale"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/instruments/{ticker}": {
+      "get": {
+        "tags": [
+          "market"
+        ],
+        "summary": "Instrument identity, latest quote, and history coverage",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "required": true,
+            "name": "ticker",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instrument detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ticker": {
+                          "type": "string"
+                        },
+                        "nameEn": {
+                          "type": "string"
+                        },
+                        "nameAr": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "sector": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "industry": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "stock",
+                            "index"
+                          ]
+                        },
+                        "currency": {
+                          "type": "string"
+                        },
+                        "quote": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "price": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "change": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "changePct": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "volume": {
+                              "type": "integer",
+                              "nullable": true
+                            },
+                            "marketCap": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "currency": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "asOf": {
+                              "type": "string",
+                              "nullable": true,
+                              "format": "date-time"
+                            },
+                            "source": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "stale": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "price",
+                            "change",
+                            "changePct",
+                            "volume",
+                            "marketCap",
+                            "currency",
+                            "asOf",
+                            "source",
+                            "stale"
+                          ]
+                        },
+                        "tvSymbol": {
+                          "type": "string"
+                        },
+                        "yahooSymbol": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "isin": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "logoid": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "history": {
+                          "type": "object",
+                          "properties": {
+                            "barCount": {
+                              "type": "integer"
+                            },
+                            "firstDate": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "lastDate": {
+                              "type": "string",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "barCount",
+                            "firstDate",
+                            "lastDate"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "ticker",
+                        "nameEn",
+                        "nameAr",
+                        "sector",
+                        "industry",
+                        "kind",
+                        "currency",
+                        "quote",
+                        "tvSymbol",
+                        "yahooSymbol",
+                        "isin",
+                        "logoid",
+                        "history"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "stale": {
+                          "type": "boolean"
+                        },
+                        "universeAsOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "asOf",
+                        "source",
+                        "stale"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instrument not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/market/overview": {
+      "get": {
+        "tags": [
+          "market"
+        ],
+        "summary": "Market index, breadth, movers, and sector performance",
+        "responses": {
+          "200": {
+            "description": "Market overview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "index": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "ticker": {
+                              "type": "string"
+                            },
+                            "nameEn": {
+                              "type": "string"
+                            },
+                            "nameAr": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "sector": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "industry": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "stock",
+                                "index"
+                              ]
+                            },
+                            "currency": {
+                              "type": "string"
+                            },
+                            "quote": {
+                              "type": "object",
+                              "nullable": true,
+                              "properties": {
+                                "price": {
+                                  "type": "number",
+                                  "nullable": true
+                                },
+                                "change": {
+                                  "type": "number",
+                                  "nullable": true
+                                },
+                                "changePct": {
+                                  "type": "number",
+                                  "nullable": true
+                                },
+                                "volume": {
+                                  "type": "integer",
+                                  "nullable": true
+                                },
+                                "marketCap": {
+                                  "type": "number",
+                                  "nullable": true
+                                },
+                                "currency": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "asOf": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "format": "date-time"
+                                },
+                                "source": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "stale": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "price",
+                                "change",
+                                "changePct",
+                                "volume",
+                                "marketCap",
+                                "currency",
+                                "asOf",
+                                "source",
+                                "stale"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "ticker",
+                            "nameEn",
+                            "nameAr",
+                            "sector",
+                            "industry",
+                            "kind",
+                            "currency",
+                            "quote"
+                          ]
+                        },
+                        "indexSparkline": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        },
+                        "breadth": {
+                          "type": "object",
+                          "properties": {
+                            "advancers": {
+                              "type": "integer"
+                            },
+                            "decliners": {
+                              "type": "integer"
+                            },
+                            "unchanged": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "advancers",
+                            "decliners",
+                            "unchanged",
+                            "total"
+                          ]
+                        },
+                        "gainers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "ticker": {
+                                "type": "string"
+                              },
+                              "nameEn": {
+                                "type": "string"
+                              },
+                              "nameAr": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "sector": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "industry": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "stock",
+                                  "index"
+                                ]
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "quote": {
+                                "type": "object",
+                                "nullable": true,
+                                "properties": {
+                                  "price": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "change": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "changePct": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "volume": {
+                                    "type": "integer",
+                                    "nullable": true
+                                  },
+                                  "marketCap": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "currency": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "asOf": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "format": "date-time"
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "stale": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "price",
+                                  "change",
+                                  "changePct",
+                                  "volume",
+                                  "marketCap",
+                                  "currency",
+                                  "asOf",
+                                  "source",
+                                  "stale"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "ticker",
+                              "nameEn",
+                              "nameAr",
+                              "sector",
+                              "industry",
+                              "kind",
+                              "currency",
+                              "quote"
+                            ]
+                          }
+                        },
+                        "losers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "ticker": {
+                                "type": "string"
+                              },
+                              "nameEn": {
+                                "type": "string"
+                              },
+                              "nameAr": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "sector": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "industry": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "stock",
+                                  "index"
+                                ]
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "quote": {
+                                "type": "object",
+                                "nullable": true,
+                                "properties": {
+                                  "price": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "change": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "changePct": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "volume": {
+                                    "type": "integer",
+                                    "nullable": true
+                                  },
+                                  "marketCap": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "currency": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "asOf": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "format": "date-time"
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "stale": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "price",
+                                  "change",
+                                  "changePct",
+                                  "volume",
+                                  "marketCap",
+                                  "currency",
+                                  "asOf",
+                                  "source",
+                                  "stale"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "ticker",
+                              "nameEn",
+                              "nameAr",
+                              "sector",
+                              "industry",
+                              "kind",
+                              "currency",
+                              "quote"
+                            ]
+                          }
+                        },
+                        "sectors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sector": {
+                                "type": "string"
+                              },
+                              "changePct": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "advancers": {
+                                "type": "integer"
+                              },
+                              "decliners": {
+                                "type": "integer"
+                              },
+                              "count": {
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "sector",
+                              "changePct",
+                              "advancers",
+                              "decliners",
+                              "count"
+                            ]
+                          }
+                        },
+                        "instrumentCount": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "index",
+                        "indexSparkline",
+                        "breadth",
+                        "gainers",
+                        "losers",
+                        "sectors",
+                        "instrumentCount"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "stale": {
+                          "type": "boolean"
+                        },
+                        "universeAsOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "asOf",
+                        "source",
+                        "stale"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

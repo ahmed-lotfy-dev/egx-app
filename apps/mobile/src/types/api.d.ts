@@ -62,6 +62,373 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/status/data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Last ingest run per job and stored row counts */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Data pipeline status */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                jobs: {
+                                    job: string;
+                                    /** @enum {string} */
+                                    status: "running" | "success" | "partial" | "failed";
+                                    provider: string | null;
+                                    /** Format: date-time */
+                                    startedAt: string;
+                                    /** Format: date-time */
+                                    finishedAt: string | null;
+                                    itemsOk: number;
+                                    itemsFailed: number;
+                                    error: string | null;
+                                    stale: boolean;
+                                }[];
+                                counts: {
+                                    instruments: number;
+                                    stocks: number;
+                                    indices: number;
+                                    quotes: number;
+                                    dailyBars: number;
+                                    barInstruments: number;
+                                };
+                            };
+                            meta: {
+                                /** Format: date-time */
+                                asOf: string | null;
+                                source: string;
+                                stale: boolean;
+                                /** Format: date-time */
+                                universeAsOf?: string | null;
+                                nextCursor?: string | null;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/instruments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List and search instruments */
+        get: {
+            parameters: {
+                query?: {
+                    q?: string;
+                    sector?: string;
+                    kind?: "stock" | "index";
+                    limit?: number;
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instrument page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                ticker: string;
+                                nameEn: string;
+                                nameAr: string | null;
+                                sector: string | null;
+                                industry: string | null;
+                                /** @enum {string} */
+                                kind: "stock" | "index";
+                                currency: string;
+                                quote: {
+                                    price: number | null;
+                                    change: number | null;
+                                    changePct: number | null;
+                                    volume: number | null;
+                                    marketCap: number | null;
+                                    currency: string | null;
+                                    /** Format: date-time */
+                                    asOf: string | null;
+                                    source: string | null;
+                                    stale: boolean;
+                                } | null;
+                            }[];
+                            meta: {
+                                /** Format: date-time */
+                                asOf: string | null;
+                                source: string;
+                                stale: boolean;
+                                /** Format: date-time */
+                                universeAsOf?: string | null;
+                                nextCursor?: string | null;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/instruments/{ticker}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Instrument identity, latest quote, and history coverage */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    ticker: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instrument detail */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                ticker: string;
+                                nameEn: string;
+                                nameAr: string | null;
+                                sector: string | null;
+                                industry: string | null;
+                                /** @enum {string} */
+                                kind: "stock" | "index";
+                                currency: string;
+                                quote: {
+                                    price: number | null;
+                                    change: number | null;
+                                    changePct: number | null;
+                                    volume: number | null;
+                                    marketCap: number | null;
+                                    currency: string | null;
+                                    /** Format: date-time */
+                                    asOf: string | null;
+                                    source: string | null;
+                                    stale: boolean;
+                                } | null;
+                                tvSymbol: string;
+                                yahooSymbol: string | null;
+                                isin: string | null;
+                                logoid: string | null;
+                                history: {
+                                    barCount: number;
+                                    firstDate: string | null;
+                                    lastDate: string | null;
+                                };
+                            };
+                            meta: {
+                                /** Format: date-time */
+                                asOf: string | null;
+                                source: string;
+                                stale: boolean;
+                                /** Format: date-time */
+                                universeAsOf?: string | null;
+                                nextCursor?: string | null;
+                            };
+                        };
+                    };
+                };
+                /** @description Instrument not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                code: string;
+                                message: string;
+                                requestId?: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/market/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Market index, breadth, movers, and sector performance */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Market overview */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                index: {
+                                    ticker: string;
+                                    nameEn: string;
+                                    nameAr: string | null;
+                                    sector: string | null;
+                                    industry: string | null;
+                                    /** @enum {string} */
+                                    kind: "stock" | "index";
+                                    currency: string;
+                                    quote: {
+                                        price: number | null;
+                                        change: number | null;
+                                        changePct: number | null;
+                                        volume: number | null;
+                                        marketCap: number | null;
+                                        currency: string | null;
+                                        /** Format: date-time */
+                                        asOf: string | null;
+                                        source: string | null;
+                                        stale: boolean;
+                                    } | null;
+                                } | null;
+                                indexSparkline: number[];
+                                breadth: {
+                                    advancers: number;
+                                    decliners: number;
+                                    unchanged: number;
+                                    total: number;
+                                };
+                                gainers: {
+                                    ticker: string;
+                                    nameEn: string;
+                                    nameAr: string | null;
+                                    sector: string | null;
+                                    industry: string | null;
+                                    /** @enum {string} */
+                                    kind: "stock" | "index";
+                                    currency: string;
+                                    quote: {
+                                        price: number | null;
+                                        change: number | null;
+                                        changePct: number | null;
+                                        volume: number | null;
+                                        marketCap: number | null;
+                                        currency: string | null;
+                                        /** Format: date-time */
+                                        asOf: string | null;
+                                        source: string | null;
+                                        stale: boolean;
+                                    } | null;
+                                }[];
+                                losers: {
+                                    ticker: string;
+                                    nameEn: string;
+                                    nameAr: string | null;
+                                    sector: string | null;
+                                    industry: string | null;
+                                    /** @enum {string} */
+                                    kind: "stock" | "index";
+                                    currency: string;
+                                    quote: {
+                                        price: number | null;
+                                        change: number | null;
+                                        changePct: number | null;
+                                        volume: number | null;
+                                        marketCap: number | null;
+                                        currency: string | null;
+                                        /** Format: date-time */
+                                        asOf: string | null;
+                                        source: string | null;
+                                        stale: boolean;
+                                    } | null;
+                                }[];
+                                sectors: {
+                                    sector: string;
+                                    changePct: number | null;
+                                    advancers: number;
+                                    decliners: number;
+                                    count: number;
+                                }[];
+                                instrumentCount: number;
+                            };
+                            meta: {
+                                /** Format: date-time */
+                                asOf: string | null;
+                                source: string;
+                                stale: boolean;
+                                /** Format: date-time */
+                                universeAsOf?: string | null;
+                                nextCursor?: string | null;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {

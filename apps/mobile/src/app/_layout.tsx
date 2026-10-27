@@ -2,14 +2,14 @@ import "../global.css";
 
 import { IBMPlexSansArabic_400Regular, IBMPlexSansArabic_600SemiBold, IBMPlexSansArabic_700Bold } from "@expo-google-fonts/ibm-plex-sans-arabic";
 import { Inter_500Medium, Inter_600SemiBold } from "@expo-google-fonts/inter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { DevSettings, I18nManager } from "react-native";
+import { DevSettings, I18nManager, AppState } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -29,6 +29,15 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
     },
   },
+});
+
+// Pause interval polling while the app is in the background.
+focusManager.setEventListener((handleFocus) => {
+  const subscription = AppState.addEventListener("change", (status) => {
+    handleFocus(status === "active");
+  });
+
+  return () => subscription.remove();
 });
 
 export default function RootLayout() {
@@ -99,7 +108,15 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.canvas }}>
+    <GestureHandlerRootView
+      style={{
+        flex: 1,
+        backgroundColor: colors.canvas,
+        // forceRTL needs a native restart that Expo Go does not perform. Yoga's
+        // direction flips row layouts immediately in both Expo Go and builds.
+        direction: locale === "ar" ? "rtl" : "ltr",
+      }}
+    >
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <StatusBar style="light" />

@@ -4,14 +4,16 @@ Arabic-first mobile app for the Egyptian Exchange: markets, stock data, news, a
 watchlist, manual positions, alerts, and a grounded AI assistant.
 
 The design is in [docs/superpowers/specs/2026-10-26-egx-app-design.md](docs/superpowers/specs/2026-10-26-egx-app-design.md).
-Milestone 1 covers the workspace, authentication, generated API types, design tokens,
-and an empty Markets screen.
+Milestone 1 covers the workspace, authentication, generated API types, and design tokens.
+M2a adds the market schema, the ingestion worker, the instruments/overview/status APIs,
+and the live Markets screen. Scheduled ingestion (pg-boss) is M2b.
 
 ## Layout
 
 ```
 apps/mobile      Expo SDK 58 app (expo-router, Uniwind, Better Auth)
-apps/api         Bun + Hono API, Drizzle, Better Auth, pg-boss worker (M2)
+apps/api         Bun + Hono API, Drizzle, Better Auth
+apps/worker      market-data ingestion CLI (TradingView universe/quotes, Yahoo bars)
 packages/contracts  shared Zod schemas and the generated OpenAPI document
 ```
 
@@ -35,9 +37,14 @@ cp .env.example apps/mobile/.env
 bun install
 bun run db:up
 bun run db:migrate
+bun run sync:all          # universe, Yahoo symbols, daily bars, then quotes
 bun run dev:api
 bun run dev:mobile
 ```
+
+`sync:all` needs the root `.env` with `DATABASE_URL`; it runs the universe, Yahoo-symbol
+resolver, bars, and quotes jobs. Re-run `bun run sync:quotes` whenever you want fresh
+prices, and `bun run sync:bars -- --missing` to fill only tickers with no stored bars.
 
 The API listens on `http://localhost:3000`. In development, when `RESEND_API_KEY` is
 unset, the email OTP is written to the API log instead of being sent.
@@ -58,6 +65,51 @@ bun run contracts:generate   # regenerate openapi.json and api.d.ts
 bun run contracts:check      # fail when either artifact is stale
 ```
 
+## Market data (M2a)
+
+The worker writes to the same Postgres database as the API:
+
+```sh
+bun run sync:universe   # TradingView: 296 instruments, Arabic names, sectors, logos
+bun run sync:quotes     # TradingView: latest quotes + snapshots
+bun run sync:symbols    # resolve missing EGX tickers to Yahoo symbols
+bun run sync:bars       # Yahoo: daily bars (requests one year)
+bun run sync:bars -- --missing   # only tickers with no stored bars
+bun run sync:all        # universe -> symbols -> bars -> quotes
+```
+
+`sync:bars` also accepts `--tickers COMI,HRHO`, `--limit 10`, and `--days 365`.
+
+Verified endpoints:
+
+| Endpoint | Returns |
+|---|---|
+| `GET /api/instruments?q=&sector=&kind=&limit=&cursor=` | Searchable, paginated instrument list with latest quote |
+| `GET /api/instruments/:ticker` | Identity, quote, Yahoo/TradingView symbols, history coverage |
+| `GET /api/market/overview` | EGX30, breadth, top gainers/losers, 21 sectors, sparkline |
+| `GET /api/status/data` | Last run per job and stored row counts |
+| `GET /api/status` | API and database health |
+
+Coverage on the verified snapshot: 296 instruments (295 stocks + EGX30), 296 quotes,
+249 stocks with a Yahoo symbol, and 42,835 stored daily bars across 246 instruments
+(245 stocks + EGX30). History is bimodal: 176 stocks have 240–243 bars, while 69 stocks
+and EGX30 have a single recent bar because Yahoo returns only the latest day for those
+symbols. 50 stocks have no bars at all: 46 have no Yahoo listing and four are
+placeholder-only (`GPPL`, `MISR`, `SAIB`, `GROV`). Quotes and search still work for every
+instrument. EGX30 history is unavailable from Yahoo and TradingView, so `indexSparkline`
+is served from stored index bars and the UI hides it until there are at least two points.
+
+Provider and RTL details, including the Yahoo cookie/crumb flow and the `كل` font
+workaround, are in [docs/discovery/07-m2a-ingestion-and-rtl-spike.md](docs/discovery/07-m2a-ingestion-and-rtl-spike.md).
+
+## Locale and RTL
+
+Arabic is the default locale; English is a full translation. The locale is stored in
+SecureStore and the root view sets Yoga's `direction` from it, so Expo Go and standalone
+builds mirror rows, tabs, and cards immediately. A standalone build also applies
+`I18nManager.forceRTL` on the next launch for native controls. Signed values are wrapped
+in Unicode LTR isolates so `+2.91%` stays intact in Arabic paragraphs.
+
 ## Styling
 
 Uniwind turns the Tailwind classes and tokens in `apps/mobile/src/global.css` into React
@@ -77,15 +129,21 @@ bun run --cwd apps/mobile uniwind:generate
 | `bun run db:migrate` | Apply pending migrations |
 | `bun run dev:api` | API with watch mode |
 | `bun run dev:mobile` | Expo dev server |
+| `bun run sync:universe` | Ingest the TradingView instrument universe |
+| `bun run sync:quotes` | Ingest the latest TradingView quotes |
+| `bun run sync:symbols` | Resolve missing EGX tickers to Yahoo symbols |
+| `bun run sync:bars` | Backfill Yahoo daily bars |
+| `bun run sync:all` | Run universe, symbols, bars, then quotes |
 | `bun run contracts:generate` | Regenerate OpenAPI document and mobile types |
 | `bun run contracts:check` | Verify generated artifacts are current |
-| `bun run typecheck` | Typecheck both apps |
+| `bun run typecheck` | Typecheck the API, worker, and mobile app |
 
 ## Development builds
 
-Expo Go is enough for M1 (email OTP and the empty Markets screen). Push
-notifications, custom native modules, and release builds need a development build
-(`npx expo run:android` or EAS Build); Expo Go cannot load those native modules.
+Expo Go is enough for M1 and the M2a Markets screen (email OTP, live market data, Arabic
+and English). Push notifications, custom native modules, and release builds need a
+development build (`npx expo run:android` or EAS Build); Expo Go cannot load those native
+modules.
 
 ## Google sign in
 
