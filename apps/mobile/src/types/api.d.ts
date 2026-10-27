@@ -108,6 +108,9 @@ export interface paths {
                                     quotes: number;
                                     dailyBars: number;
                                     barInstruments: number;
+                                    fundamentals: number;
+                                    newsItems: number;
+                                    newsLinks: number;
                                 };
                             };
                             meta: {
@@ -262,6 +265,32 @@ export interface paths {
                                     firstDate: string | null;
                                     lastDate: string | null;
                                 };
+                                fundamentals: {
+                                    source: string;
+                                    asOf: string | null;
+                                    /** Format: date-time */
+                                    observedAt: string;
+                                    currency: string | null;
+                                    marketCap: number | null;
+                                    pe: number | null;
+                                    pb: number | null;
+                                    eps: number | null;
+                                    roe: number | null;
+                                    roa: number | null;
+                                    debtToEquity: number | null;
+                                    dividendYield: number | null;
+                                    revenueTtm: number | null;
+                                    netIncomeTtm: number | null;
+                                    fcfTtm: number | null;
+                                    currentRatio: number | null;
+                                    beta: number | null;
+                                    grossMargin: number | null;
+                                    netMargin: number | null;
+                                    totalDebt: number | null;
+                                    totalAssets: number | null;
+                                    bookValuePerShare: number | null;
+                                    evEbitda: number | null;
+                                } | null;
                             };
                             meta: {
                                 /** Format: date-time */
@@ -271,6 +300,185 @@ export interface paths {
                                 /** Format: date-time */
                                 universeAsOf?: string | null;
                                 nextCursor?: string | null;
+                            };
+                        };
+                    };
+                };
+                /** @description Instrument not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                code: string;
+                                message: string;
+                                requestId?: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/instruments/{ticker}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily bars, range stats, and support/resistance levels */
+        get: {
+            parameters: {
+                query?: {
+                    range?: "1W" | "1M" | "3M" | "6M" | "1Y";
+                };
+                header?: never;
+                path: {
+                    ticker: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instrument history */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                date: string;
+                                open: number | null;
+                                high: number | null;
+                                low: number | null;
+                                close: number | null;
+                                adjClose: number | null;
+                                volume: number | null;
+                            }[];
+                            stats: {
+                                barCount: number;
+                                rangeBarCount: number;
+                                firstDate: string | null;
+                                lastDate: string | null;
+                                high20: number | null;
+                                low20: number | null;
+                                high52w: number | null;
+                                low52w: number | null;
+                                avgVolume20: number | null;
+                            };
+                            levels: {
+                                pivot: number;
+                                r1: number;
+                                r2: number;
+                                r3: number;
+                                s1: number;
+                                s2: number;
+                                s3: number;
+                                asOf: string;
+                                /** @enum {string} */
+                                basis: "raw" | "adjusted";
+                            } | null;
+                            meta: {
+                                /** Format: date-time */
+                                asOf: string | null;
+                                source: string;
+                                stale: boolean;
+                                /** Format: date-time */
+                                universeAsOf?: string | null;
+                                nextCursor?: string | null;
+                            };
+                        };
+                    };
+                };
+                /** @description Instrument not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                code: string;
+                                message: string;
+                                requestId?: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/instruments/{ticker}/news": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** News linked to one instrument */
+        get: {
+            parameters: {
+                query?: {
+                    limit?: number;
+                    lang?: "ar" | "en";
+                };
+                header?: never;
+                path: {
+                    ticker: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instrument news */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                id: number;
+                                source: string;
+                                /** @enum {string} */
+                                lang: "ar" | "en";
+                                title: string;
+                                summary: string | null;
+                                url: string;
+                                /** Format: date-time */
+                                publishedAt: string;
+                                /** @enum {string} */
+                                matchType: "ticker" | "name";
+                            }[];
+                            meta: {
+                                /** Format: date-time */
+                                asOf: string | null;
+                                source: string;
+                                stale: boolean;
+                                /** Format: date-time */
+                                universeAsOf?: string | null;
+                                nextCursor?: string | null;
+                                /** @enum {string|null} */
+                                lang: "ar" | "en" | null;
+                                fallback: boolean;
                             };
                         };
                     };

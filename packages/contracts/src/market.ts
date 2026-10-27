@@ -46,6 +46,34 @@ export type InstrumentListResponse = z.infer<
   typeof InstrumentListResponseSchema
 >;
 
+export const FundamentalsSchema = z.object({
+  source: z.string(),
+  asOf: z.string().nullable(),
+  observedAt: z.iso.datetime(),
+  currency: z.string().nullable(),
+  marketCap: z.number().nullable(),
+  pe: z.number().nullable(),
+  pb: z.number().nullable(),
+  eps: z.number().nullable(),
+  roe: z.number().nullable(),
+  roa: z.number().nullable(),
+  debtToEquity: z.number().nullable(),
+  dividendYield: z.number().nullable(),
+  revenueTtm: z.number().nullable(),
+  netIncomeTtm: z.number().nullable(),
+  fcfTtm: z.number().nullable(),
+  currentRatio: z.number().nullable(),
+  beta: z.number().nullable(),
+  grossMargin: z.number().nullable(),
+  netMargin: z.number().nullable(),
+  totalDebt: z.number().nullable(),
+  totalAssets: z.number().nullable(),
+  bookValuePerShare: z.number().nullable(),
+  evEbitda: z.number().nullable(),
+});
+
+export type Fundamentals = z.infer<typeof FundamentalsSchema>;
+
 export const InstrumentDetailSchema = InstrumentSummarySchema.extend({
   tvSymbol: z.string(),
   yahooSymbol: z.string().nullable(),
@@ -56,6 +84,7 @@ export const InstrumentDetailSchema = InstrumentSummarySchema.extend({
     firstDate: z.string().nullable(),
     lastDate: z.string().nullable(),
   }),
+  fundamentals: FundamentalsSchema.nullable(),
 });
 
 export type InstrumentDetail = z.infer<typeof InstrumentDetailSchema>;
@@ -79,8 +108,38 @@ export const DailyBarSchema = z.object({
   volume: z.number().int().nullable(),
 });
 
+export const HistoryStatsSchema = z.object({
+  barCount: z.number().int(),
+  rangeBarCount: z.number().int(),
+  firstDate: z.string().nullable(),
+  lastDate: z.string().nullable(),
+  high20: z.number().nullable(),
+  low20: z.number().nullable(),
+  high52w: z.number().nullable(),
+  low52w: z.number().nullable(),
+  avgVolume20: z.number().int().nullable(),
+});
+
+export type HistoryStats = z.infer<typeof HistoryStatsSchema>;
+
+export const SupportResistanceSchema = z.object({
+  pivot: z.number(),
+  r1: z.number(),
+  r2: z.number(),
+  r3: z.number(),
+  s1: z.number(),
+  s2: z.number(),
+  s3: z.number(),
+  asOf: z.string(),
+  basis: z.enum(["raw", "adjusted"]),
+});
+
+export type SupportResistance = z.infer<typeof SupportResistanceSchema>;
+
 export const InstrumentHistoryResponseSchema = z.object({
   data: z.array(DailyBarSchema),
+  stats: HistoryStatsSchema,
+  levels: SupportResistanceSchema.nullable(),
   meta: MarketMetaSchema,
 });
 
@@ -144,9 +203,37 @@ export const DataStatusResponseSchema = z.object({
       quotes: z.number().int(),
       dailyBars: z.number().int(),
       barInstruments: z.number().int(),
+      fundamentals: z.number().int(),
+      newsItems: z.number().int(),
+      newsLinks: z.number().int(),
     }),
   }),
   meta: MarketMetaSchema,
 });
 
 export type DataStatusResponse = z.infer<typeof DataStatusResponseSchema>;
+
+export const NewsItemSchema = z.object({
+  id: z.number().int(),
+  source: z.string(),
+  lang: z.enum(["ar", "en"]),
+  title: z.string(),
+  summary: z.string().nullable(),
+  url: z.string(),
+  publishedAt: z.iso.datetime(),
+  matchType: z.enum(["ticker", "name"]),
+});
+
+export type NewsItem = z.infer<typeof NewsItemSchema>;
+
+export const InstrumentNewsResponseSchema = z.object({
+  data: z.array(NewsItemSchema),
+  meta: MarketMetaSchema.extend({
+    lang: z.enum(["ar", "en"]).nullable(),
+    fallback: z.boolean(),
+  }),
+});
+
+export type InstrumentNewsResponse = z.infer<
+  typeof InstrumentNewsResponseSchema
+>;

@@ -1,8 +1,10 @@
+import { cairoDate } from "@egx/api/market";
 import { hasArabic } from "@egx/api/text";
 
 import { fetchWithRetry } from "../lib/http";
 import type {
   DailyBarRecord,
+  FundamentalRecord,
   InstrumentRef,
   InstrumentSeed,
   MarketDataProvider,
@@ -34,6 +36,31 @@ const QUOTE_COLUMNS = [
   "type",
 ] as const;
 
+const FUNDAMENTAL_COLUMNS = [
+  "name",
+  "description",
+  "currency",
+  "market_cap_basic",
+  "price_earnings_ttm",
+  "earnings_per_share_basic_ttm",
+  "price_book_ratio",
+  "return_on_equity",
+  "return_on_assets",
+  "debt_to_equity",
+  "dividends_yield",
+  "total_revenue_ttm",
+  "net_income_ttm",
+  "free_cash_flow_ttm",
+  "current_ratio",
+  "beta_1_year",
+  "gross_margin",
+  "net_margin",
+  "total_debt",
+  "total_assets",
+  "book_value_per_share_fq",
+  "enterprise_value_ebitda_ttm",
+] as const;
+
 type ScanRow = { s: string; d: unknown[] };
 type ScanResponse = { totalCount?: number; data?: ScanRow[] };
 
@@ -45,6 +72,16 @@ function num(value: unknown): number | null {
   const parsed = typeof value === "number" ? value : Number(value);
 
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+/**
+ * TradingView's scan endpoint reports unavailable metrics as 0. Treat those as
+ * missing so the app shows "not available" instead of a fabricated zero.
+ */
+function metric(value: unknown): number | null {
+  const parsed = num(value);
+
+  return parsed === 0 ? null : parsed;
 }
 
 function intOrNull(value: unknown): number | null {
@@ -196,6 +233,59 @@ export class TradingViewProvider implements MarketDataProvider {
     }
 
     return quotes;
+  }
+
+  async fetchFundamentals(
+    instruments: InstrumentRef[],
+  ): Promise<FundamentalRecord[]> {
+    const rows = await scan(FUNDAMENTAL_COLUMNS, "en");
+    const byTicker = new Map(rows.map((row) => [text(row.d[0]), row] as const));
+    const observedAt = new Date();
+    const asOf = cairoDate(observedAt);
+    const records: FundamentalRecord[] = [];
+
+    for (const instrument of instruments) {
+      if (instrument.kind !== "stock") {
+        continue;
+      }
+
+      const row = byTicker.get(instrument.ticker);
+
+      if (!row) {
+        continue;
+      }
+
+      records.push({
+        ticker: instrument.ticker,
+        asOf,
+        observedAt,
+        currency: text(row.d[2]),
+        marketCap: metric(row.d[3]),
+        pe: metric(row.d[4]),
+        eps: metric(row.d[5]),
+        pb: metric(row.d[6]),
+        roe: metric(row.d[7]),
+        roa: metric(row.d[8]),
+        debtToEquity: metric(row.d[9]),
+        dividendYield: metric(row.d[10]),
+        revenueTtm: metric(row.d[11]),
+        netIncomeTtm: metric(row.d[12]),
+        fcfTtm: metric(row.d[13]),
+        currentRatio: metric(row.d[14]),
+        beta: metric(row.d[15]),
+        grossMargin: metric(row.d[16]),
+        netMargin: metric(row.d[17]),
+        totalDebt: metric(row.d[18]),
+        totalAssets: metric(row.d[19]),
+        bookValuePerShare: metric(row.d[20]),
+        evEbitda: metric(row.d[21]),
+        raw: Object.fromEntries(
+          FUNDAMENTAL_COLUMNS.map((column, index) => [column, row.d[index]]),
+        ),
+      });
+    }
+
+    return records;
   }
 
   private async fetchIndexQuote(

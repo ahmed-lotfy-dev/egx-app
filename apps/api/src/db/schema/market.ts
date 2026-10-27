@@ -110,6 +110,83 @@ export const dailyBars = pgTable(
   ],
 );
 
+export const fundamentals = pgTable(
+  "fundamentals",
+  {
+    instrumentId: bigint("instrument_id", { mode: "number" })
+      .notNull()
+      .references(() => instruments.id, { onDelete: "cascade" }),
+    source: text("source").notNull(),
+    asOf: date("as_of", { mode: "string" }),
+    observedAt: timestamp("observed_at", tz).notNull(),
+    currency: text("currency"),
+    marketCap: numeric("market_cap", { precision: 24, scale: 2 }),
+    pe: numeric("pe", { precision: 18, scale: 4 }),
+    pb: numeric("pb", { precision: 18, scale: 4 }),
+    eps: numeric("eps", { precision: 18, scale: 4 }),
+    roe: numeric("roe", { precision: 12, scale: 4 }),
+    roa: numeric("roa", { precision: 12, scale: 4 }),
+    debtToEquity: numeric("debt_to_equity", { precision: 18, scale: 4 }),
+    dividendYield: numeric("dividend_yield", { precision: 12, scale: 4 }),
+    revenueTtm: numeric("revenue_ttm", { precision: 24, scale: 2 }),
+    netIncomeTtm: numeric("net_income_ttm", { precision: 24, scale: 2 }),
+    fcfTtm: numeric("fcf_ttm", { precision: 24, scale: 2 }),
+    currentRatio: numeric("current_ratio", { precision: 12, scale: 4 }),
+    beta: numeric("beta", { precision: 12, scale: 4 }),
+    grossMargin: numeric("gross_margin", { precision: 12, scale: 4 }),
+    netMargin: numeric("net_margin", { precision: 12, scale: 4 }),
+    totalDebt: numeric("total_debt", { precision: 24, scale: 2 }),
+    totalAssets: numeric("total_assets", { precision: 24, scale: 2 }),
+    bookValuePerShare: numeric("book_value_per_share", {
+      precision: 18,
+      scale: 4,
+    }),
+    evEbitda: numeric("ev_ebitda", { precision: 18, scale: 4 }),
+    raw: jsonb("raw"),
+  },
+  (table) => [primaryKey({ columns: [table.instrumentId, table.source] })],
+);
+
+export const newsItems = pgTable(
+  "news_items",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    source: text("source").notNull(),
+    lang: text("lang").notNull(),
+    title: text("title").notNull(),
+    summary: text("summary"),
+    url: text("url").notNull().unique(),
+    publishedAt: timestamp("published_at", tz).notNull(),
+    category: text("category"),
+    contentHash: text("content_hash").notNull(),
+    fetchedAt: timestamp("fetched_at", tz).defaultNow().notNull(),
+  },
+  (table) => [
+    index("news_items_published_idx").on(table.publishedAt.desc()),
+  ],
+);
+
+export const newsInstrumentLinks = pgTable(
+  "news_instrument_links",
+  {
+    newsId: bigint("news_id", { mode: "number" })
+      .notNull()
+      .references(() => newsItems.id, { onDelete: "cascade" }),
+    instrumentId: bigint("instrument_id", { mode: "number" })
+      .notNull()
+      .references(() => instruments.id, { onDelete: "cascade" }),
+    matchType: text("match_type").notNull(),
+    matchScore: integer("match_score").notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.newsId, table.instrumentId] }),
+    index("news_instrument_links_instrument_idx").on(
+      table.instrumentId,
+      table.newsId,
+    ),
+  ],
+);
+
 export const ingestRuns = pgTable(
   "ingest_runs",
   {
@@ -134,6 +211,8 @@ export const instrumentRelations = relations(instruments, ({ one, many }) => ({
   }),
   quoteSnapshots: many(quoteSnapshots),
   dailyBars: many(dailyBars),
+  fundamentals: many(fundamentals),
+  newsLinks: many(newsInstrumentLinks),
 }));
 
 export const latestQuoteRelations = relations(latestQuotes, ({ one }) => ({
@@ -149,3 +228,28 @@ export const dailyBarRelations = relations(dailyBars, ({ one }) => ({
     references: [instruments.id],
   }),
 }));
+
+export const fundamentalsRelations = relations(fundamentals, ({ one }) => ({
+  instrument: one(instruments, {
+    fields: [fundamentals.instrumentId],
+    references: [instruments.id],
+  }),
+}));
+
+export const newsItemRelations = relations(newsItems, ({ many }) => ({
+  instrumentLinks: many(newsInstrumentLinks),
+}));
+
+export const newsInstrumentLinkRelations = relations(
+  newsInstrumentLinks,
+  ({ one }) => ({
+    newsItem: one(newsItems, {
+      fields: [newsInstrumentLinks.newsId],
+      references: [newsItems.id],
+    }),
+    instrument: one(instruments, {
+      fields: [newsInstrumentLinks.instrumentId],
+      references: [instruments.id],
+    }),
+  }),
+);

@@ -7,6 +7,8 @@ import { auth } from "./lib/auth";
 import { logger } from "./lib/logger";
 import { OPENAPI_CONFIG } from "./openapi";
 import { dataStatusRoutes } from "./routes/data-status";
+import { instrumentHistoryRoutes } from "./routes/instrument-history";
+import { instrumentNewsRoutes } from "./routes/instrument-news";
 import { instrumentRoutes } from "./routes/instruments";
 import { marketRoutes } from "./routes/market";
 import { statusRoutes } from "./routes/status";
@@ -51,6 +53,8 @@ app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.route("/", statusRoutes);
 app.route("/", dataStatusRoutes);
 app.route("/", instrumentRoutes);
+app.route("/", instrumentHistoryRoutes);
+app.route("/", instrumentNewsRoutes);
 app.route("/", marketRoutes);
 
 app.doc31("/openapi.json", OPENAPI_CONFIG);

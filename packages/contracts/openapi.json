@@ -182,6 +182,15 @@
                             },
                             "barInstruments": {
                               "type": "integer"
+                            },
+                            "fundamentals": {
+                              "type": "integer"
+                            },
+                            "newsItems": {
+                              "type": "integer"
+                            },
+                            "newsLinks": {
+                              "type": "integer"
                             }
                           },
                           "required": [
@@ -190,7 +199,10 @@
                             "indices",
                             "quotes",
                             "dailyBars",
-                            "barInstruments"
+                            "barInstruments",
+                            "fundamentals",
+                            "newsItems",
+                            "newsLinks"
                           ]
                         }
                       },
@@ -593,6 +605,128 @@
                             "firstDate",
                             "lastDate"
                           ]
+                        },
+                        "fundamentals": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "source": {
+                              "type": "string"
+                            },
+                            "asOf": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "observedAt": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "currency": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "marketCap": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "pe": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "pb": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "eps": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "roe": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "roa": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "debtToEquity": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "dividendYield": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "revenueTtm": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "netIncomeTtm": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "fcfTtm": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "currentRatio": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "beta": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "grossMargin": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "netMargin": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "totalDebt": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "totalAssets": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "bookValuePerShare": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "evEbitda": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "source",
+                            "asOf",
+                            "observedAt",
+                            "currency",
+                            "marketCap",
+                            "pe",
+                            "pb",
+                            "eps",
+                            "roe",
+                            "roa",
+                            "debtToEquity",
+                            "dividendYield",
+                            "revenueTtm",
+                            "netIncomeTtm",
+                            "fcfTtm",
+                            "currentRatio",
+                            "beta",
+                            "grossMargin",
+                            "netMargin",
+                            "totalDebt",
+                            "totalAssets",
+                            "bookValuePerShare",
+                            "evEbitda"
+                          ]
                         }
                       },
                       "required": [
@@ -608,7 +742,8 @@
                         "yahooSymbol",
                         "isin",
                         "logoid",
-                        "history"
+                        "history",
+                        "fundamentals"
                       ]
                     },
                     "meta": {
@@ -639,6 +774,457 @@
                         "asOf",
                         "source",
                         "stale"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instrument not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/instruments/{ticker}/history": {
+      "get": {
+        "tags": [
+          "market"
+        ],
+        "summary": "Daily bars, range stats, and support/resistance levels",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "required": true,
+            "name": "ticker",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1W",
+                "1M",
+                "3M",
+                "6M",
+                "1Y"
+              ],
+              "default": "3M"
+            },
+            "required": false,
+            "name": "range",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instrument history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "date": {
+                            "type": "string"
+                          },
+                          "open": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "high": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "low": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "close": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "adjClose": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "volume": {
+                            "type": "integer",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "date",
+                          "open",
+                          "high",
+                          "low",
+                          "close",
+                          "adjClose",
+                          "volume"
+                        ]
+                      }
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "barCount": {
+                          "type": "integer"
+                        },
+                        "rangeBarCount": {
+                          "type": "integer"
+                        },
+                        "firstDate": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "lastDate": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "high20": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "low20": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "high52w": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "low52w": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "avgVolume20": {
+                          "type": "integer",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "barCount",
+                        "rangeBarCount",
+                        "firstDate",
+                        "lastDate",
+                        "high20",
+                        "low20",
+                        "high52w",
+                        "low52w",
+                        "avgVolume20"
+                      ]
+                    },
+                    "levels": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "pivot": {
+                          "type": "number"
+                        },
+                        "r1": {
+                          "type": "number"
+                        },
+                        "r2": {
+                          "type": "number"
+                        },
+                        "r3": {
+                          "type": "number"
+                        },
+                        "s1": {
+                          "type": "number"
+                        },
+                        "s2": {
+                          "type": "number"
+                        },
+                        "s3": {
+                          "type": "number"
+                        },
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "basis": {
+                          "type": "string",
+                          "enum": [
+                            "raw",
+                            "adjusted"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "pivot",
+                        "r1",
+                        "r2",
+                        "r3",
+                        "s1",
+                        "s2",
+                        "s3",
+                        "asOf",
+                        "basis"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "stale": {
+                          "type": "boolean"
+                        },
+                        "universeAsOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "asOf",
+                        "source",
+                        "stale"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "stats",
+                    "levels",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instrument not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/instruments/{ticker}/news": {
+      "get": {
+        "tags": [
+          "market"
+        ],
+        "summary": "News linked to one instrument",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "required": true,
+            "name": "ticker",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 10
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ]
+            },
+            "required": false,
+            "name": "lang",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instrument news",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "lang": {
+                            "type": "string",
+                            "enum": [
+                              "ar",
+                              "en"
+                            ]
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "summary": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "publishedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "matchType": {
+                            "type": "string",
+                            "enum": [
+                              "ticker",
+                              "name"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "source",
+                          "lang",
+                          "title",
+                          "summary",
+                          "url",
+                          "publishedAt",
+                          "matchType"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "stale": {
+                          "type": "boolean"
+                        },
+                        "universeAsOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "lang": {
+                          "type": "string",
+                          "nullable": true,
+                          "enum": [
+                            "ar",
+                            "en",
+                            null
+                          ]
+                        },
+                        "fallback": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "asOf",
+                        "source",
+                        "stale",
+                        "lang",
+                        "fallback"
                       ]
                     }
                   },

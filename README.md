@@ -6,14 +6,16 @@ watchlist, manual positions, alerts, and a grounded AI assistant.
 The design is in [docs/superpowers/specs/2026-10-26-egx-app-design.md](docs/superpowers/specs/2026-10-26-egx-app-design.md).
 Milestone 1 covers the workspace, authentication, generated API types, and design tokens.
 M2a adds the market schema, the ingestion worker, the instruments/overview/status APIs,
-and the live Markets screen. Scheduled ingestion (pg-boss) is M2b.
+and the live Markets screen. M3 adds the stock detail screen, daily history with support
+and resistance, TradingView fundamentals, and per-stock Arab Finance news. Scheduled
+ingestion (pg-boss) is M2b.
 
 ## Layout
 
 ```
 apps/mobile      Expo SDK 58 app (expo-router, Uniwind, Better Auth)
 apps/api         Bun + Hono API, Drizzle, Better Auth
-apps/worker      market-data ingestion CLI (TradingView universe/quotes, Yahoo bars)
+apps/worker      ingestion CLI (TradingView universe/quotes/fundamentals, Yahoo bars, RSS news)
 packages/contracts  shared Zod schemas and the generated OpenAPI document
 ```
 
@@ -37,14 +39,15 @@ cp .env.example apps/mobile/.env
 bun install
 bun run db:up
 bun run db:migrate
-bun run sync:all          # universe, Yahoo symbols, daily bars, then quotes
+bun run sync:all          # universe, symbols, bars, quotes, fundamentals, news
 bun run dev:api
 bun run dev:mobile
 ```
 
 `sync:all` needs the root `.env` with `DATABASE_URL`; it runs the universe, Yahoo-symbol
-resolver, bars, and quotes jobs. Re-run `bun run sync:quotes` whenever you want fresh
-prices, and `bun run sync:bars -- --missing` to fill only tickers with no stored bars.
+resolver, bars, quotes, fundamentals, and news jobs. Re-run `bun run sync:quotes` whenever
+you want fresh prices, and `bun run sync:bars -- --missing` to fill only tickers with no
+stored bars.
 
 The API listens on `http://localhost:3000`. In development, when `RESEND_API_KEY` is
 unset, the email OTP is written to the API log instead of being sent.
@@ -75,7 +78,9 @@ bun run sync:quotes     # TradingView: latest quotes + snapshots
 bun run sync:symbols    # resolve missing EGX tickers to Yahoo symbols
 bun run sync:bars       # Yahoo: daily bars (requests one year)
 bun run sync:bars -- --missing   # only tickers with no stored bars
-bun run sync:all        # universe -> symbols -> bars -> quotes
+bun run sync:fundamentals        # TradingView scan: valuation, profitability, health
+bun run sync:news                # Arab Finance RSS (10 categories, Arabic + English)
+bun run sync:all                 # universe -> symbols -> bars -> quotes -> fundamentals -> news
 ```
 
 `sync:bars` also accepts `--tickers COMI,HRHO`, `--limit 10`, and `--days 365`.
@@ -85,7 +90,9 @@ Verified endpoints:
 | Endpoint | Returns |
 |---|---|
 | `GET /api/instruments?q=&sector=&kind=&limit=&cursor=` | Searchable, paginated instrument list with latest quote |
-| `GET /api/instruments/:ticker` | Identity, quote, Yahoo/TradingView symbols, history coverage |
+| `GET /api/instruments/:ticker` | Identity, quote, Yahoo/TradingView symbols, history coverage, fundamentals |
+| `GET /api/instruments/:ticker/history?range=1W\|1M\|3M\|6M\|1Y` | Daily bars, range stats, and pivot support/resistance |
+| `GET /api/instruments/:ticker/news?limit=10&lang=ar\|en` | Linked Arab Finance headlines with language fallback |
 | `GET /api/market/overview` | EGX30, breadth, top gainers/losers, 21 sectors, sparkline |
 | `GET /api/status/data` | Last run per job and stored row counts |
 | `GET /api/status` | API and database health |
@@ -98,6 +105,22 @@ symbols. 50 stocks have no bars at all: 46 have no Yahoo listing and four are
 placeholder-only (`GPPL`, `MISR`, `SAIB`, `GROV`). Quotes and search still work for every
 instrument. EGX30 history is unavailable from Yahoo and TradingView, so `indexSparkline`
 is served from stored index bars and the UI hides it until there are at least two points.
+
+### M3 coverage notes
+
+TradingView's scan endpoint reports unavailable metrics as `0`, so the worker stores those
+as null and the UI renders `غير متاح` instead of a fabricated zero. On the verified
+snapshot, 295 stocks have a fundamentals row: market cap 245, P/E 63, EPS 72, P/B 119,
+ROE 69, ROA 69, debt/equity 164, dividend yield 85, revenue and net income 72, free cash
+flow 62, current ratio 167, beta 241, gross margin 55, and net margin 71. A stock with no
+row shows the financials empty state.
+
+`sync:news` reads the 10 Arab Finance category feeds in both languages and links an
+article only on a conservative match: the full normalized company name (legal suffixes
+removed), the name before ` - `, a short parenthetical alias, or an exact ticker with word
+boundaries. On the verified snapshot, 996 articles produced 98 links across 49 stocks, so
+an empty news state is expected for most tickers. The endpoint prefers the requested
+language and falls back to the other one, setting `meta.fallback` when it does.
 
 Provider and RTL details, including the Yahoo cookie/crumb flow and the `كل` font
 workaround, are in [docs/discovery/07-m2a-ingestion-and-rtl-spike.md](docs/discovery/07-m2a-ingestion-and-rtl-spike.md).
@@ -133,7 +156,9 @@ bun run --cwd apps/mobile uniwind:generate
 | `bun run sync:quotes` | Ingest the latest TradingView quotes |
 | `bun run sync:symbols` | Resolve missing EGX tickers to Yahoo symbols |
 | `bun run sync:bars` | Backfill Yahoo daily bars |
-| `bun run sync:all` | Run universe, symbols, bars, then quotes |
+| `bun run sync:fundamentals` | Ingest TradingView fundamentals |
+| `bun run sync:news` | Ingest and link Arab Finance news |
+| `bun run sync:all` | Run universe, symbols, bars, quotes, fundamentals, then news |
 | `bun run contracts:generate` | Regenerate OpenAPI document and mobile types |
 | `bun run contracts:check` | Verify generated artifacts are current |
 | `bun run typecheck` | Typecheck the API, worker, and mobile app |

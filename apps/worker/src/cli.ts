@@ -1,6 +1,8 @@
 import { closeDb } from "@egx/api/db";
 
 import { syncBars, type BarsOptions } from "./jobs/bars";
+import { syncFundamentals } from "./jobs/fundamentals";
+import { syncNews } from "./jobs/news";
 import { syncQuotes } from "./jobs/quotes";
 import { syncUniverse } from "./jobs/universe";
 import { resolveYahooSymbols } from "./jobs/yahoo-symbols";
@@ -60,18 +62,26 @@ async function main(): Promise<void> {
     case "symbols":
       print("symbols", await resolveYahooSymbols());
       break;
+    case "fundamentals":
+      print("fundamentals", await syncFundamentals());
+      break;
+    case "news":
+      print("news", await syncNews());
+      break;
     case "all": {
       const barsOptions = readBarsOptions();
       print("universe", await syncUniverse());
       print("symbols", await resolveYahooSymbols());
       print("bars", await syncBars(barsOptions));
       print("quotes", await syncQuotes());
+      print("fundamentals", await syncFundamentals());
+      print("news", await syncNews());
       break;
     }
     default:
       console.error(
         [
-          "Usage: bun src/cli.ts <universe|quotes|bars|symbols|all> [options]",
+          "Usage: bun src/cli.ts <universe|quotes|bars|symbols|fundamentals|news|all> [options]",
           "",
           "Bars options:",
           "  --tickers COMI,HRHO   limit to specific tickers",

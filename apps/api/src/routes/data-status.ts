@@ -5,9 +5,12 @@ import { count, eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import {
   dailyBars,
+  fundamentals,
   ingestRuns,
   instruments,
   latestQuotes,
+  newsInstrumentLinks,
+  newsItems,
 } from "../db/schema";
 import { jobIsStale } from "../lib/market";
 
@@ -22,7 +25,14 @@ type RunRow = {
   error: string | null;
 };
 
-const JOB_ORDER = ["universe", "yahoo-symbols", "bars", "quotes"];
+const JOB_ORDER = [
+  "universe",
+  "yahoo-symbols",
+  "bars",
+  "quotes",
+  "fundamentals",
+  "news",
+];
 const STATUSES = ["running", "success", "partial", "failed"] as const;
 
 function toDate(value: Date | string | null): Date | null {
@@ -67,6 +77,9 @@ dataStatusRoutes.openapi(dataStatusRoute, async (c) => {
     quoteCount,
     barCount,
     barInstrumentCount,
+    fundamentalCount,
+    newsItemCount,
+    newsLinkCount,
   ] = await Promise.all([
     db.select({ value: count() }).from(instruments),
     db
@@ -82,6 +95,9 @@ dataStatusRoutes.openapi(dataStatusRoute, async (c) => {
     db
       .select({ value: sql<number>`count(distinct ${dailyBars.instrumentId})` })
       .from(dailyBars),
+    db.select({ value: count() }).from(fundamentals),
+    db.select({ value: count() }).from(newsItems),
+    db.select({ value: count() }).from(newsInstrumentLinks),
   ]);
 
   const jobs = runs
@@ -128,6 +144,9 @@ dataStatusRoutes.openapi(dataStatusRoute, async (c) => {
           quotes: quoteCount[0]?.value ?? 0,
           dailyBars: barCount[0]?.value ?? 0,
           barInstruments: Number(barInstrumentCount[0]?.value ?? 0),
+          fundamentals: fundamentalCount[0]?.value ?? 0,
+          newsItems: newsItemCount[0]?.value ?? 0,
+          newsLinks: newsLinkCount[0]?.value ?? 0,
         },
       },
       meta: {

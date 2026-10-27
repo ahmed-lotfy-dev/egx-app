@@ -8,12 +8,15 @@
     "sync:quotes": "bun --env-file=../../.env src/cli.ts quotes",
     "sync:bars": "bun --env-file=../../.env src/cli.ts bars",
     "sync:symbols": "bun --env-file=../../.env src/cli.ts symbols",
+    "sync:fundamentals": "bun --env-file=../../.env src/cli.ts fundamentals",
+    "sync:news": "bun --env-file=../../.env src/cli.ts news",
     "sync:all": "bun --env-file=../../.env src/cli.ts all",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@egx/api": "workspace:*",
-    "drizzle-orm": "^0.45.4"
+    "drizzle-orm": "^0.45.4",
+    "fast-xml-parser": "^5.11.2"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",

@@ -19,11 +19,17 @@ import {
 import { z } from "zod";
 
 import { db } from "../db/client";
-import { dailyBars, instruments, latestQuotes } from "../db/schema";
+import {
+  dailyBars,
+  fundamentals,
+  instruments,
+  latestQuotes,
+} from "../db/schema";
 import { marketColumns } from "../db/selects";
 import {
   latestQuoteAsOf,
   latestUniverseAsOf,
+  numberOrNull,
   quoteIsStale,
   toInstrumentSummary,
 } from "../lib/market";
@@ -182,6 +188,17 @@ instrumentRoutes.openapi(detailRoute, async (c) => {
     .from(dailyBars)
     .where(eq(dailyBars.instrumentId, row.id));
 
+  const [fundamentalRow] = await db
+    .select()
+    .from(fundamentals)
+    .where(
+      and(
+        eq(fundamentals.instrumentId, row.id),
+        eq(fundamentals.source, "tradingview"),
+      ),
+    )
+    .limit(1);
+
   return c.json(
     {
       data: {
@@ -195,6 +212,35 @@ instrumentRoutes.openapi(detailRoute, async (c) => {
           firstDate: coverage?.firstDate ?? null,
           lastDate: coverage?.lastDate ?? null,
         },
+        fundamentals: fundamentalRow
+          ? {
+              source: fundamentalRow.source,
+              asOf: fundamentalRow.asOf,
+              observedAt: fundamentalRow.observedAt.toISOString(),
+              currency: fundamentalRow.currency,
+              marketCap: numberOrNull(fundamentalRow.marketCap),
+              pe: numberOrNull(fundamentalRow.pe),
+              pb: numberOrNull(fundamentalRow.pb),
+              eps: numberOrNull(fundamentalRow.eps),
+              roe: numberOrNull(fundamentalRow.roe),
+              roa: numberOrNull(fundamentalRow.roa),
+              debtToEquity: numberOrNull(fundamentalRow.debtToEquity),
+              dividendYield: numberOrNull(fundamentalRow.dividendYield),
+              revenueTtm: numberOrNull(fundamentalRow.revenueTtm),
+              netIncomeTtm: numberOrNull(fundamentalRow.netIncomeTtm),
+              fcfTtm: numberOrNull(fundamentalRow.fcfTtm),
+              currentRatio: numberOrNull(fundamentalRow.currentRatio),
+              beta: numberOrNull(fundamentalRow.beta),
+              grossMargin: numberOrNull(fundamentalRow.grossMargin),
+              netMargin: numberOrNull(fundamentalRow.netMargin),
+              totalDebt: numberOrNull(fundamentalRow.totalDebt),
+              totalAssets: numberOrNull(fundamentalRow.totalAssets),
+              bookValuePerShare: numberOrNull(
+                fundamentalRow.bookValuePerShare,
+              ),
+              evEbitda: numberOrNull(fundamentalRow.evEbitda),
+            }
+          : null,
       },
       meta: {
         asOf: row.quoteAsOf?.toISOString() ?? null,

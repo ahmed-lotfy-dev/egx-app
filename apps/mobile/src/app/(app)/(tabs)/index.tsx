@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import {
   type ComponentRef,
   useCallback,
@@ -522,12 +523,21 @@ function BreadthStat({
   );
 }
 
+function openStock(ticker: string) {
+  router.push({ pathname: "/(app)/stock/[ticker]", params: { ticker } });
+}
+
 function MoverRow({ item, locale }: { item: Instrument; locale: Locale }) {
   const name = locale === "ar" && item.nameAr ? item.nameAr : item.nameEn;
   const tone = toneFor(item.quote?.changePct);
 
   return (
-    <View className="flex-row items-center gap-3 border-t border-border/60 py-2.5">
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${name}, ${item.ticker}`}
+      onPress={() => openStock(item.ticker)}
+      className="flex-row items-center gap-3 border-t border-border/60 py-2.5 active:opacity-70"
+    >
       <Text
         numberOfLines={1}
         ellipsizeMode="tail"
@@ -547,7 +557,7 @@ function MoverRow({ item, locale }: { item: Instrument; locale: Locale }) {
       <Text className={`w-16 text-end font-title text-[12px] ${tone.text}`}>
         {formatPercent(item.quote?.changePct)}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -622,12 +632,13 @@ function InstrumentRow({
   const sector = t(`sectors.${sectorKey(item.sector)}`);
 
   return (
-    <View
-      accessible
+    <Pressable
+      accessibilityRole="button"
       accessibilityLabel={`${name}, ${item.ticker}, ${formatPrice(
         quote?.price,
       )}, ${formatPercent(quote?.changePct)}`}
-      className="mx-5 mb-2 flex-row items-center rounded-2xl border border-border bg-surface px-4 py-3"
+      onPress={() => openStock(item.ticker)}
+      className="mx-5 mb-2 flex-row items-center rounded-2xl border border-border bg-surface px-4 py-3 active:opacity-80"
     >
       <View className="h-10 w-10 items-center justify-center rounded-xl border border-gold/30 bg-surface-elevated">
         <Text
@@ -671,7 +682,7 @@ function InstrumentRow({
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

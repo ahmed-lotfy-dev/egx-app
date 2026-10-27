@@ -15,6 +15,13 @@
       "when": 1793098617118,
       "tag": "0001_tiny_invaders",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793103250050,
+      "tag": "0002_slow_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

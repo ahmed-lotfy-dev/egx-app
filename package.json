@@ -16,6 +16,8 @@
     "sync:quotes": "bun run --cwd apps/worker sync:quotes",
     "sync:bars": "bun run --cwd apps/worker sync:bars",
     "sync:symbols": "bun run --cwd apps/worker sync:symbols",
+    "sync:fundamentals": "bun run --cwd apps/worker sync:fundamentals",
+    "sync:news": "bun run --cwd apps/worker sync:news",
     "sync:all": "bun run --cwd apps/worker sync:all",
     "contracts:generate": "bun run --cwd apps/api openapi:generate && bun run --cwd apps/mobile types:generate",
     "contracts:check": "bun run --cwd apps/api openapi:check && bun run --cwd apps/mobile types:check",

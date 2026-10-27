@@ -30,6 +30,33 @@ export type QuoteRecord = {
   asOf: Date;
 };
 
+export type FundamentalRecord = {
+  ticker: string;
+  asOf: string;
+  observedAt: Date;
+  currency: string | null;
+  marketCap: number | null;
+  pe: number | null;
+  pb: number | null;
+  eps: number | null;
+  roe: number | null;
+  roa: number | null;
+  debtToEquity: number | null;
+  dividendYield: number | null;
+  revenueTtm: number | null;
+  netIncomeTtm: number | null;
+  fcfTtm: number | null;
+  currentRatio: number | null;
+  beta: number | null;
+  grossMargin: number | null;
+  netMargin: number | null;
+  totalDebt: number | null;
+  totalAssets: number | null;
+  bookValuePerShare: number | null;
+  evEbitda: number | null;
+  raw: unknown;
+};
+
 export type DailyBarRecord = {
   /** Cairo trading date, YYYY-MM-DD. */
   date: string;
@@ -48,6 +75,9 @@ export interface MarketDataProvider {
   readonly name: string;
   fetchUniverse?(): Promise<InstrumentSeed[]>;
   fetchQuotes?(instruments: InstrumentRef[]): Promise<QuoteRecord[]>;
+  fetchFundamentals?(
+    instruments: InstrumentRef[],
+  ): Promise<FundamentalRecord[]>;
   fetchDailyBars?(
     instrument: InstrumentRef,
     days: number,
