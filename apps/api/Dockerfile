@@ -39,4 +39,4 @@ COPY --from=builder /app/packages/contracts ./packages/contracts
 WORKDIR /app/apps/api
 
 # Run migrations and start the server
-CMD ["bun", "run", "src/db/migrate.ts", "&&", "bun", "run", "src/index.ts"]
+CMD ["sh", "-c", "bun run src/db/migrate.ts && bun run src/index.ts"]
