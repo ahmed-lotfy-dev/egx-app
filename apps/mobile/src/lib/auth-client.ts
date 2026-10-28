@@ -3,8 +3,10 @@ import { createAuthClient } from "better-auth/react";
 import { emailOTPClient } from "better-auth/client/plugins";
 import * as SecureStore from "expo-secure-store";
 
+import { apiBaseUrl } from "@/lib/config";
+
 export const authClient = createAuthClient({
-  baseURL: `${process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000"}/api/auth`,
+  baseURL: `${apiBaseUrl}/api/auth`,
   plugins: [
     expoClient({
       scheme: "ahmedlotfy-egx-app",

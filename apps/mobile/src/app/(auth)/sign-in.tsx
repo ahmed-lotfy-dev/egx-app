@@ -11,9 +11,10 @@ import { Screen } from "@/components/Screen";
 import { TextField } from "@/components/TextField";
 import { colors } from "@/constants/theme";
 import { authClient } from "@/lib/auth-client";
+import { googleAuthEnabled } from "@/lib/config";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const googleEnabled = process.env.EXPO_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
+const googleEnabled = googleAuthEnabled;
 
 // Expo Go cannot handle the app's custom scheme, so send it back through the
 // exp:// deep link. Development and release builds use the ahmedlotfy-egx-app:// scheme.
@@ -52,7 +53,7 @@ export default function SignInScreen() {
       return;
     }
 
-    router.push({ pathname: "/(auth)/otp", params: { email: normalizedEmail } });
+    router.push({ pathname: "/otp", params: { email: normalizedEmail } });
   }
 
   async function signInWithGoogle() {

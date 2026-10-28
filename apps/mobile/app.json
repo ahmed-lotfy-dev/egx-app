@@ -4,6 +4,9 @@
     "slug": "egx",
     "scheme": "ahmedlotfy-egx-app",
     "version": "0.1.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -11,7 +14,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.egx.app"
+      "bundleIdentifier": "com.egx.app",
+      "infoPlist": {}
     },
     "android": {
       "package": "com.egx.app",
@@ -34,16 +38,46 @@
       "expo-localization",
       "expo-font",
       [
+        "expo-build-properties",
+        {
+          "android": {
+            "buildArchs": ["arm64-v8a"]
+          }
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#0F1115",
           "image": "./assets/splash-icon.png",
           "imageWidth": 120
         }
+      ],
+      [
+        "expo-updates",
+        {
+          "url": "https://u.expo.dev/63f9d64e-e014-4de1-9f17-64904f7e1ccf",
+          "checkAutomatically": "ON_LOAD",
+          "fallbackToCacheTimeout": 0
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "63f9d64e-e014-4de1-9f17-64904f7e1ccf"
+      }
+    },
+    "owner": "ahmed-lotfy",
+    "updates": {
+      "url": "https://u.expo.dev/63f9d64e-e014-4de1-9f17-64904f7e1ccf"
     }
   }
 }

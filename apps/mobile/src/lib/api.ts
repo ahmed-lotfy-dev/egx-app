@@ -1,10 +1,10 @@
 import createClient from "openapi-fetch";
 
 import { authClient } from "@/lib/auth-client";
+import { apiBaseUrl } from "@/lib/config";
 import type { paths } from "@/types/api";
 
-const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL ?? "http://10.0.2.2:3000";
-export const apiBaseUrl = rawBaseUrl;
+export { apiBaseUrl };
 
 export const api = createClient<paths>({
   baseUrl: apiBaseUrl,
