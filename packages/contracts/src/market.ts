@@ -237,3 +237,28 @@ export const InstrumentNewsResponseSchema = z.object({
 export type InstrumentNewsResponse = z.infer<
   typeof InstrumentNewsResponseSchema
 >;
+
+export const FeedNewsItemSchema = z.object({
+  id: z.number().int(),
+  source: z.string(),
+  lang: z.enum(["ar", "en"]),
+  title: z.string(),
+  summary: z.string().nullable(),
+  url: z.string(),
+  publishedAt: z.iso.datetime(),
+  category: z.string().nullable(),
+});
+
+export type FeedNewsItem = z.infer<typeof FeedNewsItemSchema>;
+
+export const NewsFeedResponseSchema = z.object({
+  data: z.array(FeedNewsItemSchema),
+  meta: z.object({
+    nextCursor: z.string().nullable(),
+    limit: z.number().int(),
+    feed: z.enum(["market", "economy"]),
+    asOf: z.iso.datetime().nullable(),
+  }),
+});
+
+export type NewsFeedResponse = z.infer<typeof NewsFeedResponseSchema>;
