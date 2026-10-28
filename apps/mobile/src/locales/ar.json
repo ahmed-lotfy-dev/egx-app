@@ -203,5 +203,19 @@
     "restartTitle": "إعادة تشغيل مطلوبة",
     "restartBody": "علشان اتجاه الواجهة يتغيّر، اقفل التطبيق وافتحه تاني.",
     "languageNote": "تغيير اللغة يحتاج إعادة تشغيل."
+  },
+  "newsTab": {
+    "title": "الأخبار",
+    "marketTab": "السوق",
+    "economyTab": "الاقتصاد",
+    "emptyMarketTitle": "مفيش أخبار للشركات لسه",
+    "emptyMarketBody": "أول ما يظهر خبر مرتبط بإحدى شركات البورصة هتلاقيه هنا.",
+    "emptyEconomyTitle": "مفيش أخبار اقتصادية لسه",
+    "emptyEconomyBody": "أخبار الاقتصاد الكلي والقطاعات والعالم هتتجمع هنا.",
+    "errorTitle": "تعذر تحميل الأخبار",
+    "errorBody": "حدث خطأ أثناء جلب العناوين.",
+    "sourceArabFinance": "Arab Finance",
+    "sourceGoogleNews": "Google News",
+    "endOfList": "دي كل الأخبار الحديثة لحد دلوقتي"
   }
 }

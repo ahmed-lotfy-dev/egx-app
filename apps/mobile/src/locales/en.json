@@ -203,5 +203,19 @@
     "restartTitle": "Restart required",
     "restartBody": "Close and reopen the app to apply the interface direction.",
     "languageNote": "Changing language requires a restart."
+  },
+  "newsTab": {
+    "title": "News",
+    "marketTab": "Market",
+    "economyTab": "Economy",
+    "emptyMarketTitle": "No company news yet",
+    "emptyMarketBody": "Headlines matched to EGX companies will appear here as they come in.",
+    "emptyEconomyTitle": "No economy news yet",
+    "emptyEconomyBody": "Macro, sector, and global stories will appear here as they come in.",
+    "errorTitle": "Couldn't load the news",
+    "errorBody": "Something went wrong while fetching headlines.",
+    "sourceArabFinance": "Arab Finance",
+    "sourceGoogleNews": "Google News",
+    "endOfList": "You're all caught up"
   }
 }
