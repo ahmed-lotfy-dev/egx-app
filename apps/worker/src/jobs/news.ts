@@ -67,6 +67,12 @@ type Match = {
   score: number;
 };
 
+type IngestResult = {
+  itemsOk: number;
+  linked: number;
+  instrumentsWithNews: number;
+};
+
 const FEEDS: Feed[] = CATEGORIES.flatMap((category) => [
   {
     lang: "en" as const,
@@ -312,32 +318,121 @@ function chunks<T>(values: T[], size: number): T[][] {
   return result;
 }
 
-export async function syncNews() {
-  return withIngestRun("news", "arabfinance", async () => {
-    const instrumentRows = await db
-      .select({
-        id: instruments.id,
-        ticker: instruments.ticker,
-        nameEn: instruments.nameEn,
-        nameAr: instruments.nameAr,
-      })
-      .from(instruments)
-      .where(eq(instruments.kind, "stock"));
+export async function loadInstrumentAliases(): Promise<InstrumentAliases[]> {
+  const instrumentRows = await db
+    .select({
+      id: instruments.id,
+      ticker: instruments.ticker,
+      nameEn: instruments.nameEn,
+      nameAr: instruments.nameAr,
+    })
+    .from(instruments)
+    .where(eq(instruments.kind, "stock"));
 
-    if (instrumentRows.length === 0) {
-      throw new Error("No stocks; run the universe sync first");
+  if (instrumentRows.length === 0) {
+    throw new Error("No stocks; run the universe sync first");
+  }
+
+  return instrumentRows.map((instrument) => ({
+    id: instrument.id,
+    ticker: instrument.ticker,
+    aliases: [
+      ...aliasesFor(instrument.nameEn, "en", instrument.ticker),
+      ...aliasesFor(instrument.nameAr, "ar", instrument.ticker),
+    ],
+  }));
+}
+
+export async function ingestArticles(
+  articles: Map<string, Article>,
+  source: string,
+  instrumentsWithAliases: InstrumentAliases[],
+): Promise<IngestResult> {
+  const fetchedAt = new Date();
+  const values = [...articles.values()].map((article) => ({
+    source,
+    lang: article.lang,
+    title: article.title,
+    summary: article.summary,
+    url: article.url,
+    publishedAt: article.publishedAt,
+    category: article.category,
+    contentHash: hash(
+      `${article.url}\n${normalizeArabic(normalizeEnglish(article.title))}`,
+    ),
+    fetchedAt,
+  }));
+
+  const idsByUrl = new Map<string, number>();
+
+  for (const chunk of chunks(values, 100)) {
+    const inserted = await db
+      .insert(newsItems)
+      .values(chunk)
+      .onConflictDoUpdate({
+        target: newsItems.url,
+        set: {
+          title: sql`excluded.title`,
+          summary: sql`excluded.summary`,
+          publishedAt: sql`excluded.published_at`,
+          category: sql`excluded.category`,
+          contentHash: sql`excluded.content_hash`,
+          fetchedAt: sql`excluded.fetched_at`,
+        },
+      })
+      .returning({ id: newsItems.id, url: newsItems.url });
+
+    for (const row of inserted) {
+      idsByUrl.set(row.url, row.id);
+    }
+  }
+
+  const links: {
+    newsId: number;
+    instrumentId: number;
+    matchType: MatchType;
+    matchScore: number;
+  }[] = [];
+
+  for (const article of articles.values()) {
+    const newsId = idsByUrl.get(article.url);
+
+    if (!newsId) {
+      continue;
     }
 
-    const instrumentsWithAliases: InstrumentAliases[] = instrumentRows.map(
-      (instrument) => ({
-        id: instrument.id,
-        ticker: instrument.ticker,
-        aliases: [
-          ...aliasesFor(instrument.nameEn, "en", instrument.ticker),
-          ...aliasesFor(instrument.nameAr, "ar", instrument.ticker),
-        ],
-      }),
+    const originalText = `${article.title} ${article.summary ?? ""}`;
+    const normalizedText = normalizeArabic(normalizeEnglish(originalText));
+    const matches = matchesFor(
+      originalText,
+      normalizedText,
+      instrumentsWithAliases,
     );
+
+    for (const match of matches) {
+      links.push({
+        newsId,
+        instrumentId: match.instrumentId,
+        matchType: match.matchType,
+        matchScore: match.score,
+      });
+    }
+  }
+
+  for (const chunk of chunks(links, 200)) {
+    await db.insert(newsInstrumentLinks).values(chunk).onConflictDoNothing();
+  }
+
+  return {
+    itemsOk: values.length,
+    linked: links.length,
+    instrumentsWithNews: new Set(links.map((link) => link.instrumentId)).size,
+  };
+}
+
+export async function syncNews() {
+  return withIngestRun("news", "arabfinance", async () => {
+    const instrumentsWithAliases = await loadInstrumentAliases();
 
     const articles = new Map<string, Article>();
     let failedFeeds = 0;
@@ -408,90 +503,20 @@ export async function syncNews() {
       throw new Error("No news items parsed from Arab Finance");
     }
 
-    const fetchedAt = new Date();
-    const values = [...articles.values()].map((article) => ({
-      source: "arabfinance",
-      lang: article.lang,
-      title: article.title,
-      summary: article.summary,
-      url: article.url,
-      publishedAt: article.publishedAt,
-      category: article.category,
-      contentHash: hash(
-        `${article.url}\n${normalizeArabic(normalizeEnglish(article.title))}`,
-      ),
-      fetchedAt,
-    }));
-
-    const idsByUrl = new Map<string, number>();
-
-    for (const chunk of chunks(values, 100)) {
-      const inserted = await db
-        .insert(newsItems)
-        .values(chunk)
-        .onConflictDoUpdate({
-          target: newsItems.url,
-          set: {
-            title: sql`excluded.title`,
-            summary: sql`excluded.summary`,
-            publishedAt: sql`excluded.published_at`,
-            category: sql`excluded.category`,
-            contentHash: sql`excluded.content_hash`,
-            fetchedAt: sql`excluded.fetched_at`,
-          },
-        })
-        .returning({ id: newsItems.id, url: newsItems.url });
-
-      for (const row of inserted) {
-        idsByUrl.set(row.url, row.id);
-      }
-    }
-
-    const links: {
-      newsId: number;
-      instrumentId: number;
-      matchType: MatchType;
-      matchScore: number;
-    }[] = [];
-
-    for (const article of articles.values()) {
-      const newsId = idsByUrl.get(article.url);
-
-      if (!newsId) {
-        continue;
-      }
-
-      const originalText = `${article.title} ${article.summary ?? ""}`;
-      const normalizedText = normalizeArabic(normalizeEnglish(originalText));
-      const matches = matchesFor(
-        originalText,
-        normalizedText,
-        instrumentsWithAliases,
-      );
-
-      for (const match of matches) {
-        links.push({
-          newsId,
-          instrumentId: match.instrumentId,
-          matchType: match.matchType,
-          matchScore: match.score,
-        });
-      }
-    }
-
-    for (const chunk of chunks(links, 200)) {
-      await db.insert(newsInstrumentLinks).values(chunk).onConflictDoNothing();
-    }
+    const result = await ingestArticles(
+      articles,
+      "arabfinance",
+      instrumentsWithAliases,
+    );
 
     return {
-      itemsOk: values.length,
+      itemsOk: result.itemsOk,
       itemsFailed: failedFeeds,
       metadata: {
         feeds: FEEDS.length,
-        parsed: values.length,
-        linked: links.length,
-        instrumentsWithNews: new Set(links.map((link) => link.instrumentId))
-          .size,
+        parsed: result.itemsOk,
+        linked: result.linked,
+        instrumentsWithNews: result.instrumentsWithNews,
       },
     };
   });
