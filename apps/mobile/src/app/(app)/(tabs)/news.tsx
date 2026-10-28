@@ -256,7 +256,7 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
       >
         {item.title}
       </Text>
-      {item.summary ? (
+      {item.summary && item.summary !== item.title ? (
         <Text
           className="mt-1 font-body text-[13px] leading-5 text-text-secondary"
           numberOfLines={2}
