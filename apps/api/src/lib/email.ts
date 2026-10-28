@@ -6,6 +6,7 @@ import { logger } from "./logger";
 type OtpType = "sign-in" | "email-verification" | "forget-password" | "change-email";
 
 export async function sendOtpEmail(input: { email: string; otp: string; type: OtpType }) {
+  console.log('[sendOtpEmail] Input:', JSON.stringify(input));
   if (!env.RESEND_API_KEY) {
     logger.warn(
       { email: input.email, otp: input.otp, type: input.type },
