@@ -121,3 +121,25 @@ Fill-ins  : Currents API free tier (250/day) for keyword search and gap-filling
 An ingestion worker polls every 15–30 minutes, deduplicates by URL/headline hash, maps
 each item to a sector using the Arab Finance category it came from, and stores it. The
 site then reads from our own database — third-party feeds are never hit at page render.
+
+## 5. M4 update — Google News RSS economy feed (2026-10-28)
+
+The News tab's `الاقتصاد` feed adds Google News RSS to Arab Finance:
+
+- Six curated search queries, EG-localized: AR `مصر اقتصاد`, `البورصة المصرية`,
+  `أسعار النفط` and EN `Egypt economy`, `Egypt stock market`, `oil prices`.
+  Queries must use `%20` encoding; the `+` form is redirected and loses the
+  EG locale.
+- Google no longer embeds the publisher URL in the description anchor — it
+  now points back to a `news.google.com` redirect whose `AU_yqL…` ID cannot
+  be decoded without Google's undocumented internal endpoint. We store the
+  redirect URL and the publisher name from `<source>`. If Google's terms on
+  automated reuse are ever challenged in review, this feed is the first to
+  drop.
+- Google News summaries are publisher attributions, so `summary` is null and
+  the ` - Publisher` suffix is stripped from titles.
+- The same conservative alias matcher runs on Google items, so company
+  mentions join the market feed automatically; the market/economy split is
+  computed at read time (`EXISTS`/`NOT EXISTS` on `news_instrument_links`).
+- Known limitation: syndicated copies of one story have different redirect
+  URLs, so URL dedupe keeps them as separate cards.
