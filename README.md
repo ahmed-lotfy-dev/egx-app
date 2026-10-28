@@ -34,7 +34,7 @@ use. It runs in the `egx-db` container with a named volume.
 cp .env.example .env
 # fill BETTER_AUTH_SECRET; generate one with: openssl rand -base64 32
 cp .env.example apps/mobile/.env
-# keep the EXPO_PUBLIC_* values; use 10.0.2.2 for the Android emulator
+# the mobile app always targets the deployed backend
 
 bun install
 bun run db:up
@@ -52,10 +52,10 @@ stored bars.
 The API listens on `http://localhost:3000`. In development, when `RESEND_API_KEY` is
 unset, the email OTP is written to the API log instead of being sent.
 
-`EXPO_PUBLIC_API_URL` must be reachable from the device. `10.0.2.2` is the Android
-emulator's alias for the host. A physical device needs the host LAN address. Use the
-origin only (for example `http://10.0.2.2:3000`); the app appends `/api/auth` for
-Better Auth and uses the `/api/...` paths from the generated contract.
+The mobile app always targets the deployed backend at `https://egx-api.alotfy.site`.
+There is no localhost or emulator fallback, so a build can never send requests to a
+developer machine. The local API above is only for server-side development; point the
+mobile app at it only by changing `apps/mobile/src/lib/config.ts` deliberately.
 
 ## Contracts
 
@@ -172,12 +172,11 @@ modules.
 
 ## Google sign in
 
-Create a **Web application** OAuth client in Google Cloud Console and register
-`http://localhost:3000/api/auth/callback/google` as an authorized redirect URI. Then set
-`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the root `.env`, and set
-`EXPO_PUBLIC_GOOGLE_AUTH_ENABLED=true` in `apps/mobile/.env`. Without the credentials the
-Google button is hidden and email OTP remains available.
+Create a **Web application** OAuth client in Google Cloud Console and register the
+deployed callback `https://egx-api.alotfy.site/api/auth/callback/google` as an authorized
+redirect URI. For local API work, add `http://localhost:3000/api/auth/callback/google`
+as well. Then set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the root `.env`.
 
-The callback is built from `BETTER_AUTH_URL`, so keep it at `http://localhost:3000` in
-development. On the Android emulator, run `adb reverse tcp:3000 tcp:3000` once per boot so
-the browser can reach the API at `localhost:3000`.
+The mobile app always talks to the deployed API, so the deployed callback is the one the
+shipped app uses. `EXPO_PUBLIC_GOOGLE_AUTH_ENABLED=false` hides the Google button;
+otherwise it is shown and email OTP remains available as a fallback.
