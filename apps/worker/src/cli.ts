@@ -2,7 +2,7 @@ import { closeDb } from "@egx/api/db";
 
 import { syncBars, type BarsOptions } from "./jobs/bars";
 import { syncFundamentals } from "./jobs/fundamentals";
-import { syncNews } from "./jobs/news";
+import { syncGoogleNews, syncNews } from "./jobs/news";
 import { syncQuotes } from "./jobs/quotes";
 import { syncUniverse } from "./jobs/universe";
 import { resolveYahooSymbols } from "./jobs/yahoo-symbols";
@@ -48,6 +48,36 @@ function print(job: string, result: object): void {
   console.log(JSON.stringify({ job, ...result }, null, 2));
 }
 
+async function tryPass(
+  label: string,
+  run: () => Promise<object>,
+): Promise<boolean> {
+  try {
+    print(label, await run());
+    return true;
+  } catch (error) {
+    console.warn(
+      `${label} failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return false;
+  }
+}
+
+/**
+ * Runs both news passes. Each source records its own ingest run, so a single
+ * source failure is auditable; the command exits nonzero only when both fail.
+ */
+async function syncNewsSources(): Promise<void> {
+  const arabfinance = await tryPass("news-arabfinance", syncNews);
+  const google = await tryPass("news-google", syncGoogleNews);
+
+  if (!arabfinance && !google) {
+    throw new Error("All news sources failed");
+  }
+}
+
 async function main(): Promise<void> {
   switch (command) {
     case "universe":
@@ -66,7 +96,7 @@ async function main(): Promise<void> {
       print("fundamentals", await syncFundamentals());
       break;
     case "news":
-      print("news", await syncNews());
+      await syncNewsSources();
       break;
     case "all": {
       const barsOptions = readBarsOptions();
@@ -75,7 +105,7 @@ async function main(): Promise<void> {
       print("bars", await syncBars(barsOptions));
       print("quotes", await syncQuotes());
       print("fundamentals", await syncFundamentals());
-      print("news", await syncNews());
+      await syncNewsSources();
       break;
     }
     default:

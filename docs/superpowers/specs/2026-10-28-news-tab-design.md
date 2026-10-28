@@ -139,11 +139,12 @@ existing provider shape, plus a pass inside `syncNews()` in
     `oil prices`
 - Parse `title`, `link`, `description`, `pubDate`, and the `<source>` element
   (publisher name).
-- Canonical URL: prefer the publisher URL extracted from the first `<a href>`
-  inside the item description (Google News embeds it there); strip its query
-  and hash the same way as `canonicalUrl`. Fall back to the `news.google.com`
-  redirect URL when no anchor exists. Keep the Google redirect URL as the
-  display URL only when the publisher URL cannot be recovered.
+- Canonical URL: Google News no longer embeds the publisher URL in the item
+  description (the anchor points back to `news.google.com` redirect URLs, and
+  the new `AU_yqL`-style redirect IDs cannot be decoded without Google's
+  undocumented internal endpoint). The worker still prefers a publisher URL
+  when the anchor carries a non-Google host, and otherwise falls back to the
+  item's redirect URL through `canonicalUrl`; v1 stores the redirect URL.
 - Summary: Google News summaries are publisher attributions, not excerpts.
   Store `summary: null` for `google-news` items; the publisher name from
   `<source>` is the card's source label.

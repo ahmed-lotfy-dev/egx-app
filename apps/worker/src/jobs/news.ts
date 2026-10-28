@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { eq, sql } from "drizzle-orm";
 import { XMLParser } from "fast-xml-parser";
 
@@ -12,7 +10,20 @@ import {
 import { normalizeArabic, normalizeEnglish } from "@egx/api/text";
 
 import { fetchWithRetry, sleep } from "../lib/http";
+import {
+  asArray,
+  asRecord,
+  canonicalUrl,
+  hash,
+  textValue,
+} from "../lib/parse";
 import { withIngestRun } from "../lib/runs";
+import {
+  buildGoogleNewsUrl,
+  GOOGLE_NEWS_QUERIES,
+  parseGoogleNewsItem,
+  publisherUrl,
+} from "../providers/google-news";
 
 const NEWS_USER_AGENT =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -30,7 +41,7 @@ const CATEGORIES = [
   { id: 10, en: "Education", ar: "تعليم" },
 ] as const;
 
-type NewsLang = "ar" | "en";
+export type NewsLang = "ar" | "en";
 
 type Feed = {
   lang: NewsLang;
@@ -45,6 +56,11 @@ type Article = {
   publishedAt: Date;
   lang: NewsLang;
   category: string;
+  /**
+   * Optional extra text included when matching aliases. Google News titles
+   * lose the publisher suffix, so the publisher name is passed here.
+   */
+  matchText?: string;
 };
 
 type MatchType = "ticker" | "name";
@@ -134,52 +150,6 @@ const parser = new XMLParser({
   removeNSPrefix: true,
   trimValues: true,
 });
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function asArray(value: unknown): unknown[] {
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  return value === undefined || value === null ? [] : [value];
-}
-
-function textValue(value: unknown): string | null {
-  if (typeof value === "string") {
-    return value.trim() || null;
-  }
-
-  if (typeof value === "number") {
-    return String(value);
-  }
-
-  const record = asRecord(value);
-
-  return record ? textValue(record["#text"]) : null;
-}
-
-function canonicalUrl(raw: string): string | null {
-  try {
-    const url = new URL(raw);
-    url.protocol = "https:";
-    url.hostname = url.hostname.toLowerCase();
-    url.hash = "";
-    url.search = "";
-    url.pathname = url.pathname.replace(/\/+$/, "");
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
-function hash(value: string): string {
-  return createHash("sha256").update(value).digest("hex");
-}
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -401,7 +371,9 @@ export async function ingestArticles(
       continue;
     }
 
-    const originalText = `${article.title} ${article.summary ?? ""}`;
+    const originalText = `${
+      article.matchText ?? article.title
+    } ${article.summary ?? ""}`;
     const normalizedText = normalizeArabic(normalizeEnglish(originalText));
     const matches = matchesFor(
       originalText,
@@ -520,4 +492,131 @@ export async function syncNews() {
       },
     };
   });
+}
+
+export async function syncGoogleNews() {
+  return withIngestRun("news", "google-news", async () => {
+    const instrumentsWithAliases = await loadInstrumentAliases();
+    const articles = new Map<string, Article>();
+    let failedFeeds = 0;
+    const parsedByQuery = new Map<string, number>();
+
+    for (const queryConfig of GOOGLE_NEWS_QUERIES) {
+      const url = buildGoogleNewsUrl(queryConfig);
+
+      try {
+        const response = await fetchWithRetry(
+          url,
+          { headers: { "User-Agent": NEWS_USER_AGENT } },
+          { retries: 2, timeoutMs: 20_000 },
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const document = parser.parse(await response.text()) as unknown;
+        const channel = asRecord(asRecord(asRecord(document)?.rss)?.channel);
+        const items = asArray(channel?.item);
+        let parsed = 0;
+
+        for (const item of items) {
+          const node = asRecord(item);
+
+          if (!node) {
+            continue;
+          }
+
+          const source = parseGoogleNewsItem(node);
+
+          if (!source) {
+            continue;
+          }
+
+          const canonical = publisherUrl(answerDescription(node));
+          const publishedAt = new Date(source.publishedRaw);
+
+          if (Number.isNaN(publishedAt.getTime())) {
+            continue;
+          }
+
+          const target = canonical ?? canonicalUrl(source.link);
+
+          if (!target) {
+            continue;
+          }
+
+          if (!articles.has(target)) {
+            parsed += 1;
+            articles.set(target, {
+              title: stripPublisherSuffix(
+                source.title,
+                source.publisherName,
+              ),
+              summary: null,
+              url: target,
+              publishedAt,
+              lang: queryConfig.lang,
+              category: queryConfig.category,
+              matchText: source.publisherName ?? undefined,
+            });
+          }
+        }
+
+        parsedByQuery.set(queryConfig.query, parsed);
+      } catch (error) {
+        failedFeeds += 1;
+        console.warn(
+          `news feed failed: ${url}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+
+      await sleep(250);
+    }
+
+    if (articles.size === 0) {
+      throw new Error("No news items parsed from Google News");
+    }
+
+    const result = await ingestArticles(
+      articles,
+      "google-news",
+      instrumentsWithAliases,
+    );
+
+    return {
+      itemsOk: result.itemsOk,
+      itemsFailed: failedFeeds,
+      metadata: {
+        queries: GOOGLE_NEWS_QUERIES.length,
+        parsedByQuery: Object.fromEntries(parsedByQuery),
+        parsed: result.itemsOk,
+        linked: result.linked,
+        instrumentsWithNews: result.instrumentsWithNews,
+      },
+    };
+  });
+}
+
+function answerDescription(node: Record<string, unknown>): string | null {
+  const value = node.description;
+
+  return typeof value === "string" ? value : null;
+}
+
+function stripPublisherSuffix(
+  title: string,
+  publisherName: string | null,
+): string {
+  if (!publisherName) {
+    return title;
+  }
+
+  const suffix = ` - ${publisherName}`;
+
+  return title.toLowerCase().endsWith(suffix.toLowerCase())
+    ? title.slice(0, title.length - suffix.length).trim()
+    : title;
 }
