@@ -1,7 +1,7 @@
 # News Tab — Design
 
 Date: 2026-10-28
-Status: Draft
+Status: Approved
 Branch: `feat/m3-stock-detail`
 
 ## 1. Summary
