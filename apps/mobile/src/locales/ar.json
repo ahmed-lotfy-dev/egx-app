@@ -217,5 +217,19 @@
     "sourceArabFinance": "Arab Finance",
     "sourceGoogleNews": "Google News",
     "endOfList": "دي كل الأخبار الحديثة لحد دلوقتي"
+  },
+  "watchlist": {
+    "title": "القوائم",
+    "predefined": "جاهزة",
+    "custom": "مخصصة",
+    "indicesTitle": "المؤشرات",
+    "sectorsTitle": "القطاعات",
+    "instrumentCount": "{{count}} سهم",
+    "noQuote": "لا يوجد سعر",
+    "loadErrorTitle": "تعذر تحميل القوائم",
+    "loadErrorBody": "حدث خطأ أثناء جلب القوائم الجاهزة.",
+    "empty": "مفيش قوائم جاهزة لسه",
+    "emptyList": "القائمة دي فاضية",
+    "notFound": "القائمة غير موجودة"
   }
 }

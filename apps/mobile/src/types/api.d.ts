@@ -714,6 +714,68 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/watchlists/predefined": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Predefined watchlists (EGX30, EGX70, sectors, etc.) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Predefined watchlists with instruments and quotes */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                id: string;
+                                nameAr: string;
+                                nameEn: string;
+                                /** @enum {string} */
+                                type: "index" | "sector" | "sharia";
+                                instrumentCount: number;
+                                instruments: {
+                                    ticker: string;
+                                    nameAr: string | null;
+                                    nameEn: string;
+                                    sector: string | null;
+                                    quote: {
+                                        price: number | null;
+                                        change: number | null;
+                                        changePct: number | null;
+                                        currency: string | null;
+                                    } | null;
+                                }[];
+                            }[];
+                            meta: {
+                                /** Format: date-time */
+                                asOf: string | null;
+                                source: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {

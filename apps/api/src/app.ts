@@ -13,6 +13,7 @@ import { instrumentRoutes } from "./routes/instruments";
 import { marketRoutes } from "./routes/market";
 import { newsRoutes } from "./routes/news";
 import { statusRoutes } from "./routes/status";
+import { watchlistRoutes } from "./routes/watchlist";
 
 export const app = new OpenAPIHono();
 
@@ -58,6 +59,7 @@ app.route("/", instrumentHistoryRoutes);
 app.route("/", instrumentNewsRoutes);
 app.route("/", marketRoutes);
 app.route("/", newsRoutes);
+app.route("/", watchlistRoutes);
 
 app.doc31("/openapi.json", OPENAPI_CONFIG);
 

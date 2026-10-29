@@ -262,3 +262,37 @@ export const NewsFeedResponseSchema = z.object({
 });
 
 export type NewsFeedResponse = z.infer<typeof NewsFeedResponseSchema>;
+
+export const PredefinedWatchlistInstrumentSchema = z.object({
+  ticker: z.string(),
+  nameAr: z.string().nullable(),
+  nameEn: z.string(),
+  sector: z.string().nullable(),
+  quote: z.object({
+    price: z.number().nullable(),
+    change: z.number().nullable(),
+    changePct: z.number().nullable(),
+    currency: z.string().nullable(),
+  }).nullable(),
+});
+
+export const PredefinedWatchlistSchema = z.object({
+  id: z.string(),
+  nameAr: z.string(),
+  nameEn: z.string(),
+  type: z.enum(["index", "sector", "sharia"]),
+  instrumentCount: z.number().int(),
+  instruments: z.array(PredefinedWatchlistInstrumentSchema),
+});
+
+export type PredefinedWatchlist = z.infer<typeof PredefinedWatchlistSchema>;
+
+export const PredefinedWatchlistsResponseSchema = z.object({
+  data: z.array(PredefinedWatchlistSchema),
+  meta: z.object({
+    asOf: z.iso.datetime().nullable(),
+    source: z.string(),
+  }),
+});
+
+export type PredefinedWatchlistsResponse = z.infer<typeof PredefinedWatchlistsResponseSchema>;

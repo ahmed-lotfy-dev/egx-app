@@ -1882,6 +1882,142 @@
           }
         }
       }
+    },
+    "/api/watchlists/predefined": {
+      "get": {
+        "tags": [
+          "market"
+        ],
+        "summary": "Predefined watchlists (EGX30, EGX70, sectors, etc.)",
+        "responses": {
+          "200": {
+            "description": "Predefined watchlists with instruments and quotes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "nameAr": {
+                            "type": "string"
+                          },
+                          "nameEn": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "index",
+                              "sector",
+                              "sharia"
+                            ]
+                          },
+                          "instrumentCount": {
+                            "type": "integer"
+                          },
+                          "instruments": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "ticker": {
+                                  "type": "string"
+                                },
+                                "nameAr": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "nameEn": {
+                                  "type": "string"
+                                },
+                                "sector": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "quote": {
+                                  "type": "object",
+                                  "nullable": true,
+                                  "properties": {
+                                    "price": {
+                                      "type": "number",
+                                      "nullable": true
+                                    },
+                                    "change": {
+                                      "type": "number",
+                                      "nullable": true
+                                    },
+                                    "changePct": {
+                                      "type": "number",
+                                      "nullable": true
+                                    },
+                                    "currency": {
+                                      "type": "string",
+                                      "nullable": true
+                                    }
+                                  },
+                                  "required": [
+                                    "price",
+                                    "change",
+                                    "changePct",
+                                    "currency"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "ticker",
+                                "nameAr",
+                                "nameEn",
+                                "sector",
+                                "quote"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "nameAr",
+                          "nameEn",
+                          "type",
+                          "instrumentCount",
+                          "instruments"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "asOf",
+                        "source"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

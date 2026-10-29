@@ -217,5 +217,19 @@
     "sourceArabFinance": "Arab Finance",
     "sourceGoogleNews": "Google News",
     "endOfList": "You're all caught up"
+  },
+  "watchlist": {
+    "title": "Watchlists",
+    "predefined": "Ready-made",
+    "custom": "Custom",
+    "indicesTitle": "Indices",
+    "sectorsTitle": "Sectors",
+    "instrumentCount": "{{count}} stocks",
+    "noQuote": "No quote",
+    "loadErrorTitle": "Couldn't load watchlists",
+    "loadErrorBody": "Something went wrong while fetching predefined lists.",
+    "empty": "No predefined lists yet",
+    "emptyList": "This list is empty",
+    "notFound": "List not found"
   }
 }
