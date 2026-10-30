@@ -705,6 +705,7 @@ export interface paths {
                                 translatedSummary: string | null;
                                 sourceRegion: string | null;
                                 sourceCategory: string | null;
+                                tradingSignals: string[] | null;
                             }[];
                             meta: {
                                 nextCursor: string | null;

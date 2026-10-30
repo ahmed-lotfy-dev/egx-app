@@ -172,6 +172,7 @@ export const newsItems = pgTable(
     entities: jsonb("entities"),
     sourceRegion: text("source_region"),
     sourceCategory: text("source_category"),
+    tradingSignals: jsonb("trading_signals"),
     processedAt: timestamp("processed_at", tz),
     processingVersion: text("processing_version"),
   },

@@ -264,6 +264,7 @@ export const FeedNewsItemSchema = z.object({
   translatedSummary: z.string().nullable(),
   sourceRegion: z.string().nullable(),
   sourceCategory: z.string().nullable(),
+  tradingSignals: z.array(z.string()).nullable(),
 }).transform((data) => ({
   ...data,
   aiKeyPoints: data.aiKeyPoints ?? [],

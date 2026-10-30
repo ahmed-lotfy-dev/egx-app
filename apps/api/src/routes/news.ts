@@ -200,6 +200,7 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
       translatedSummary: newsItems.translatedSummary,
       sourceRegion: newsItems.sourceRegion,
       sourceCategory: newsItems.sourceCategory,
+      tradingSignals: newsItems.tradingSignals,
     })
     .from(newsItems)
     .where(and(...conditions))
@@ -239,6 +240,7 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
         translatedSummary: row.translatedSummary,
         sourceRegion: row.sourceRegion,
         sourceCategory: row.sourceCategory,
+        tradingSignals: (row.tradingSignals as string[]) ?? [],
       })),
       meta: {
         nextCursor,
