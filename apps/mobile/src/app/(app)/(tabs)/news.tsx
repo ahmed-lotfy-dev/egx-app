@@ -31,9 +31,7 @@ const REGIONS = [
   { id: "all", labelKey: "newsTab.filterAllRegions" },
   { id: "egypt", labelKey: "newsTab.filterEgypt" },
   { id: "saudi", labelKey: "newsTab.filterSaudi" },
-  { id: "global", labelKey: "newsTab.filterGlobal" },
-  { id: "mena", labelKey: "newsTab.filterMena" },
-  { id: "gcc", labelKey: "newsTab.filterGcc" },
+  { id: "international", labelKey: "newsTab.filterInternational" },
 ] as const;
 
 const SENTIMENTS = [
@@ -53,7 +51,7 @@ const IMPACT_LEVELS = [
 ] as const;
 
 type FilterState = {
-  region: "all" | "egypt" | "saudi" | "global" | "mena" | "gcc";
+  region: "all" | "egypt" | "saudi" | "international";
   sentiment: "all" | "bullish" | "bearish" | "neutral" | "mixed";
   impactLevel: "all" | "critical" | "high" | "medium" | "low";
   hasAI: boolean;
@@ -73,17 +71,16 @@ export default function NewsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const buildQuery = (pageParam?: string) => ({
-    feed,
+    region: filters.region !== "all" ? filters.region : undefined,
     limit: 20,
     cursor: pageParam,
-    region: filters.region !== "all" ? filters.region : undefined,
     sentiment: filters.sentiment !== "all" ? filters.sentiment : undefined,
     impactLevel: filters.impactLevel !== "all" ? filters.impactLevel : undefined,
     hasAI: filters.hasAI || undefined,
   });
 
   const query = useInfiniteQuery({
-    queryKey: ["news", feed, filters],
+    queryKey: ["news", filters],
     queryFn: async ({ pageParam }) => {
       const { data, error } = await api.GET("/api/news", {
         params: {

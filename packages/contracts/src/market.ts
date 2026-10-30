@@ -265,10 +265,12 @@ export const FeedNewsItemSchema = z.object({
   sourceRegion: z.string().nullable(),
   sourceCategory: z.string().nullable(),
   tradingSignals: z.array(z.string()).nullable(),
+  aiAdvice: z.string().nullable(),
 }).transform((data) => ({
   ...data,
   aiKeyPoints: data.aiKeyPoints ?? [],
   entities: data.entities ?? { tickers: [], sectors: [], countries: [], people: [], companies: [] },
+  tradingSignals: data.tradingSignals ?? [],
 }));
 
 export type FeedNewsItem = z.infer<typeof FeedNewsItemSchema>;
@@ -278,7 +280,7 @@ export const NewsFeedResponseSchema = z.object({
   meta: z.object({
     nextCursor: z.string().nullable(),
     limit: z.number().int(),
-    feed: z.enum(["market", "economy"]),
+    region: z.enum(["egypt", "saudi", "international"]),
     asOf: z.iso.datetime().nullable(),
   }),
 });

@@ -544,6 +544,7 @@ export async function processAnalysisQueue(batchSize = 20): Promise<{ processed:
           entities: analysis.entities,
           translatedTitle: analysis.translatedTitle,
           translatedSummary: analysis.translatedSummary,
+          aiAdvice: analysis.advice,
           processedAt: new Date(),
           processingVersion: "nemotron-3-ultra-v1",
         })

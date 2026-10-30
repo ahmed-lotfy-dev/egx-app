@@ -644,15 +644,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** News feed for the market or economy sections */
+        /** News feed for EGX, Saudi, or International markets */
         get: {
             parameters: {
-                query: {
-                    feed: "market" | "economy";
+                query?: {
+                    region?: "egypt" | "saudi" | "international";
                     limit?: number | null;
                     cursor?: string;
                     lang?: "ar" | "en";
-                    region?: "egypt" | "saudi" | "global" | "mena" | "gcc";
                     sentiment?: "bullish" | "bearish" | "neutral" | "mixed";
                     impactMin?: number | null;
                     impactLevel?: "critical" | "high" | "medium" | "low";
@@ -706,12 +705,13 @@ export interface paths {
                                 sourceRegion: string | null;
                                 sourceCategory: string | null;
                                 tradingSignals: string[] | null;
+                                aiAdvice: string | null;
                             }[];
                             meta: {
                                 nextCursor: string | null;
                                 limit: number;
                                 /** @enum {string} */
-                                feed: "market" | "economy";
+                                region: "egypt" | "saudi" | "international";
                                 /** Format: date-time */
                                 asOf: string | null;
                             };

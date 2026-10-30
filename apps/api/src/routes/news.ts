@@ -25,15 +25,14 @@ const newsFeedRoute = createRoute({
   method: "get",
   path: "/api/news",
   tags: ["market"],
-  summary: "News feed for the market or economy sections",
+  summary: "News feed for EGX, Saudi, or International markets",
   request: {
     query: z.object({
-      feed: z.enum(["market", "economy"]),
+      region: z.enum(["egypt", "saudi", "international"]).default("egypt"),
       limit: z.coerce.number().int().default(20),
       cursor: z.string().trim().min(1).optional(),
       lang: z.enum(["ar", "en"]).optional(),
       // New filters
-      region: z.enum(["egypt", "saudi", "global", "mena", "gcc"]).optional(),
       sentiment: z.enum(["bullish", "bearish", "neutral", "mixed"]).optional(),
       impactMin: z.coerce.number().int().min(0).max(100).optional(),
       impactLevel: z.enum(["critical", "high", "medium", "low"]).optional(),
@@ -102,7 +101,7 @@ const linkedSubquery = db
 export const newsRoutes = new OpenAPIHono();
 
 newsRoutes.openapi(newsFeedRoute, async (c) => {
-  const { feed, cursor, lang, region, sentiment, impactMin, impactLevel, sourceCategory, hasAI, entities } = c.req.valid("query");
+  const { region, cursor, lang, sentiment, impactMin, impactLevel, sourceCategory, hasAI, entities } = c.req.valid("query");
   const limit = Math.min(30, Math.max(1, c.req.valid("query").limit));
 
   let cursorData: Cursor | null = null;
@@ -123,17 +122,17 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
     }
   }
 
+  const regionMap: Record<string, readonly string[]> = {
+    egypt: ["egypt"] as const,
+    saudi: ["saudi"] as const,
+    international: ["global", "mena", "gcc"] as const,
+  };
+
+  const regionValues = (regionMap[region] ?? regionMap.egypt) as readonly string[];
+
   const conditions = [
-    feed === "market" ? exists(linkedSubquery) : notExists(linkedSubquery),
+    inArray(newsItems.sourceRegion, regionValues),
   ];
-
-  if (lang) {
-    conditions.push(eq(newsItems.lang, lang));
-  }
-
-  if (region) {
-    conditions.push(eq(newsItems.sourceRegion, region));
-  }
 
   if (sentiment) {
     conditions.push(eq(newsItems.sentiment, sentiment));
@@ -201,6 +200,7 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
       sourceRegion: newsItems.sourceRegion,
       sourceCategory: newsItems.sourceCategory,
       tradingSignals: newsItems.tradingSignals,
+      aiAdvice: newsItems.aiAdvice,
     })
     .from(newsItems)
     .where(and(...conditions))
@@ -241,11 +241,12 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
         sourceRegion: row.sourceRegion,
         sourceCategory: row.sourceCategory,
         tradingSignals: (row.tradingSignals as string[]) ?? [],
+        aiAdvice: row.aiAdvice,
       })),
       meta: {
         nextCursor,
         limit,
-        feed,
+        region,
         asOf: asOf?.toISOString() ?? null,
       },
     },

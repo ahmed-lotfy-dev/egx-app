@@ -38,6 +38,7 @@ export interface NewsAnalysisResult {
     companies: string[];
   };
   tradingSignals: string[];
+  advice: string | null;
   translatedTitle?: string;
   translatedSummary?: string;
 }
@@ -127,6 +128,7 @@ Output ONLY valid JSON with this exact structure:
     "companies": ["company names"]
   },
   "tradingSignals": ["earnings", "dividend", "merger", "regulatory", "analyst_rating", "guidance", "buyback", "split", "default_risk", "geopolitical"],
+  "advice": "string - Arabic trading advice: specific buy/sell/hold recommendation with reasoning, separate advice for traders vs investors, mention specific tickers, confidence level",
   "translatedTitle": "string - Arabic title if original was English, English if original was Arabic",
   "translatedSummary": "string - Arabic summary if original was English, English if original was Arabic"
 }
@@ -137,6 +139,7 @@ Guidelines:
 - sentiment: based on price impact direction for mentioned stocks
 - tradingSignals: only include if explicitly mentioned or strongly implied
 - tickers: use EGX ticker format (e.g., COMI, EAST, CIB)
+- advice: MUST be in Arabic. Specific format: "بناءً على هذا الخبر، يُنصح بـ [شراء/بيع/احتفاظ/انتظار] لأسهم [COMI, EAST] لأن [السبب المحدد]. للمستثمرين طويلي الأجل: [نصيحة]. للمضاربين: [نصيحة]. مستوى الثقة: [عالي/متوسط/منخفض]." Must mention specific tickers, separate advice for traders vs investors, include confidence level.
 - Translate between Arabic and English as needed`;
 
 function buildAnalysisPrompt(
@@ -178,9 +181,10 @@ function parseAnalysisResponse(content: string, fallbackLang: "ar" | "en"): News
         companies: Array.isArray(parsed.entities?.companies) ? parsed.entities.companies.slice(0, 10) : [],
       },
       tradingSignals: Array.isArray(parsed.tradingSignals) ? parsed.tradingSignals.filter((s: string) => typeof s === "string").slice(0, 10) : [],
-      translatedTitle: parsed.translatedTitle,
-      translatedSummary: parsed.translatedSummary,
-    };
+        advice: typeof parsed.advice === "string" ? parsed.advice : null,
+        translatedTitle: parsed.translatedTitle,
+        translatedSummary: parsed.translatedSummary,
+      };
   } catch (error) {
     console.error("[NIM] Failed to parse analysis response:", error);
     return {
@@ -191,6 +195,7 @@ function parseAnalysisResponse(content: string, fallbackLang: "ar" | "en"): News
       impactLevel: "low",
       entities: { tickers: [], sectors: [], countries: [], people: [], companies: [] },
       tradingSignals: [],
+      advice: null,
     };
   }
 }

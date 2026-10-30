@@ -1705,18 +1705,20 @@
         "tags": [
           "market"
         ],
-        "summary": "News feed for the market or economy sections",
+        "summary": "News feed for EGX, Saudi, or International markets",
         "parameters": [
           {
             "schema": {
               "type": "string",
               "enum": [
-                "market",
-                "economy"
-              ]
+                "egypt",
+                "saudi",
+                "international"
+              ],
+              "default": "egypt"
             },
-            "required": true,
-            "name": "feed",
+            "required": false,
+            "name": "region",
             "in": "query"
           },
           {
@@ -1748,21 +1750,6 @@
             },
             "required": false,
             "name": "lang",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "egypt",
-                "saudi",
-                "global",
-                "mena",
-                "gcc"
-              ]
-            },
-            "required": false,
-            "name": "region",
             "in": "query"
           },
           {
@@ -1977,6 +1964,10 @@
                             "items": {
                               "type": "string"
                             }
+                          },
+                          "aiAdvice": {
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -1997,7 +1988,8 @@
                           "translatedSummary",
                           "sourceRegion",
                           "sourceCategory",
-                          "tradingSignals"
+                          "tradingSignals",
+                          "aiAdvice"
                         ]
                       }
                     },
@@ -2011,11 +2003,12 @@
                         "limit": {
                           "type": "integer"
                         },
-                        "feed": {
+                        "region": {
                           "type": "string",
                           "enum": [
-                            "market",
-                            "economy"
+                            "egypt",
+                            "saudi",
+                            "international"
                           ]
                         },
                         "asOf": {
@@ -2027,7 +2020,7 @@
                       "required": [
                         "nextCursor",
                         "limit",
-                        "feed",
+                        "region",
                         "asOf"
                       ]
                     }

@@ -173,6 +173,7 @@ export const newsItems = pgTable(
     sourceRegion: text("source_region"),
     sourceCategory: text("source_category"),
     tradingSignals: jsonb("trading_signals"),
+    aiAdvice: text("ai_advice"),
     processedAt: timestamp("processed_at", tz),
     processingVersion: text("processing_version"),
   },
