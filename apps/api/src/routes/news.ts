@@ -9,9 +9,12 @@ import {
   eq,
   exists,
   gt,
+  ilike,
+  inArray,
   lt,
   notExists,
   or,
+  sql,
 } from "drizzle-orm";
 import { z } from "zod";
 
@@ -29,6 +32,14 @@ const newsFeedRoute = createRoute({
       limit: z.coerce.number().int().default(20),
       cursor: z.string().trim().min(1).optional(),
       lang: z.enum(["ar", "en"]).optional(),
+      // New filters
+      region: z.enum(["egypt", "saudi", "global", "mena", "gcc"]).optional(),
+      sentiment: z.enum(["bullish", "bearish", "neutral", "mixed"]).optional(),
+      impactMin: z.coerce.number().int().min(0).max(100).optional(),
+      impactLevel: z.enum(["critical", "high", "medium", "low"]).optional(),
+      sourceCategory: z.string().optional(),
+      hasAI: z.coerce.boolean().optional(),
+      entities: z.string().optional(),
     }),
   },
   responses: {
@@ -91,7 +102,7 @@ const linkedSubquery = db
 export const newsRoutes = new OpenAPIHono();
 
 newsRoutes.openapi(newsFeedRoute, async (c) => {
-  const { feed, cursor, lang } = c.req.valid("query");
+  const { feed, cursor, lang, region, sentiment, impactMin, impactLevel, sourceCategory, hasAI, entities } = c.req.valid("query");
   const limit = Math.min(30, Math.max(1, c.req.valid("query").limit));
 
   let cursorData: Cursor | null = null;
@@ -120,6 +131,41 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
     conditions.push(eq(newsItems.lang, lang));
   }
 
+  if (region) {
+    conditions.push(eq(newsItems.sourceRegion, region));
+  }
+
+  if (sentiment) {
+    conditions.push(eq(newsItems.sentiment, sentiment));
+  }
+
+  if (impactMin !== undefined) {
+    conditions.push(sql`${newsItems.impactScore} >= ${impactMin}`);
+  }
+
+  if (impactLevel) {
+    conditions.push(eq(newsItems.impactLevel, impactLevel));
+  }
+
+  if (sourceCategory) {
+    conditions.push(eq(newsItems.sourceCategory, sourceCategory));
+  }
+
+  if (hasAI !== undefined) {
+    if (hasAI) {
+      conditions.push(sql`${newsItems.aiSummary} IS NOT NULL`);
+    } else {
+      conditions.push(sql`${newsItems.aiSummary} IS NULL`);
+    }
+  }
+
+  if (entities) {
+    const entityList = entities.split(",").map((e) => e.trim().toUpperCase());
+    conditions.push(
+      sql`${newsItems.entities}->'tickers' @> ${JSON.stringify(entityList)}::jsonb`
+    );
+  }
+
   if (cursorData) {
     const cursorAt = cursorData.publishedAt;
     conditions.push(
@@ -143,6 +189,17 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
       url: newsItems.url,
       publishedAt: newsItems.publishedAt,
       category: newsItems.category,
+      // AI fields
+      aiSummary: newsItems.aiSummary,
+      aiKeyPoints: sql`${newsItems.aiKeyPoints}::jsonb`.as("aiKeyPoints"),
+      sentiment: newsItems.sentiment,
+      impactScore: newsItems.impactScore,
+      impactLevel: newsItems.impactLevel,
+      entities: sql`${newsItems.entities}::jsonb`.as("entities"),
+      translatedTitle: newsItems.translatedTitle,
+      translatedSummary: newsItems.translatedSummary,
+      sourceRegion: newsItems.sourceRegion,
+      sourceCategory: newsItems.sourceCategory,
     })
     .from(newsItems)
     .where(and(...conditions))
@@ -171,6 +228,17 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
         url: row.url,
         publishedAt: row.publishedAt.toISOString(),
         category: row.category,
+        // AI fields
+        aiSummary: row.aiSummary,
+        aiKeyPoints: (row.aiKeyPoints as string[]) ?? [],
+        sentiment: (row.sentiment as "bullish" | "bearish" | "neutral" | "mixed" | null) ?? "neutral",
+        impactScore: row.impactScore,
+        impactLevel: (row.impactLevel as "critical" | "high" | "medium" | "low" | null) ?? "low",
+        entities: (row.entities as { tickers: string[]; sectors: string[]; countries: string[]; people: string[]; companies: string[] }) ?? { tickers: [], sectors: [], countries: [], people: [], companies: [] },
+        translatedTitle: row.translatedTitle,
+        translatedSummary: row.translatedSummary,
+        sourceRegion: row.sourceRegion,
+        sourceCategory: row.sourceCategory,
       })),
       meta: {
         nextCursor,

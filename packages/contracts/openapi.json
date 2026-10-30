@@ -1749,6 +1749,85 @@
             "required": false,
             "name": "lang",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "egypt",
+                "saudi",
+                "global",
+                "mena",
+                "gcc"
+              ]
+            },
+            "required": false,
+            "name": "region",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "bullish",
+                "bearish",
+                "neutral",
+                "mixed"
+              ]
+            },
+            "required": false,
+            "name": "sentiment",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "nullable": true,
+              "minimum": 0,
+              "maximum": 100
+            },
+            "required": false,
+            "name": "impactMin",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "critical",
+                "high",
+                "medium",
+                "low"
+              ]
+            },
+            "required": false,
+            "name": "impactLevel",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "sourceCategory",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "required": false,
+            "name": "hasAI",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "entities",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1794,6 +1873,103 @@
                           "category": {
                             "type": "string",
                             "nullable": true
+                          },
+                          "aiSummary": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "aiKeyPoints": {
+                            "type": "array",
+                            "nullable": true,
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "sentiment": {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              "bullish",
+                              "bearish",
+                              "neutral",
+                              "mixed",
+                              null
+                            ],
+                            "default": "neutral"
+                          },
+                          "impactScore": {
+                            "type": "integer",
+                            "nullable": true
+                          },
+                          "impactLevel": {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              "critical",
+                              "high",
+                              "medium",
+                              "low",
+                              null
+                            ]
+                          },
+                          "entities": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "tickers": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "sectors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "countries": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "people": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "companies": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "tickers",
+                              "sectors",
+                              "countries",
+                              "people",
+                              "companies"
+                            ]
+                          },
+                          "translatedTitle": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "translatedSummary": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "sourceRegion": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "sourceCategory": {
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -1804,7 +1980,16 @@
                           "summary",
                           "url",
                           "publishedAt",
-                          "category"
+                          "category",
+                          "aiSummary",
+                          "aiKeyPoints",
+                          "impactScore",
+                          "impactLevel",
+                          "entities",
+                          "translatedTitle",
+                          "translatedSummary",
+                          "sourceRegion",
+                          "sourceCategory"
                         ]
                       }
                     },

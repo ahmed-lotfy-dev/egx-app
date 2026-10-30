@@ -652,6 +652,13 @@ export interface paths {
                     limit?: number | null;
                     cursor?: string;
                     lang?: "ar" | "en";
+                    region?: "egypt" | "saudi" | "global" | "mena" | "gcc";
+                    sentiment?: "bullish" | "bearish" | "neutral" | "mixed";
+                    impactMin?: number | null;
+                    impactLevel?: "critical" | "high" | "medium" | "low";
+                    sourceCategory?: string;
+                    hasAI?: boolean | null;
+                    entities?: string;
                 };
                 header?: never;
                 path?: never;
@@ -677,6 +684,27 @@ export interface paths {
                                 /** Format: date-time */
                                 publishedAt: string;
                                 category: string | null;
+                                aiSummary: string | null;
+                                aiKeyPoints: string[] | null;
+                                /**
+                                 * @default neutral
+                                 * @enum {string|null}
+                                 */
+                                sentiment: "bullish" | "bearish" | "neutral" | "mixed" | null;
+                                impactScore: number | null;
+                                /** @enum {string|null} */
+                                impactLevel: "critical" | "high" | "medium" | "low" | null;
+                                entities: {
+                                    tickers: string[];
+                                    sectors: string[];
+                                    countries: string[];
+                                    people: string[];
+                                    companies: string[];
+                                } | null;
+                                translatedTitle: string | null;
+                                translatedSummary: string | null;
+                                sourceRegion: string | null;
+                                sourceCategory: string | null;
                             }[];
                             meta: {
                                 nextCursor: string | null;

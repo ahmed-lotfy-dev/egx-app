@@ -247,7 +247,28 @@ export const FeedNewsItemSchema = z.object({
   url: z.string(),
   publishedAt: z.iso.datetime(),
   category: z.string().nullable(),
-});
+  // AI fields
+  aiSummary: z.string().nullable(),
+  aiKeyPoints: z.array(z.string()).nullable(),
+  sentiment: z.enum(["bullish", "bearish", "neutral", "mixed"]).nullable().default("neutral"),
+  impactScore: z.number().int().nullable(),
+  impactLevel: z.enum(["critical", "high", "medium", "low"]).nullable(),
+  entities: z.object({
+    tickers: z.array(z.string()),
+    sectors: z.array(z.string()),
+    countries: z.array(z.string()),
+    people: z.array(z.string()),
+    companies: z.array(z.string()),
+  }).nullable(),
+  translatedTitle: z.string().nullable(),
+  translatedSummary: z.string().nullable(),
+  sourceRegion: z.string().nullable(),
+  sourceCategory: z.string().nullable(),
+}).transform((data) => ({
+  ...data,
+  aiKeyPoints: data.aiKeyPoints ?? [],
+  entities: data.entities ?? { tickers: [], sectors: [], countries: [], people: [], companies: [] },
+}));
 
 export type FeedNewsItem = z.infer<typeof FeedNewsItemSchema>;
 

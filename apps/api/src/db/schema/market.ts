@@ -153,16 +153,34 @@ export const newsItems = pgTable(
     id: bigserial("id", { mode: "number" }).primaryKey(),
     source: text("source").notNull(),
     lang: text("lang").notNull(),
+    originalLang: text("original_lang"),
     title: text("title").notNull(),
     summary: text("summary"),
+    translatedTitle: text("translated_title"),
+    translatedSummary: text("translated_summary"),
     url: text("url").notNull().unique(),
     publishedAt: timestamp("published_at", tz).notNull(),
     category: text("category"),
     contentHash: text("content_hash").notNull(),
     fetchedAt: timestamp("fetched_at", tz).defaultNow().notNull(),
+    // AI fields
+    aiSummary: text("ai_summary"),
+    aiKeyPoints: jsonb("ai_key_points"),
+    sentiment: text("sentiment"),
+    impactScore: integer("impact_score"),
+    impactLevel: text("impact_level"),
+    entities: jsonb("entities"),
+    sourceRegion: text("source_region"),
+    sourceCategory: text("source_category"),
+    processedAt: timestamp("processed_at", tz),
+    processingVersion: text("processing_version"),
   },
   (table) => [
     index("news_items_published_idx").on(table.publishedAt.desc()),
+    index("news_items_impact_idx").on(table.impactScore.desc(), table.publishedAt.desc()),
+    index("news_items_region_idx").on(table.sourceRegion),
+    index("news_items_sentiment_idx").on(table.sentiment),
+    index("news_items_entities_gin").using("gin", table.entities),
   ],
 );
 
@@ -204,6 +222,26 @@ export const ingestRuns = pgTable(
   (table) => [index("ingest_runs_job_started_idx").on(table.job, table.startedAt.desc())],
 );
 
+export const newsProcessingQueue = pgTable(
+  "news_processing_queue",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    newsId: bigint("news_id", { mode: "number" })
+      .notNull()
+      .references(() => newsItems.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("pending"),
+    priority: integer("priority").default(0),
+    attempts: integer("attempts").default(0),
+    error: text("error"),
+    createdAt: timestamp("created_at", tz).defaultNow().notNull(),
+    startedAt: timestamp("started_at", tz),
+    completedAt: timestamp("completed_at", tz),
+  },
+  (table) => [
+    index("news_processing_queue_status_priority_idx").on(table.status, table.priority.desc(), table.createdAt),
+  ],
+);
+
 export const instrumentRelations = relations(instruments, ({ one, many }) => ({
   latestQuote: one(latestQuotes, {
     fields: [instruments.id],
@@ -238,7 +276,18 @@ export const fundamentalsRelations = relations(fundamentals, ({ one }) => ({
 
 export const newsItemRelations = relations(newsItems, ({ many }) => ({
   instrumentLinks: many(newsInstrumentLinks),
+  processingQueue: many(newsProcessingQueue),
 }));
+
+export const newsProcessingQueueRelations = relations(
+  newsProcessingQueue,
+  ({ one }) => ({
+    newsItem: one(newsItems, {
+      fields: [newsProcessingQueue.newsId],
+      references: [newsItems.id],
+    }),
+  }),
+);
 
 export const newsInstrumentLinkRelations = relations(
   newsInstrumentLinks,
