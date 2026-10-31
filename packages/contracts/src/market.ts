@@ -334,6 +334,12 @@ export const AddWatchlistItemRequestSchema = z.object({
   ticker: z.string().trim().min(1).max(20).toUpperCase(),
 });
 
+/** Full ordered list of tickers for a watchlist (drag & drop reorder) */
+export const ReorderWatchlistItemsRequestSchema = z.object({
+  tickers: z.array(z.string().trim().min(1).max(20).toUpperCase()).min(1).max(200),
+});
+
 export type CreateWatchlistRequest = z.infer<typeof CreateWatchlistRequestSchema>;
 export type RenameWatchlistRequest = z.infer<typeof RenameWatchlistRequestSchema>;
 export type AddWatchlistItemRequest = z.infer<typeof AddWatchlistItemRequestSchema>;
+export type ReorderWatchlistItemsRequest = z.infer<typeof ReorderWatchlistItemsRequestSchema>;

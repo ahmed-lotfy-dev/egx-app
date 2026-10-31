@@ -285,6 +285,8 @@
     "noQuote": "No price",
     "loadErrorTitle": "Couldn't load watchlists",
     "loadErrorBody": "An error occurred while fetching watchlists.",
-    "notFound": "List not found"
+    "notFound": "List not found",
+    "addSelected": "Add {{count}} stocks",
+    "dragHint": "Long-press & drag to reorder"
   }
 }

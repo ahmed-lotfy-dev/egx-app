@@ -13,6 +13,10 @@ import {
   TextInput,
   View,
 } from "react-native";
+import DraggableFlatList, {
+  ScaleDecorator,
+  type RenderItemParams,
+} from "react-native-draggable-flatlist";
 import { useTranslation } from "react-i18next";
 
 import { Screen } from "@/components/Screen";
@@ -45,6 +49,7 @@ export default function WatchlistScreen() {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [picked, setPicked] = useState<string[]>([]);
 
   const query = useQuery({
     queryKey: ["watchlists"],
@@ -130,18 +135,22 @@ export default function WatchlistScreen() {
     },
   });
 
-  const addItem = useMutation({
-    mutationFn: async ({ id, ticker }: { id: string; ticker: string }) => {
+  // Multi-add: sequential so server-side positions follow the picked order
+  const addItems = useMutation({
+    mutationFn: async ({ id, tickers }: { id: string; tickers: string[] }) => {
       const numericId = Number(id.replace("custom:", ""));
-      const { error } = await api.POST("/api/watchlists/{id}/items", {
-        params: { path: { id: numericId } },
-        body: { ticker },
-      });
-      if (error) throw new Error("add failed");
+      for (const ticker of tickers) {
+        const { error } = await api.POST("/api/watchlists/{id}/items", {
+          params: { path: { id: numericId } },
+          body: { ticker },
+        });
+        if (error) throw new Error("add failed");
+      }
     },
     onSuccess: () => {
       setAddModalVisible(false);
       setSearchInput("");
+      setPicked([]);
       void invalidate();
     },
     onError: () => {
@@ -161,6 +170,47 @@ export default function WatchlistScreen() {
     onError: () => {
       Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
     },
+  });
+
+  const reorderItems = useMutation({
+    mutationFn: async ({ id, tickers }: { id: string; tickers: string[] }) => {
+      const numericId = Number(id.replace("custom:", ""));
+      const { error } = await api.PUT("/api/watchlists/{id}/items/order", {
+        params: { path: { id: numericId } },
+        body: { tickers },
+      });
+      if (error) throw new Error("reorder failed");
+    },
+    // Optimistic update: reorder in cache immediately, roll back on failure
+    onMutate: async ({ id, tickers }) => {
+      await queryClient.cancelQueries({ queryKey: ["watchlists"] });
+      const previous = queryClient.getQueryData(["watchlists"]);
+      queryClient.setQueryData(["watchlists"], (old: { data: Watchlist[] } | undefined) => {
+        if (!old) return old;
+        const order = new Map(tickers.map((tk, i) => [tk, i]));
+        return {
+          ...old,
+          data: old.data.map((l) =>
+            l.id === id
+              ? {
+                  ...l,
+                  instruments: [...l.instruments].sort(
+                    (a, b) => (order.get(a.ticker) ?? 0) - (order.get(b.ticker) ?? 0),
+                  ),
+                }
+              : l,
+          ),
+        };
+      });
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["watchlists"], context.previous);
+      }
+      Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+    },
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: ["watchlists"] }),
   });
 
   const searchResults = useQuery({
@@ -186,12 +236,14 @@ export default function WatchlistScreen() {
     ]);
   };
 
-  const renderInstrument = ({ item }: { item: WatchlistInstrument }) => (
+  const renderRow = (item: WatchlistInstrument, onLongPress?: () => void) => (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${item.nameEn ?? item.nameAr}, ${item.ticker}`}
       onPress={() => router.push({ pathname: "/(app)/stock/[ticker]", params: { ticker: item.ticker } })}
-      className="mx-5 border-t border-border/60 py-3 active:opacity-70"
+      onLongPress={onLongPress}
+      delayLongPress={280}
+      className={`mx-5 border-t border-border/60 py-3 active:opacity-70 ${onLongPress ? "flex-row" : ""}`}
     >
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1 min-w-0">
@@ -199,6 +251,9 @@ export default function WatchlistScreen() {
             {locale === "ar" && item.nameAr ? item.nameAr : item.nameEn}
           </Text>
           <View className="mt-1 flex-row items-center gap-2">
+            {onLongPress ? (
+              <Ionicons name="reorder-two" size={16} color={colors.textMuted} />
+            ) : null}
             <Text className="font-body text-[12px] text-text-muted">{item.ticker}</Text>
             {item.sector ? (
               <>
@@ -245,6 +300,15 @@ export default function WatchlistScreen() {
     </Pressable>
   );
 
+  const renderInstrument = ({ item }: { item: WatchlistInstrument }) => renderRow(item);
+
+  const renderDraggableInstrument = ({ item, drag, isActive }: RenderItemParams<WatchlistInstrument>) => (
+    <ScaleDecorator>
+      {renderRow(item, drag)}
+      {isActive ? <View className="mx-5 h-px bg-border/40" /> : null}
+    </ScaleDecorator>
+  );
+
   const renderPill = (list: Watchlist) => {
     const active = selected?.id === list.id;
     return (
@@ -258,7 +322,7 @@ export default function WatchlistScreen() {
         }}
         className={`mr-2 rounded-full border px-4 py-2 active:opacity-80 ${active ? "border-gold bg-gold" : "border-border bg-surface"}`}
       >
-        <Text className={`font-title text-[14px] ${active ? "text-background" : "text-text"}`}>
+        <Text className={`font-title text-[14px] ${active ? "text-canvas" : "text-text"}`}>
           {list.name}
         </Text>
       </Pressable>
@@ -304,114 +368,149 @@ export default function WatchlistScreen() {
     );
   }
 
-  return (
-    <Screen>
-      <FlatList
-        data={instruments}
-        keyExtractor={(item) => item.ticker}
-        renderItem={renderInstrument}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={async () => {
-              setRefreshing(true);
-              await query.refetch();
-              setRefreshing(false);
-            }}
-            tintColor={colors.gold}
-          />
-        }
-        ListHeaderComponent={
-          <View>
-            <View className="px-5 pb-3 pt-2">
-              <Text className="font-display text-[28px] leading-9 text-text">{t("watchlist.title")}</Text>
-            </View>
-            {/* Telda-style pill tabs */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 12, gap: 8 }}
-            >
-              {lists.map(renderPill)}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("watchlist.create")}
-                onPress={() => {
-                  if (!signedIn) {
-                    Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
-                    return;
-                  }
-                  setNameInput("");
-                  setCreateModalVisible(true);
-                }}
-                className="rounded-full border border-dashed border-border bg-surface px-4 py-2 active:opacity-80"
-              >
-                <Ionicons name="add" size={16} color={colors.gold} />
-              </Pressable>
-            </ScrollView>
-            {selected ? (
-              <View className="flex-row items-center justify-between px-5 pb-2">
-                <View className="flex-row items-center gap-2">
-                  <Text className="font-body text-[13px] text-text-muted">
-                    {t("watchlist.instrumentCount", { count: selected.instrumentCount })}
-                  </Text>
-                  {selected.editable ? (
-                    <>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t("watchlist.rename")}
-                        hitSlop={8}
-                        onPress={() => {
-                          setNameInput(selected.name);
-                          setRenameModalVisible(true);
-                        }}
-                        className="h-7 w-7 items-center justify-center rounded-full bg-surface-elevated"
-                      >
-                        <Ionicons name="pencil" size={14} color={colors.textMuted} />
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t("watchlist.deleteTitle")}
-                        hitSlop={8}
-                        onPress={() => confirmDeleteList(selected)}
-                        className="h-7 w-7 items-center justify-center rounded-full bg-surface-elevated"
-                      >
-                        <Ionicons name="trash-outline" size={14} color={colors.textMuted} />
-                      </Pressable>
-                    </>
-                  ) : null}
-                </View>
-              </View>
+  const listHeader = (
+    <View>
+      <View className="px-5 pb-3 pt-2">
+        <Text className="font-display text-[28px] leading-9 text-text">{t("watchlist.title")}</Text>
+      </View>
+      {/* Telda-style pill tabs */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 12, gap: 8 }}
+      >
+        {lists.map(renderPill)}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("watchlist.create")}
+          onPress={() => {
+            if (!signedIn) {
+              Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+              return;
+            }
+            setNameInput("");
+            setCreateModalVisible(true);
+          }}
+          className="rounded-full border border-dashed border-border bg-surface px-4 py-2 active:opacity-80"
+        >
+          <Ionicons name="add" size={16} color={colors.gold} />
+        </Pressable>
+      </ScrollView>
+      {selected ? (
+        <View className="flex-row items-center justify-between px-5 pb-2">
+          <View className="flex-row items-center gap-2">
+            <Text className="font-body text-[13px] text-text-muted">
+              {t("watchlist.instrumentCount", { count: selected.instrumentCount })}
+            </Text>
+            {selected.editable ? (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("watchlist.rename")}
+                  hitSlop={8}
+                  onPress={() => {
+                    setNameInput(selected.name);
+                    setRenameModalVisible(true);
+                  }}
+                  className="h-7 w-7 items-center justify-center rounded-full bg-surface-elevated"
+                >
+                  <Ionicons name="pencil" size={14} color={colors.textMuted} />
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("watchlist.deleteTitle")}
+                  hitSlop={8}
+                  onPress={() => confirmDeleteList(selected)}
+                  className="h-7 w-7 items-center justify-center rounded-full bg-surface-elevated"
+                >
+                  <Ionicons name="trash-outline" size={14} color={colors.textMuted} />
+                </Pressable>
+              </>
             ) : null}
           </View>
-        }
-        ListFooterComponent={
-          <>
-            {selected?.editable ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => {
-                  setSearchInput("");
-                  setAddModalVisible(true);
-                }}
-                className="mx-5 mt-4 min-h-11 flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-surface active:opacity-80"
-              >
-                <Ionicons name="add-circle-outline" size={18} color={colors.gold} />
-                <Text className="font-title text-[14px] text-text">{t("watchlist.addStock")}</Text>
-              </Pressable>
-            ) : null}
-            {instruments.length === 0 ? (
-              <View className="pt-10 px-5">
-                <Text className="text-center font-body text-[15px] leading-6 text-text-secondary">
-                  {selected?.editable ? t("watchlist.emptyCustomList") : t("watchlist.emptyList")}
-                </Text>
-              </View>
-            ) : (
-              <View className="pb-10" />
-            )}
-          </>
-        }
-      />
+          {selected.editable && instruments.length > 1 ? (
+            <Text className="font-body text-[11px] text-text-muted">{t("watchlist.dragHint")}</Text>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const listFooter = (
+    <>
+      {selected?.editable ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            if (!signedIn) {
+              Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+              return;
+            }
+            setSearchInput("");
+            setPicked([]);
+            setAddModalVisible(true);
+          }}
+          className="mx-5 mt-4 min-h-11 flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-surface active:opacity-80"
+        >
+          <Ionicons name="add-circle-outline" size={18} color={colors.gold} />
+          <Text className="font-title text-[14px] text-text">{t("watchlist.addStock")}</Text>
+        </Pressable>
+      ) : null}
+      {instruments.length === 0 ? (
+        <View className="pt-10 px-5">
+          <Text className="text-center font-body text-[15px] leading-6 text-text-secondary">
+            {selected?.editable ? t("watchlist.emptyCustomList") : t("watchlist.emptyList")}
+          </Text>
+        </View>
+      ) : (
+        <View className="pb-10" />
+      )}
+    </>
+  );
+
+  const refreshControl = (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={async () => {
+        setRefreshing(true);
+        await query.refetch();
+        setRefreshing(false);
+      }}
+      tintColor={colors.gold}
+    />
+  );
+
+  return (
+    <Screen>
+      {selected?.editable ? (
+        <DraggableFlatList
+          data={instruments}
+          keyExtractor={(item) => item.ticker}
+          renderItem={renderDraggableInstrument}
+          refreshControl={refreshControl}
+          ListHeaderComponent={listHeader}
+          ListFooterComponent={listFooter}
+          autoscrollThreshold={80}
+          dragHitSlop={{ top: 8, bottom: 8 }}
+          onDragEnd={({ data }) => {
+            if (!selected) return;
+            const tickers = data.map((d) => d.ticker);
+            const current = instruments.map((i) => i.ticker);
+            if (tickers.join("|") !== current.join("|")) {
+              reorderItems.mutate({ id: selected.id, tickers });
+            }
+          }}
+        />
+      ) : (
+        <FlatList
+          data={instruments}
+          keyExtractor={(item) => item.ticker}
+          renderItem={renderInstrument}
+          refreshControl={refreshControl}
+          ListHeaderComponent={listHeader}
+          ListFooterComponent={listFooter}
+        />
+      )}
 
       {/* Create list modal */}
       <NameModal
@@ -446,8 +545,13 @@ export default function WatchlistScreen() {
       />
 
       {/* Add stock modal */}
-      <Modal visible={addModalVisible} animationType="slide" onRequestClose={() => setAddModalVisible(false)}>
-        <View className="flex-1 bg-background px-5 pt-14">
+      <Modal
+        visible={addModalVisible}
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={() => setAddModalVisible(false)}
+      >
+        <View className="flex-1 bg-canvas px-5 pt-14">
           <View className="flex-row items-center justify-between pb-4">
             <Text className="font-display text-[22px] text-text">{t("watchlist.addStock")}</Text>
             <Pressable
@@ -479,12 +583,20 @@ export default function WatchlistScreen() {
             renderItem={({ item }) => {
               const instrument = item as InstrumentSearchResult & { nameAr?: string | null; nameEn?: string };
               const alreadyIn = instruments.some((i) => i.ticker === instrument.ticker);
+              const isPicked = picked.includes(instrument.ticker);
               return (
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityState={{ selected: isPicked }}
                   disabled={alreadyIn}
-                  onPress={() => selected && addItem.mutate({ id: selected.id, ticker: instrument.ticker })}
-                  className="flex-row items-center justify-between border-b border-border/60 py-3 active:opacity-70"
+                  onPress={() =>
+                    setPicked((prev) =>
+                      prev.includes(instrument.ticker)
+                        ? prev.filter((tk) => tk !== instrument.ticker)
+                        : [...prev, instrument.ticker],
+                    )
+                  }
+                  className={`flex-row items-center justify-between border-b border-border/60 py-3 active:opacity-70 ${isPicked ? "bg-surface-elevated" : ""}`}
                 >
                   <View className="flex-1 min-w-0">
                     <Text className="font-title text-[15px] text-text" numberOfLines={1}>
@@ -493,9 +605,11 @@ export default function WatchlistScreen() {
                     <Text className="mt-1 font-body text-[12px] text-text-muted">{instrument.ticker}</Text>
                   </View>
                   {alreadyIn ? (
-                    <Ionicons name="checkmark" size={18} color={colors.gold} />
+                    <Ionicons name="checkmark" size={18} color={colors.textMuted} />
+                  ) : isPicked ? (
+                    <Ionicons name="checkmark-circle" size={20} color={colors.gold} />
                   ) : (
-                    <Ionicons name="add" size={18} color={colors.gold} />
+                    <Ionicons name="add-circle-outline" size={20} color={colors.gold} />
                   )}
                 </Pressable>
               );
@@ -508,6 +622,21 @@ export default function WatchlistScreen() {
               ) : undefined
             }
           />
+          {picked.length > 0 ? (
+            <View className="border-t border-border bg-surface px-5 py-3">
+              <Pressable
+                accessibilityRole="button"
+                disabled={addItems.isPending || !selected}
+                onPress={() => selected && addItems.mutate({ id: selected.id, tickers: picked })}
+                className="min-h-12 flex-row items-center justify-center gap-2 rounded-2xl bg-gold active:opacity-80 disabled:opacity-50"
+              >
+                <Ionicons name="add" size={18} color={colors.canvas} />
+                <Text className="font-title text-[15px] text-canvas">
+                  {t("watchlist.addSelected", { count: picked.length })}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       </Modal>
     </Screen>
@@ -546,7 +675,13 @@ function NameModal({
 }) {
   const { t } = useTranslation();
   return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
+    <Modal
+      transparent
+      visible={visible}
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
       <View className="flex-1 items-center justify-center bg-black/50 px-8">
         <View className="w-full rounded-2xl border border-border bg-surface p-5">
           <Text className="font-title text-[17px] text-text">{title}</Text>
@@ -569,7 +704,7 @@ function NameModal({
               onPress={onConfirm}
               className="min-h-11 justify-center rounded-xl bg-gold px-5 disabled:opacity-50"
             >
-              <Text className="font-title text-[14px] text-background">{confirmLabel}</Text>
+              <Text className="font-title text-[14px] text-canvas">{confirmLabel}</Text>
             </Pressable>
           </View>
         </View>

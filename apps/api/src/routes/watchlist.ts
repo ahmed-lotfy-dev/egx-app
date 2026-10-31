@@ -4,6 +4,7 @@ import {
   CreateWatchlistRequestSchema,
   ErrorResponseSchema,
   RenameWatchlistRequestSchema,
+  ReorderWatchlistItemsRequestSchema,
   WatchlistsResponseSchema,
 } from "@egx/contracts";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
@@ -399,6 +400,59 @@ const removeWatchlistItemRoute = createRoute({
   },
 });
 
+const reorderWatchlistItemsRoute = createRoute({
+  method: "put",
+  path: "/api/watchlists/{id}/items/order",
+  tags: ["market"],
+  summary: "Reorder items in a custom watchlist (owner only). Body is the full ordered ticker list.",
+  request: {
+    params: z.object({
+      id: z.coerce.number().int().positive(),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: ReorderWatchlistItemsRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Reordered",
+      content: {
+        "application/json": {
+          schema: z.object({ ok: z.boolean() }),
+        },
+      },
+    },
+    400: {
+      description: "Tickers do not match the list contents",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    401: {
+      description: "Sign-in required",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    404: {
+      description: "List not found",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
 export const watchlistRoutes = new OpenAPIHono();
 
 watchlistRoutes.openapi(listWatchlistsRoute, async (c) => {
@@ -563,6 +617,64 @@ watchlistRoutes.openapi(removeWatchlistItemRoute, async (c) => {
   if (deleted.length === 0) {
     return c.json({ error: { code: "NOT_FOUND", message: "Item not in list." } }, 404);
   }
+
+  return c.json({ ok: true }, 200);
+});
+
+watchlistRoutes.openapi(reorderWatchlistItemsRoute, async (c) => {
+  const userId = await getSessionUserId(c);
+  if (!userId) {
+    return c.json({ error: { code: "UNAUTHORIZED", message: "Sign in to edit watchlists." } }, 401);
+  }
+
+  const { id } = c.req.valid("param");
+  const list = await requireOwnedWatchlist(userId, id);
+  if (!list) {
+    return c.json({ error: { code: "NOT_FOUND", message: "Watchlist not found." } }, 404);
+  }
+
+  const { tickers } = c.req.valid("json");
+
+  // Validate: the submitted list must contain exactly the items already in the list
+  const currentItems = await db
+    .select({
+      id: watchlistItems.id,
+      ticker: instruments.ticker,
+      position: watchlistItems.position,
+    })
+    .from(watchlistItems)
+    .innerJoin(instruments, eq(watchlistItems.instrumentId, instruments.id))
+    .where(eq(watchlistItems.watchlistId, id));
+
+  const currentTickers = new Set(currentItems.map((i) => i.ticker));
+  const submitted = new Set(tickers);
+  const same =
+    currentTickers.size === submitted.size && tickers.every((t) => currentTickers.has(t));
+  if (!same) {
+    return c.json(
+      { error: { code: "INVALID_ORDER", message: "Tickers must match the current list contents." } },
+      400,
+    );
+  }
+
+  // Update positions in one transaction
+  await db.transaction(async (tx) => {
+    for (const [i, ticker] of tickers.entries()) {
+      await tx
+        .update(watchlistItems)
+        .set({ position: i })
+        .where(
+          and(
+            eq(watchlistItems.watchlistId, id),
+            inArray(
+              watchlistItems.instrumentId,
+              tx.select({ id: instruments.id }).from(instruments).where(eq(instruments.ticker, ticker)),
+            ),
+          ),
+        );
+    }
+    await tx.update(watchlists).set({ updatedAt: new Date() }).where(eq(watchlists.id, id));
+  });
 
   return c.json({ ok: true }, 200);
 });
