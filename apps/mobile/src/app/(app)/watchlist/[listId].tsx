@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -200,5 +200,3 @@ export default function PredefinedWatchlistScreen() {
     </Screen>
   );
 }
-
-import { useState } from "react";

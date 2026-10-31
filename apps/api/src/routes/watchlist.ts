@@ -41,6 +41,8 @@ watchlistRoutes.openapi(watchlistRoute, async (c) => {
       quoteChange: latestQuotes.change,
       quoteChangePct: latestQuotes.changePct,
       quoteCurrency: latestQuotes.currency,
+      quoteMarketCap: latestQuotes.marketCap,
+      quoteAsOf: latestQuotes.asOf,
     })
     .from(instruments)
     .leftJoin(latestQuotes, eq(instruments.id, latestQuotes.instrumentId))
@@ -65,10 +67,10 @@ watchlistRoutes.openapi(watchlistRoute, async (c) => {
     instruments: rows.map(mapInstrument),
   }));
 
-  // EGX30 / EGX70 / EWI by market cap ranking
+  // EGX30 / EGX70 / EWI by market cap ranking (nulls last — stocks without quotes excluded)
   const withMarketCap = instrumentRows
-    .filter((r) => r.quotePrice !== null)
-    .sort((a, b) => Number(b.quotePrice ?? 0) - Number(a.quotePrice ?? 0));
+    .filter((r) => r.quotePrice !== null && r.quoteMarketCap !== null)
+    .sort((a, b) => Number(b.quoteMarketCap ?? 0) - Number(a.quoteMarketCap ?? 0));
 
   const egx30 = withMarketCap.slice(0, 30);
   const egx70 = withMarketCap.slice(30, 100);
@@ -113,10 +115,11 @@ watchlistRoutes.openapi(watchlistRoute, async (c) => {
 
   const allLists = [...indexLists, shariaList, ...sectorLists];
 
-  const latestQuote = instrumentRows.find((r) => r.quotePrice !== null);
-  const asOf = latestQuote
-    ? new Date().toISOString()
-    : null;
+  const quoteTimes = instrumentRows
+    .map((r) => r.quoteAsOf)
+    .filter((t): t is Date => t !== null)
+    .sort((a, b) => b.getTime() - a.getTime());
+  const asOf = quoteTimes[0] ? quoteTimes[0].toISOString() : null;
 
   return c.json(
     {
@@ -140,6 +143,8 @@ type RawInstrumentRow = {
   quoteChange: string | null;
   quoteChangePct: string | null;
   quoteCurrency: string | null;
+  quoteMarketCap: string | null;
+  quoteAsOf: Date | null;
 };
 
 function mapInstrument(row: RawInstrumentRow) {
