@@ -6,6 +6,7 @@ import { processAnalysisQueue, syncNews, syncNewsWithAnalysis } from "./jobs/new
 import { syncQuotes } from "./jobs/quotes";
 import { syncUniverse } from "./jobs/universe";
 import { resolveYahooSymbols } from "./jobs/yahoo-symbols";
+import { startScheduler } from "./scheduler";
 
 const args = process.argv.slice(2);
 const command = args[0] ?? "help";
@@ -33,6 +34,8 @@ function positiveNumber(name: string): number | undefined {
 }
 
 function readBarsOptions(): BarsOptions {
+  const providerArg = option("provider");
+
   return {
     tickers: option("tickers")
       ?.split(",")
@@ -41,6 +44,10 @@ function readBarsOptions(): BarsOptions {
     limit: positiveNumber("limit"),
     days: positiveNumber("days"),
     missing: args.includes("--missing"),
+    provider:
+      providerArg === "tradingview" || providerArg === "yahoo"
+        ? providerArg
+        : undefined,
   };
 }
 
@@ -84,16 +91,24 @@ async function main(): Promise<void> {
       print("news", await syncNews());
       break;
     }
+    case "schedule":
+      startScheduler();
+      // Keep the event loop alive; the scheduler owns shutdown.
+      await new Promise(() => {});
+      break;
     default:
       console.error(
         [
-          "Usage: bun src/cli.ts <universe|quotes|bars|symbols|fundamentals|news|news:analyze|news:full|all> [options]",
+          "Usage: bun src/cli.ts <universe|quotes|bars|symbols|fundamentals|news|news:analyze|news:full|all|schedule> [options]",
           "",
           "Bars options:",
           "  --tickers COMI,HRHO   limit to specific tickers",
           "  --limit 10            limit the number of instruments",
           "  --days 365            history window in days",
           "  --missing             only instruments with no stored bars",
+          "  --provider tradingview|yahoo",
+          "schedule:               run the ingest scheduler loop (quotes every 3 min",
+          "                        in market hours, bars/fundamentals/news daily)",
         ].join("\n"),
       );
       process.exitCode = 1;

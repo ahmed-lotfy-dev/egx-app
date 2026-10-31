@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "@egx/api/db";
 import { dailyBars, instruments } from "@egx/api/schema";
@@ -13,6 +13,10 @@ export type BarsOptions = {
   limit?: number;
   days?: number;
   missing?: boolean;
+  /** "yahoo" (default): Yahoo first, TradingView fallback. "tradingview": TV
+   * for every instrument, fully replacing its stored bars so a single chart
+   * never mixes sources. */
+  provider?: "yahoo" | "tradingview";
 };
 
 type Failure = { ticker: string; error: string };
@@ -24,7 +28,7 @@ export async function syncBars(options: BarsOptions = {}) {
     const conditions = [
       inArray(instruments.kind, ["stock", "index"]),
       eq(instruments.isActive, true),
-      isNotNull(instruments.yahooSymbol),
+      sql`(${instruments.yahooSymbol} is not null or ${instruments.tvSymbol} is not null)`,
     ];
 
     if (options.tickers?.length) {
@@ -86,17 +90,24 @@ export async function syncBars(options: BarsOptions = {}) {
 
         try {
           let bars: Awaited<ReturnType<typeof provider.fetchDailyBars>> = [];
+          let fromTradingView = false;
 
-          try {
-            bars = await provider.fetchDailyBars(instrument, days);
-          } catch {
-            // Yahoo gaps (delisted symbols, recent IPOs) fall through to TV.
-          }
-
-          // Yahoo sometimes "succeeds" with a single bar for EGX listings it
-          // does not really carry — TradingView has their full history.
-          if (bars.length < 2 && instrument.tvSymbol) {
+          if (options.provider === "tradingview" || !instrument.yahooSymbol) {
             bars = await tvProvider.fetchDailyBars(instrument, days);
+            fromTradingView = true;
+          } else {
+            try {
+              bars = await provider.fetchDailyBars(instrument, days);
+            } catch {
+              // Yahoo gaps (delisted symbols, recent IPOs) fall through to TV.
+            }
+
+            // Yahoo sometimes "succeeds" with a single bar for EGX listings it
+            // does not really carry — TradingView has their full history.
+            if (bars.length < 2 && instrument.tvSymbol) {
+              bars = await tvProvider.fetchDailyBars(instrument, days);
+              fromTradingView = true;
+            }
           }
 
           if (bars.length === 0) {
@@ -111,6 +122,14 @@ export async function syncBars(options: BarsOptions = {}) {
                 eq(dailyBars.close, "0"),
               ),
             );
+
+          // TV prices are split-adjusted while Yahoo rows are raw; never mix
+          // the two within one instrument's chart.
+          if (fromTradingView) {
+            await db
+              .delete(dailyBars)
+              .where(eq(dailyBars.instrumentId, instrument.id));
+          }
 
           await db
             .insert(dailyBars)
