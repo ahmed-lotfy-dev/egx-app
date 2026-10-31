@@ -5,6 +5,7 @@ import { dailyBars, instruments } from "@egx/api/schema";
 
 import { sleep } from "../lib/http";
 import { withIngestRun } from "../lib/runs";
+import { TradingViewProvider } from "../providers/tradingview";
 import { YahooProvider } from "../providers/yahoo";
 
 export type BarsOptions = {
@@ -68,6 +69,7 @@ export async function syncBars(options: BarsOptions = {}) {
 
     const provider = new YahooProvider();
     await provider.init();
+    const tvProvider = new TradingViewProvider();
 
     const queue = [...universe];
     const failures: Failure[] = [];
@@ -83,7 +85,19 @@ export async function syncBars(options: BarsOptions = {}) {
         }
 
         try {
-          const bars = await provider.fetchDailyBars(instrument, days);
+          let bars: Awaited<ReturnType<typeof provider.fetchDailyBars>> = [];
+
+          try {
+            bars = await provider.fetchDailyBars(instrument, days);
+          } catch {
+            // Yahoo gaps (delisted symbols, recent IPOs) fall through to TV.
+          }
+
+          // Yahoo sometimes "succeeds" with a single bar for EGX listings it
+          // does not really carry — TradingView has their full history.
+          if (bars.length < 2 && instrument.tvSymbol) {
+            bars = await tvProvider.fetchDailyBars(instrument, days);
+          }
 
           if (bars.length === 0) {
             throw new Error("No bars returned");

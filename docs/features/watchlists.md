@@ -85,11 +85,26 @@ Mobile pill tabs → stock rows → stock detail
 - [x] Owner-only enforcement (list lookup scoped by `user_id`)
 - [x] `bun run typecheck` (api + worker + mobile) green; `contracts:check` green
 
-## 4. Known Limitations / Next
+## 4. v2.1 — Drag-and-drop reorder + multi-add (shipped `087add4`)
+
+**API** — `PUT /api/watchlists/{id}/items/order`
+- Body: `{ tickers: [...] }` — the full ordered ticker list.
+- Owner-only; validates the tickers exactly match the list contents (400 `INVALID_ORDER` otherwise); updates all `position` values in one transaction.
+
+**Mobile**
+- Custom lists render with `react-native-draggable-flatlist` (default export; `ScaleDecorator` decorator) — long-press & drag to reorder, optimistic cache update with rollback on failure.
+- Add-stock modal is now **multi-select**: tap stocks to toggle, confirm bar adds all in picked order (sequential POSTs so server-side `position` follows the pick order).
+- Modal theme fix: `bg-background`/`text-background` classes don't exist in the theme (white modal) → `bg-canvas`/`text-canvas`, `statusBarTranslucent` on modals.
+
+**Testing (verified locally end-to-end)**
+- [x] Reorder persisted (`COMI,EAST,ABUK` → `ABUK,EAST,COMI`), foreign ticker → 400
+- [x] Multi-add 3 tickers → positions follow pick order
+
+## 5. Known Limitations / Next
 
 | Item | Status |
 |---|---|
 | Sharia list = curated static seed (12 matched) | replace with official EGX33 data when available |
 | EGX30 = market-cap proxy | replace with official constituents when available |
 | Add-to-list from stock detail screen | future enhancement (API already supports it) |
-| Reorder items in custom list | `position` column exists; UI not built |
+| ~~Reorder items in custom list~~ | ✅ shipped in v2.1 (drag-and-drop) |

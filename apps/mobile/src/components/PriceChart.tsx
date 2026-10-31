@@ -5,7 +5,17 @@ import {
   Text,
   View,
 } from "react-native";
-import Svg, { G, Line, Rect, Text as SvgText } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  G,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+  Text as SvgText,
+} from "react-native-svg";
 
 import { colors, fonts } from "@/constants/theme";
 import {
@@ -38,15 +48,13 @@ type PriceChartProps = {
 
 type NormalizedBar = {
   date: string;
-  open: number;
-  high: number;
-  low: number;
   close: number;
   volume: number | null;
 };
 
-const HEIGHT = 236;
-const PADDING = { top: 12, right: 48, bottom: 22, left: 4 };
+const HEIGHT = 264;
+const PADDING = { top: 14, right: 12, bottom: 26, left: 12 };
+const VOLUME_SHARE = 0.16;
 
 function normalize(bars: ChartBar[]): NormalizedBar[] {
   return bars.flatMap((bar) => {
@@ -54,69 +62,92 @@ function normalize(bars: ChartBar[]): NormalizedBar[] {
       return [];
     }
 
-    const open = bar.open ?? bar.close;
-    const high = bar.high ?? Math.max(open, bar.close);
-    const low = bar.low ?? Math.min(open, bar.close);
-
-    return [
-      {
-        date: bar.date,
-        open,
-        high: Math.max(high, open, bar.close),
-        low: Math.min(low, open, bar.close),
-        close: bar.close,
-        volume: bar.volume,
-      },
-    ];
+    return [{ date: bar.date, close: bar.close, volume: bar.volume }];
   });
 }
 
-function Readout({
-  bar,
-  dateText,
-  locale,
+/**
+ * Catmull-Rom spline through the points, emitted as cubic beziers. Keeps the
+ * Telda-style smooth curve without adding a charting dependency.
+ */
+function smoothLinePath(
+  points: Array<{ x: number; y: number }>,
+): string {
+  if (points.length === 0) {
+    return "";
+  }
+
+  const first = points[0] as { x: number; y: number };
+
+  if (points.length === 1) {
+    return `M ${first.x} ${first.y}`;
+  }
+
+  let d = `M ${first.x} ${first.y}`;
+
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p0 = points[Math.max(0, i - 1)] as { x: number; y: number };
+    const p1 = points[i] as { x: number; y: number };
+    const p2 = points[i + 1] as { x: number; y: number };
+    const p3 = points[Math.min(points.length - 1, i + 2)] as {
+      x: number;
+      y: number;
+    };
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x} ${c1y} ${c2x} ${c2y} ${p2.x} ${p2.y}`;
+  }
+
+  return d;
+}
+
+function Bubble({
+  x,
+  y,
+  text,
+  color,
+  width,
 }: {
-  bar: NormalizedBar;
-  dateText: string;
-  locale: "ar" | "en";
+  x: number;
+  y: number;
+  text: string;
+  color: string;
+  width: number;
 }) {
-  const volume = formatVolume(bar.volume, locale);
-  const fields = [
-    { label: "O", value: bar.open },
-    { label: "H", value: bar.high },
-    { label: "L", value: bar.low },
-    { label: "C", value: bar.close },
-  ];
+  const clampedX = Math.max(2, x - width / 2);
 
   return (
-    <View className="mb-2" style={{ direction: "ltr" }}>
-      <View className="flex-row items-center justify-between">
-        <Text className="font-title text-[12px] text-text">
-          {dateText}
-        </Text>
-        <Text className="font-body text-[10px] text-text-muted">
-          {volume === null ? "" : `V ${volume}`}
-        </Text>
-      </View>
-      <View className="mt-1 flex-row items-center gap-3">
-        {fields.map((field) => (
-          <Text
-            key={field.label}
-            className="font-label text-[10px] text-text-secondary"
-          >
-            {field.label}{" "}
-            <Text className="text-text">{formatPrice(field.value)}</Text>
-          </Text>
-        ))}
-      </View>
-    </View>
+    <G>
+      <Rect
+        x={clampedX}
+        y={y}
+        width={width}
+        height={18}
+        rx={5}
+        fill={color}
+      />
+      <SvgText
+        x={clampedX + width / 2}
+        y={y + 12.5}
+        fill={colors.canvas}
+        fontFamily={fonts.label}
+        fontSize={10}
+        fontWeight="600"
+        textAnchor="middle"
+      >
+        {text}
+      </SvgText>
+    </G>
   );
 }
 
 /**
- * Dependency-light candlestick chart. The plot always runs left to right, so
- * the SVG container opts out of the app's RTL direction. Dragging horizontally
- * selects the nearest session and shows its OHLC readout.
+ * Telda-style price chart: smooth gradient line colored by period trend,
+ * touch crosshair with price/date bubbles, subtle volume bars, and optional
+ * pivot/support/resistance level lines. The plot always runs left to right,
+ * so the SVG container opts out of the app's RTL direction.
  */
 export function PriceChart({ bars, levels, locale }: PriceChartProps) {
   const [width, setWidth] = useState(0);
@@ -128,22 +159,23 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
   }, [bars]);
 
   const plotWidth = Math.max(0, width - PADDING.left - PADDING.right);
-  const plotHeight = HEIGHT - PADDING.top - PADDING.bottom;
+  const volumeHeight = (HEIGHT - PADDING.top - PADDING.bottom) * VOLUME_SHARE;
+  const plotHeight = HEIGHT - PADDING.top - PADDING.bottom - volumeHeight;
 
   const domain = useMemo(() => {
     if (normalized.length === 0) {
       return null;
     }
 
-    let min = Math.min(...normalized.map((bar) => bar.low));
-    let max = Math.max(...normalized.map((bar) => bar.high));
+    let min = Math.min(...normalized.map((bar) => bar.close));
+    let max = Math.max(...normalized.map((bar) => bar.close));
 
     if (max === min) {
       max = min + 1;
     }
 
-    // Include nearby support/resistance lines so they are not clipped, but skip
-    // levels far outside the price action.
+    // Include nearby support/resistance lines so they are not clipped, but
+    // skip levels far outside the price action.
     const band = (max - min) * 0.1;
     const candidates = levels
       ? [levels.s1, levels.pivot, levels.r1].filter(
@@ -156,22 +188,34 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
       max = Math.max(max, ...candidates);
     }
 
-    const pad = (max - min) * 0.04;
+    const pad = (max - min) * 0.08;
 
     return { min: min - pad, max: max + pad };
   }, [normalized, levels]);
 
-  if (normalized.length < 2 || !domain) {
+  const maxVolume = useMemo(
+    () => Math.max(0, ...normalized.map((bar) => bar.volume ?? 0)),
+    [normalized],
+  );
+
+  if (normalized.length === 0 || !domain) {
     return null;
   }
 
-  const slot = plotWidth / normalized.length;
-  const bodyWidth = Math.max(1, Math.min(9, slot * 0.62));
-  const x = (index: number) =>
-    PADDING.left + (index + 0.5) * slot;
+  const slot =
+    normalized.length > 1 ? plotWidth / (normalized.length - 1) : plotWidth;
+  const x = (index: number) => PADDING.left + index * slot;
   const y = (price: number) =>
     PADDING.top +
     ((domain.max - price) / (domain.max - domain.min)) * plotHeight;
+
+  const points = normalized.map((bar, index) => ({
+    x: x(index),
+    y: y(bar.close),
+  }));
+  const linePath = smoothLinePath(points);
+  const baseY = PADDING.top + plotHeight;
+  const areaPath = `${linePath} L ${x(normalized.length - 1)} ${baseY} L ${x(0)} ${baseY} Z`;
 
   const lastIndex = normalized.length - 1;
   const activeIndex =
@@ -179,6 +223,8 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
   const selected = normalized[activeIndex] ?? normalized[0];
   const firstBar = normalized[0];
   const lastBar = normalized[lastIndex];
+  const rising = (lastBar as NormalizedBar).close >= (firstBar as NormalizedBar).close;
+  const trendColor = rising ? colors.up : colors.down;
   const selectedX = x(activeIndex);
   const spansYears =
     firstBar !== undefined &&
@@ -193,7 +239,7 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
     }
 
     const localX = event.nativeEvent.locationX - PADDING.left;
-    const index = Math.floor(localX / slot);
+    const index = Math.round(localX / slot);
 
     if (index < 0) {
       setSelectedIndex(0);
@@ -207,39 +253,57 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
     setWidth(event.nativeEvent.layout.width);
   };
 
-  const gridValues = [
-    domain.max,
-    (domain.max + domain.min) / 2,
-    domain.min,
-  ];
-
   const levelLines = levels
     ? [
         { key: "R1", value: levels.r1, color: colors.up },
         { key: "P", value: levels.pivot, color: colors.gold },
         { key: "S1", value: levels.s1, color: colors.down },
-      ].filter(
-        (level) =>
-          level.value >= domain.min && level.value <= domain.max,
-      )
+      ].filter((level) => level.value >= domain.min && level.value <= domain.max)
     : [];
 
   if (!selected || !firstBar || !lastBar) {
     return null;
   }
 
+  const previous =
+    activeIndex > 0 ? (normalized[activeIndex - 1] as NormalizedBar) : null;
+  const selectedChange =
+    previous === null ? null : selected.close - (previous as NormalizedBar).close;
+  const priceBubbleWidth = formatPrice(selected.close).length * 6.6 + 14;
+
   return (
     <View>
-      <Readout
-        bar={selected}
-        dateText={dateLabel(selected.date)}
-        locale={locale}
-      />
+      {selectedIndex !== null ? (
+        <View className="mb-2" style={{ direction: "ltr" }}>
+          <View className="flex-row items-center justify-between">
+            <Text className="font-title text-[12px] text-text">
+              {dateLabel(selected.date)}
+            </Text>
+            <View className="flex-row items-center gap-2">
+              {selectedChange !== null ? (
+                <Text
+                  className="font-label text-[11px]"
+                  style={{ color: selectedChange >= 0 ? colors.up : colors.down }}
+                >
+                  {selectedChange >= 0 ? "+" : ""}
+                  {formatPrice(selectedChange)}
+                </Text>
+              ) : null}
+              <Text className="font-title text-[13px] text-text">
+                {formatPrice(selected.close)}
+              </Text>
+              <Text className="font-body text-[10px] text-text-muted">
+                {formatVolume(selected.volume, locale) ?? ""}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : null}
 
       <View
         accessible
         accessibilityRole="image"
-        accessibilityLabel={`${locale === "ar" ? "رسم شموع" : "Candlestick chart"} ${dateLabel(
+        accessibilityLabel={`${locale === "ar" ? "رسم بياني للسعر" : "Price chart"} ${dateLabel(
           firstBar.date,
         )} — ${dateLabel(lastBar.date)}`}
         onLayout={onLayout}
@@ -253,119 +317,133 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
       >
         {width > 0 ? (
           <Svg width={width} height={HEIGHT}>
-            {gridValues.map((value) => (
-              <Line
-                key={`grid-${value}`}
-                x1={PADDING.left}
-                x2={width - PADDING.right}
-                y1={y(value)}
-                y2={y(value)}
-                stroke={colors.border}
-                strokeWidth={1}
-                strokeDasharray="2 4"
-              />
-            ))}
+            <Defs>
+              <LinearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor={trendColor} stopOpacity={0.22} />
+                <Stop offset="1" stopColor={trendColor} stopOpacity={0.02} />
+              </LinearGradient>
+            </Defs>
 
-            {gridValues.map((value) => (
-              <SvgText
-                key={`grid-label-${value}`}
-                x={width - PADDING.right + 6}
-                y={y(value) + 3}
-                fill={colors.textMuted}
-                fontFamily={fonts.label}
-                fontSize={9}
-              >
-                {formatPrice(value)}
-              </SvgText>
-            ))}
+            {/* Baseline at the period's opening close */}
+            <Line
+              x1={PADDING.left}
+              x2={width - PADDING.right}
+              y1={y(firstBar.close)}
+              y2={y(firstBar.close)}
+              stroke={colors.border}
+              strokeWidth={1}
+              strokeDasharray="2 5"
+            />
 
+            <Path d={areaPath} fill="url(#areaFill)" />
+            <Path
+              d={linePath}
+              stroke={trendColor}
+              strokeWidth={1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+
+            {/* Volume bars */}
+            {maxVolume > 0
+              ? normalized.map((bar, index) => {
+                  const volume = bar.volume ?? 0;
+
+                  if (volume <= 0) {
+                    return null;
+                  }
+
+                  const barWidth = Math.max(1, Math.min(6, slot * 0.55));
+                  const barHeight = Math.max(
+                    1,
+                    (volume / maxVolume) * (volumeHeight - 4),
+                  );
+
+                  return (
+                    <Rect
+                      key={`vol-${bar.date}-${index}`}
+                      x={x(index) - barWidth / 2}
+                      y={baseY + 4 + (volumeHeight - 4 - barHeight)}
+                      width={barWidth}
+                      height={barHeight}
+                      rx={1}
+                      fill={trendColor}
+                      opacity={0.18}
+                    />
+                  );
+                })
+              : null}
+
+            {/* Pivot / support / resistance */}
             {levelLines.map((level) => (
-              <Line
-                key={`level-${level.key}`}
-                x1={PADDING.left}
-                x2={width - PADDING.right}
-                y1={y(level.value)}
-                y2={y(level.value)}
-                stroke={level.color}
-                strokeWidth={1}
-                strokeDasharray="4 3"
-                opacity={0.65}
-              />
+              <G key={`level-${level.key}`}>
+                <Line
+                  x1={PADDING.left}
+                  x2={width - PADDING.right}
+                  y1={y(level.value)}
+                  y2={y(level.value)}
+                  stroke={level.color}
+                  strokeWidth={1}
+                  strokeDasharray="5 4"
+                  opacity={0.5}
+                />
+                <SvgText
+                  x={PADDING.left + 2}
+                  y={y(level.value) - 3}
+                  fill={level.color}
+                  fontFamily={fonts.label}
+                  fontSize={8}
+                  opacity={0.9}
+                >
+                  {level.key}
+                </SvgText>
+              </G>
             ))}
-
-            {levelLines.map((level) => (
-              <SvgText
-                key={`level-label-${level.key}`}
-                x={PADDING.left + 2}
-                y={y(level.value) - 3}
-                fill={level.color}
-                fontFamily={fonts.label}
-                fontSize={8}
-              >
-                {level.key}
-              </SvgText>
-            ))}
-
-            {normalized.map((bar, index) => {
-              const up = bar.close >= bar.open;
-              const color = up ? colors.up : colors.down;
-              const bodyTop = y(Math.max(bar.open, bar.close));
-              const bodyHeight = Math.max(
-                1,
-                y(Math.min(bar.open, bar.close)) - bodyTop,
-              );
-              const centerX = x(index);
-
-              return (
-                <G key={`${bar.date}-${index}`}>
-                  <Line
-                    x1={centerX}
-                    x2={centerX}
-                    y1={y(bar.high)}
-                    y2={y(bar.low)}
-                    stroke={color}
-                    strokeWidth={1}
-                  />
-                  <Rect
-                    x={centerX - bodyWidth / 2}
-                    y={bodyTop}
-                    width={bodyWidth}
-                    height={bodyHeight}
-                    fill={color}
-                    rx={bodyWidth > 3 ? 1 : 0}
-                  />
-                </G>
-              );
-            })}
 
             {selectedIndex !== null ? (
-              <>
+              <G>
                 <Line
                   x1={selectedX}
                   x2={selectedX}
                   y1={PADDING.top}
-                  y2={PADDING.top + plotHeight}
+                  y2={baseY + volumeHeight}
                   stroke={colors.textSecondary}
                   strokeWidth={1}
                   strokeDasharray="3 3"
-                  opacity={0.7}
+                  opacity={0.6}
                 />
-                <Line
-                  x1={PADDING.left}
-                  x2={width - PADDING.right}
-                  y1={y(selected.close)}
-                  y2={y(selected.close)}
-                  stroke={colors.textSecondary}
-                  strokeWidth={1}
-                  strokeDasharray="3 3"
-                  opacity={0.5}
+                <Circle
+                  cx={selectedX}
+                  cy={y(selected.close)}
+                  r={4}
+                  fill={trendColor}
+                  stroke={colors.canvas}
+                  strokeWidth={2}
                 />
-              </>
-            ) : null}
+                <Bubble
+                  x={Math.min(
+                    Math.max(selectedX, PADDING.left + priceBubbleWidth / 2),
+                    width - PADDING.right - priceBubbleWidth / 2,
+                  )}
+                  y={PADDING.top - 6}
+                  text={formatPrice(selected.close)}
+                  color={colors.text}
+                  width={priceBubbleWidth}
+                />
+              </G>
+            ) : (
+              <Circle
+                cx={x(lastIndex)}
+                cy={y(lastBar.close)}
+                r={3.5}
+                fill={trendColor}
+              />
+            )}
 
             <SvgText
               x={PADDING.left}
-              y={HEIGHT - 6}
+              y={HEIGHT - 8}
               fill={colors.textMuted}
               fontFamily={fonts.body}
               fontSize={9}
@@ -374,7 +452,7 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
             </SvgText>
             <SvgText
               x={width - PADDING.right}
-              y={HEIGHT - 6}
+              y={HEIGHT - 8}
               fill={colors.textMuted}
               fontFamily={fonts.body}
               fontSize={9}
