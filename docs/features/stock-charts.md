@@ -54,5 +54,5 @@ Yahoo Finance does not carry several EGX listings: `KORA.CA` returns *"No data f
 | Item | Status |
 |---|---|
 | Intraday (1D) chart | not built — TV websocket supports minute resolutions, but the API stores daily bars only; needs a new table/endpoint |
-| ~6 tickers still <10 bars | genuinely new listings with no history yet |
-| Scheduler | bars only refresh when the worker runs (scheduler still pending) |
+| ~32 tickers still 0 bars | suspended listings TradingView itself does not chart; the app shows the "insufficient history" state |
+| ~~Scheduler~~ | ✅ shipped — see `docs/features/ingest-scheduler.md` |
