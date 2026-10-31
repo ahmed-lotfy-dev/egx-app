@@ -60,6 +60,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 20m
           script: |
             docker pull ghcr.io/ahmed-lotfy-dev/egx-api:latest
             docker tag ghcr.io/ahmed-lotfy-dev/egx-api:latest egx-api:latest
