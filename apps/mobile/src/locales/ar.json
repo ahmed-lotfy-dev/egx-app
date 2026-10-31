@@ -7,7 +7,8 @@
     "back": "رجوع",
     "comingSoon": "قريبًا",
     "notFound": "الصفحة غير موجودة",
-    "goHome": "العودة للرئيسية"
+    "goHome": "العودة للرئيسية",
+    "confirm": "تأكيد"
   },
   "auth": {
     "kicker": "البورصة المصرية",
@@ -266,16 +267,24 @@
   },
   "watchlist": {
     "title": "القوائم",
-    "predefined": "جاهزة",
-    "custom": "مخصصة",
-    "indicesTitle": "المؤشرات",
-    "sectorsTitle": "القطاعات",
+    "create": "قائمة جديدة",
+    "rename": "تغيير الاسم",
+    "deleteTitle": "حذف القائمة",
+    "deleteBody": "متأكد إنك عايز تحذف قائمة \"{{name}}\"؟",
+    "deleteConfirm": "حذف",
+    "addStock": "إضافة سهم",
+    "removeItem": "إزالة من القائمة",
+    "namePlaceholder": "اسم القائمة",
+    "searchPlaceholder": "ابحث عن سهم (مثال: COMI)",
+    "noResults": "مفيش نتائج",
+    "emptyList": "القائمة دي فاضية",
+    "emptyCustomList": "ضيف أسهم لقائمتك من زرار الإضافة فوق",
+    "signinRequired": "سجّل الدخول الأول عشان تدير قوائمك",
+    "errorTitle": "حصل خطأ",
     "instrumentCount": "{{count}} سهم",
     "noQuote": "لا يوجد سعر",
     "loadErrorTitle": "تعذر تحميل القوائم",
-    "loadErrorBody": "حدث خطأ أثناء جلب القوائم الجاهزة.",
-    "empty": "مفيش قوائم جاهزة لسه",
-    "emptyList": "القائمة دي فاضية",
+    "loadErrorBody": "حدث خطأ أثناء جلب القوائم.",
     "notFound": "القائمة غير موجودة"
   }
 }

@@ -287,7 +287,7 @@ export const NewsFeedResponseSchema = z.object({
 
 export type NewsFeedResponse = z.infer<typeof NewsFeedResponseSchema>;
 
-export const PredefinedWatchlistInstrumentSchema = z.object({
+export const WatchlistInstrumentSchema = z.object({
   ticker: z.string(),
   nameAr: z.string().nullable(),
   nameEn: z.string(),
@@ -300,23 +300,40 @@ export const PredefinedWatchlistInstrumentSchema = z.object({
   }).nullable(),
 });
 
-export const PredefinedWatchlistSchema = z.object({
+export const WatchlistSchema = z.object({
   id: z.string(),
-  nameAr: z.string(),
-  nameEn: z.string(),
-  type: z.enum(["index", "sector", "sharia"]),
+  /** "egx30" and "sharia" are computed defaults; "custom" is a user list */
+  kind: z.enum(["egx30", "sharia", "custom"]),
+  name: z.string(),
+  /** custom lists can be renamed/deleted/edited; defaults are read-only */
+  editable: z.boolean(),
   instrumentCount: z.number().int(),
-  instruments: z.array(PredefinedWatchlistInstrumentSchema),
+  instruments: z.array(WatchlistInstrumentSchema),
 });
 
-export type PredefinedWatchlist = z.infer<typeof PredefinedWatchlistSchema>;
+export type Watchlist = z.infer<typeof WatchlistSchema>;
 
-export const PredefinedWatchlistsResponseSchema = z.object({
-  data: z.array(PredefinedWatchlistSchema),
+export const WatchlistsResponseSchema = z.object({
+  data: z.array(WatchlistSchema),
   meta: z.object({
     asOf: z.iso.datetime().nullable(),
-    source: z.string(),
   }),
 });
 
-export type PredefinedWatchlistsResponse = z.infer<typeof PredefinedWatchlistsResponseSchema>;
+export type WatchlistsResponse = z.infer<typeof WatchlistsResponseSchema>;
+
+export const CreateWatchlistRequestSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+});
+
+export const RenameWatchlistRequestSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+});
+
+export const AddWatchlistItemRequestSchema = z.object({
+  ticker: z.string().trim().min(1).max(20).toUpperCase(),
+});
+
+export type CreateWatchlistRequest = z.infer<typeof CreateWatchlistRequestSchema>;
+export type RenameWatchlistRequest = z.infer<typeof RenameWatchlistRequestSchema>;
+export type AddWatchlistItemRequest = z.infer<typeof AddWatchlistItemRequestSchema>;

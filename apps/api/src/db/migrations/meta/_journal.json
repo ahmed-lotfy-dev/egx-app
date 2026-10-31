@@ -43,6 +43,13 @@
       "when": 1793369093310,
       "tag": "0005_familiar_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793457689451,
+      "tag": "0006_silly_whizzer",
+      "breakpoints": true
     }
   ]
 }

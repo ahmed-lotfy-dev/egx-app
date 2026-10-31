@@ -12,6 +12,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 
 const tz = { withTimezone: true } as const;
@@ -304,3 +305,50 @@ export const newsInstrumentLinkRelations = relations(
     }),
   }),
 );
+
+export const watchlists = pgTable(
+  "watchlists",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    userId: text("user_id").notNull(),
+    name: text("name").notNull(),
+    kind: text("kind").notNull().default("custom"), // "custom" | "egx30" | "sharia"
+    createdAt: timestamp("created_at", tz).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", tz).defaultNow().notNull(),
+  },
+  (table) => [index("watchlists_user_id_idx").on(table.userId)],
+);
+
+export const watchlistItems = pgTable(
+  "watchlist_items",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    watchlistId: bigint("watchlist_id", { mode: "number" })
+      .notNull()
+      .references(() => watchlists.id, { onDelete: "cascade" }),
+    instrumentId: bigint("instrument_id", { mode: "number" })
+      .notNull()
+      .references(() => instruments.id, { onDelete: "cascade" }),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", tz).defaultNow().notNull(),
+  },
+  (table) => [
+    index("watchlist_items_watchlist_id_idx").on(table.watchlistId),
+    unique("watchlist_items_unique").on(table.watchlistId, table.instrumentId),
+  ],
+);
+
+export const watchlistRelations = relations(watchlists, ({ many }) => ({
+  items: many(watchlistItems),
+}));
+
+export const watchlistItemRelations = relations(watchlistItems, ({ one }) => ({
+  watchlist: one(watchlists, {
+    fields: [watchlistItems.watchlistId],
+    references: [watchlists.id],
+  }),
+  instrument: one(instruments, {
+    fields: [watchlistItems.instrumentId],
+    references: [instruments.id],
+  }),
+}));

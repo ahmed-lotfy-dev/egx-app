@@ -7,7 +7,8 @@
     "back": "Back",
     "comingSoon": "Coming soon",
     "notFound": "Page not found",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "confirm": "Confirm"
   },
   "auth": {
     "kicker": "Egyptian Exchange",
@@ -266,16 +267,24 @@
   },
   "watchlist": {
     "title": "Watchlists",
-    "predefined": "Ready-made",
-    "custom": "Custom",
-    "indicesTitle": "Indices",
-    "sectorsTitle": "Sectors",
-    "instrumentCount": "{{count}} stocks",
-    "noQuote": "No quote",
-    "loadErrorTitle": "Couldn't load watchlists",
-    "loadErrorBody": "Something went wrong while fetching predefined lists.",
-    "empty": "No predefined lists yet",
+    "create": "New list",
+    "rename": "Rename",
+    "deleteTitle": "Delete list",
+    "deleteBody": "Delete \"{{name}}\"? This cannot be undone.",
+    "deleteConfirm": "Delete",
+    "addStock": "Add stock",
+    "removeItem": "Remove from list",
+    "namePlaceholder": "List name",
+    "searchPlaceholder": "Search a stock (e.g. COMI)",
+    "noResults": "No results",
     "emptyList": "This list is empty",
+    "emptyCustomList": "Add stocks to your list using the button above",
+    "signinRequired": "Sign in to manage your watchlists",
+    "errorTitle": "Something went wrong",
+    "instrumentCount": "{{count}} stocks",
+    "noQuote": "No price",
+    "loadErrorTitle": "Couldn't load watchlists",
+    "loadErrorBody": "An error occurred while fetching watchlists.",
     "notFound": "List not found"
   }
 }
