@@ -147,7 +147,9 @@
     "historyCoverage": "{{count}} stored sessions · last session {{date}}",
     "noHistory": "No price history is stored for this stock.",
     "footer": "Data is informational only and not investment advice.",
-    "sourcesLabel": "Sources:"
+    "sourcesLabel": "Sources:",
+    "chartLine": "Line chart",
+    "chartCandles": "Candles"
   },
   "sectors": {
     "finance": "Finance",

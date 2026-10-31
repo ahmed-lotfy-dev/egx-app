@@ -147,7 +147,9 @@
     "historyCoverage": "{{count}} جلسة محفوظة · آخر جلسة {{date}}",
     "noHistory": "مفيش تاريخ سعر محفوظ للسهم ده.",
     "footer": "البيانات لأغراض معلوماتية فقط وليست توصية استثمارية.",
-    "sourcesLabel": "المصادر:"
+    "sourcesLabel": "المصادر:",
+    "chartLine": "رسم خطي",
+    "chartCandles": "شموع"
   },
   "sectors": {
     "finance": "التمويل",

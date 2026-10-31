@@ -842,13 +842,14 @@
             "schema": {
               "type": "string",
               "enum": [
+                "1D",
                 "1W",
                 "1M",
                 "3M",
                 "6M",
                 "1Y"
               ],
-              "default": "3M"
+              "default": "1D"
             },
             "required": false,
             "name": "range",

@@ -7,7 +7,8 @@
     "./db": "./src/db/client.ts",
     "./market": "./src/lib/market.ts",
     "./schema": "./src/db/schema/index.ts",
-    "./text": "./src/lib/text.ts"
+    "./text": "./src/lib/text.ts",
+    "./tradingview-history": "./src/lib/tradingview-history.ts"
   },
   "scripts": {
     "dev": "bun --env-file=../../.env --hot src/index.ts",

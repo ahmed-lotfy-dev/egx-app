@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { db } from "../db/client";
 import { dailyBars, instruments } from "../db/schema";
+import { getIntradayBars } from "../lib/intraday";
 import {
   computeHistoryStats,
   computeSupportResistance,
@@ -33,7 +34,7 @@ const historyRoute = createRoute({
       ticker: z.string().trim().min(1).max(20),
     }),
     query: z.object({
-      range: z.enum(["1W", "1M", "3M", "6M", "1Y"]).default("3M"),
+      range: z.enum(["1D", "1W", "1M", "3M", "6M", "1Y"]).default("1D"),
     }),
   },
   responses: {
@@ -65,6 +66,9 @@ instrumentHistoryRoutes.openapi(historyRoute, async (c) => {
   const [instrument] = await db
     .select({
       id: instruments.id,
+      ticker: instruments.ticker,
+      tvSymbol: instruments.tvSymbol,
+      yahooSymbol: instruments.yahooSymbol,
       updatedAt: instruments.updatedAt,
     })
     .from(instruments)
@@ -106,6 +110,47 @@ instrumentHistoryRoutes.openapi(historyRoute, async (c) => {
     close: numberOrNull(row.close),
     volume: row.volume,
   }));
+
+  // 1D = live intraday (5-minute bars), fetched on demand with a short cache.
+  if (range === "1D") {
+    const intraday = await getIntradayBars({
+      ticker: instrument.ticker,
+      yahooSymbol: instrument.yahooSymbol,
+      tvSymbol: instrument.tvSymbol,
+    });
+    const lastIntraday = intraday.bars[intraday.bars.length - 1] ?? null;
+    const lastIntradayMs = lastIntraday
+      ? new Date(lastIntraday.date).getTime()
+      : null;
+    // Intraday is stale when the session data is older than ~30 minutes
+    // (provider outage) or missing entirely.
+    const stale =
+      lastIntradayMs === null ||
+      Date.now() - lastIntradayMs > 30 * 60_000;
+
+    return c.json(
+      {
+        data: intraday.bars.map((bar) => ({
+          date: bar.date,
+          open: bar.open,
+          high: bar.high,
+          low: bar.low,
+          close: bar.close,
+          adjClose: null,
+          volume: bar.volume,
+        })),
+        stats: computeHistoryStats(allBars, 0),
+        levels: computeSupportResistance(allBars),
+        meta: {
+          asOf: intraday.asOf,
+          source: intraday.source,
+          stale,
+          universeAsOf: instrument.updatedAt.toISOString(),
+        },
+      },
+      200,
+    );
+  }
 
   const cutoff = cairoDate(
     new Date(Date.now() - RANGE_DAYS[range] * 24 * 60 * 60 * 1000),

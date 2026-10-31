@@ -19,11 +19,14 @@ import Svg, {
 
 import { colors, fonts } from "@/constants/theme";
 import {
+  formatCairoTime,
   formatDateShort,
   formatDateWithYear,
   formatPrice,
   formatVolume,
 } from "@/lib/format";
+
+export type ChartMode = "line" | "candles";
 
 type ChartBar = {
   date: string;
@@ -44,10 +47,17 @@ type PriceChartProps = {
   bars: ChartBar[];
   levels: ChartLevels;
   locale: "ar" | "en";
+  /** "line" (default) or "candles" — candlestick bars using OHLC. */
+  mode?: ChartMode;
+  /** Intraday bars: x-axis labels become Cairo clock times. */
+  intraday?: boolean;
 };
 
 type NormalizedBar = {
   date: string;
+  open: number | null;
+  high: number | null;
+  low: number | null;
   close: number;
   volume: number | null;
 };
@@ -62,7 +72,16 @@ function normalize(bars: ChartBar[]): NormalizedBar[] {
       return [];
     }
 
-    return [{ date: bar.date, close: bar.close, volume: bar.volume }];
+    return [
+      {
+        date: bar.date,
+        open: bar.open,
+        high: bar.high,
+        low: bar.low,
+        close: bar.close,
+        volume: bar.volume,
+      },
+    ];
   });
 }
 
@@ -144,12 +163,18 @@ function Bubble({
 }
 
 /**
- * Telda-style price chart: smooth gradient line colored by period trend,
- * touch crosshair with price/date bubbles, subtle volume bars, and optional
- * pivot/support/resistance level lines. The plot always runs left to right,
- * so the SVG container opts out of the app's RTL direction.
+ * Telda-style price chart: smooth gradient line or candlestick bars colored by
+ * bar direction, touch crosshair with price/date bubbles, subtle volume bars,
+ * and optional pivot/support/resistance level lines. The plot always runs
+ * left to right, so the SVG container opts out of the app's RTL direction.
  */
-export function PriceChart({ bars, levels, locale }: PriceChartProps) {
+export function PriceChart({
+  bars,
+  levels,
+  locale,
+  mode = "line",
+  intraday = false,
+}: PriceChartProps) {
   const [width, setWidth] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const normalized = useMemo(() => normalize(bars), [bars]);
@@ -167,8 +192,23 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
       return null;
     }
 
-    let min = Math.min(...normalized.map((bar) => bar.close));
-    let max = Math.max(...normalized.map((bar) => bar.close));
+    // Candles span the full high/low range; the line only needs closes.
+    const values =
+      mode === "candles"
+        ? normalized.flatMap((bar) =>
+            [bar.high, bar.low].filter(
+              (value): value is number =>
+                value !== null && Number.isFinite(value),
+            ),
+          )
+        : normalized.map((bar) => bar.close);
+
+    if (values.length === 0) {
+      return null;
+    }
+
+    let min = Math.min(...values);
+    let max = Math.max(...values);
 
     if (max === min) {
       max = min + 1;
@@ -191,7 +231,7 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
     const pad = (max - min) * 0.08;
 
     return { min: min - pad, max: max + pad };
-  }, [normalized, levels]);
+  }, [normalized, levels, mode]);
 
   const maxVolume = useMemo(
     () => Math.max(0, ...normalized.map((bar) => bar.volume ?? 0)),
@@ -217,6 +257,18 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
   const baseY = PADDING.top + plotHeight;
   const areaPath = `${linePath} L ${x(normalized.length - 1)} ${baseY} L ${x(0)} ${baseY} Z`;
 
+  // Candle geometry: wick spans high→low, body spans open→close. Bars with a
+  // missing open fall back to the previous close for direction coloring.
+  const candleWidth = Math.max(1.5, Math.min(9, slot * 0.6));
+  const candleFor = (bar: NormalizedBar, index: number) => {
+    const open = bar.open ?? (index > 0 ? normalized[index - 1]?.close ?? null : null);
+    const high = bar.high ?? bar.close;
+    const low = bar.low ?? bar.close;
+    const risingCandle = open === null || bar.close >= open;
+
+    return { open, high, low, risingCandle };
+  };
+
   const lastIndex = normalized.length - 1;
   const activeIndex =
     selectedIndex === null ? lastIndex : Math.min(selectedIndex, lastIndex);
@@ -227,11 +279,19 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
   const trendColor = rising ? colors.up : colors.down;
   const selectedX = x(activeIndex);
   const spansYears =
+    !intraday &&
     firstBar !== undefined &&
     lastBar !== undefined &&
     firstBar.date.slice(0, 4) !== lastBar.date.slice(0, 4);
-  const dateLabel = (date: string) =>
-    spansYears ? formatDateWithYear(date, locale) : formatDateShort(date, locale);
+  const dateLabel = (date: string) => {
+    if (intraday) {
+      return formatCairoTime(date, locale);
+    }
+
+    return spansYears
+      ? formatDateWithYear(date, locale)
+      : formatDateShort(date, locale);
+  };
 
   const handleTouch = (event: GestureResponderEvent) => {
     if (plotWidth <= 0) {
@@ -335,15 +395,55 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
               strokeDasharray="2 5"
             />
 
-            <Path d={areaPath} fill="url(#areaFill)" />
-            <Path
-              d={linePath}
-              stroke={trendColor}
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
+            {mode === "candles" ? (
+              normalized.map((bar, index) => {
+                const candle = candleFor(bar, index);
+                const candleColor = candle.risingCandle
+                  ? colors.up
+                  : colors.down;
+                const cx = x(index);
+                const bodyTop = y(
+                  Math.max(bar.close, candle.open ?? bar.close),
+                );
+                const bodyBottom = y(
+                  Math.min(bar.close, candle.open ?? bar.close),
+                );
+                const bodyHeight = Math.max(1, bodyBottom - bodyTop);
+
+                return (
+                  <G key={`candle-${bar.date}-${index}`}>
+                    <Line
+                      x1={cx}
+                      x2={cx}
+                      y1={y(candle.high)}
+                      y2={y(candle.low)}
+                      stroke={candleColor}
+                      strokeWidth={1}
+                    />
+                    <Rect
+                      x={cx - candleWidth / 2}
+                      y={bodyTop}
+                      width={candleWidth}
+                      height={bodyHeight}
+                      rx={1}
+                      fill={candleColor}
+                    />
+                  </G>
+                );
+              })
+            ) : (
+              <>
+                <Path d={areaPath} fill="url(#areaFill)" />
+                <Path
+                  d={linePath}
+                  stroke={trendColor}
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </>
+            )}
 
             {/* Volume bars */}
             {maxVolume > 0
@@ -368,7 +468,13 @@ export function PriceChart({ bars, levels, locale }: PriceChartProps) {
                       width={barWidth}
                       height={barHeight}
                       rx={1}
-                      fill={trendColor}
+                      fill={
+                        mode === "candles"
+                          ? candleFor(bar, index).risingCandle
+                            ? colors.up
+                            : colors.down
+                          : trendColor
+                      }
                       opacity={0.18}
                     />
                   );

@@ -340,7 +340,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    range?: "1W" | "1M" | "3M" | "6M" | "1Y";
+                    range?: "1D" | "1W" | "1M" | "3M" | "6M" | "1Y";
                 };
                 header?: never;
                 path: {

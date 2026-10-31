@@ -18,6 +18,7 @@ import { PriceChart } from "@/components/PriceChart";
 import { Screen } from "@/components/Screen";
 import { colors } from "@/constants/theme";
 import { api } from "@/lib/api";
+import { useChartModeStore } from "@/stores/chart-mode";
 import {
   formatCairoTime,
   formatCompact,
@@ -50,10 +51,11 @@ type NewsItem = NewsResponse["data"][number];
 type Fundamentals = NonNullable<Detail["fundamentals"]>;
 type Locale = "ar" | "en";
 
-const RANGES = ["1W", "1M", "3M", "6M", "1Y"] as const;
+const RANGES = ["1D", "1W", "1M", "3M", "6M", "1Y"] as const;
 type Range = (typeof RANGES)[number];
 
 const RANGE_LABELS: Record<Range, string> = {
+  "1D": "1D",
   "1W": "1W",
   "1M": "1M",
   "3M": "3M",
@@ -77,9 +79,11 @@ export default function StockScreen() {
   const { ticker } = useLocalSearchParams<{ ticker: string }>();
   const { t } = useTranslation();
   const locale = useLocaleStore((state) => state.locale);
-  const [range, setRange] = useState<Range>("3M");
+  const [range, setRange] = useState<Range>("1D");
   const [aiOpen, setAiOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const chartMode = useChartModeStore((state) => state.mode);
+  const setChartMode = useChartModeStore((state) => state.setMode);
   const symbol = (ticker ?? "").toUpperCase();
 
   const detailQuery = useQuery({
@@ -115,6 +119,9 @@ export default function StockScreen() {
       return data;
     },
     enabled: symbol.length > 0,
+    // Intraday bars update like Telda/Thndr — poll while the screen is open;
+    // the API serves its ~4-minute cache so this stays cheap.
+    refetchInterval: range === "1D" ? 60_000 : false,
   });
 
   const newsQuery = useQuery({
@@ -342,31 +349,66 @@ export default function StockScreen() {
               {t("stock.chartTitle")}
             </Text>
 
-            <View className="flex-row rounded-full border border-border bg-canvas p-1">
-              {RANGES.map((item) => {
-                const selected = range === item;
+            {/* Line ↔ candles toggle */}
+            <View className="flex-row rounded-full border border-border bg-canvas p-0.5">
+              {(
+                [
+                  { value: "line", icon: "stats-chart-outline" },
+                  { value: "candles", icon: "bar-chart-outline" },
+                ] as const
+              ).map((option) => {
+                const selected = chartMode === option.value;
 
                 return (
                   <Pressable
-                    key={item}
+                    key={option.value}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
-                    onPress={() => setRange(item)}
+                    accessibilityLabel={
+                      option.value === "candles"
+                        ? t("stock.chartCandles")
+                        : t("stock.chartLine")
+                    }
+                    onPress={() => void setChartMode(option.value)}
                     className={`rounded-full px-2.5 py-1 active:opacity-80 ${
                       selected ? "bg-surface-elevated" : ""
                     }`}
                   >
-                    <Text
-                      className={`font-label text-[10px] ${
-                        selected ? "text-gold" : "text-text-muted"
-                      }`}
-                    >
-                      {RANGE_LABELS[item]}
-                    </Text>
+                    <Ionicons
+                      name={option.icon}
+                      size={14}
+                      color={selected ? colors.gold : colors.textMuted}
+                    />
                   </Pressable>
                 );
               })}
             </View>
+          </View>
+
+          <View className="mt-2 self-start flex-row rounded-full border border-border bg-canvas p-1">
+            {RANGES.map((item) => {
+              const selected = range === item;
+
+              return (
+                <Pressable
+                  key={item}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => setRange(item)}
+                  className={`rounded-full px-2.5 py-1 active:opacity-80 ${
+                    selected ? "bg-surface-elevated" : ""
+                  }`}
+                >
+                  <Text
+                    className={`font-label text-[10px] ${
+                      selected ? "text-gold" : "text-text-muted"
+                    }`}
+                  >
+                    {RANGE_LABELS[item]}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
 
           <View className="mt-3">
@@ -400,6 +442,8 @@ export default function StockScreen() {
                 bars={bars}
                 levels={history?.levels ?? null}
                 locale={locale}
+                mode={chartMode}
+                intraday={range === "1D"}
               />
             )}
           </View>

@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { colors } from "@/constants/theme";
 import { authClient } from "@/lib/auth-client";
+import { useChartModeStore } from "@/stores/chart-mode";
 import { useMacroPrefsStore } from "@/stores/macro-prefs";
 import { useLocaleStore } from "@/stores/locale";
 
@@ -60,6 +61,7 @@ export default function RootLayout() {
       .catch(() => undefined)
       .finally(() => setLocaleReady(true));
     void useMacroPrefsStore.getState().hydrate().catch(() => undefined);
+    void useChartModeStore.getState().hydrate().catch(() => undefined);
   }, []);
 
   const ready = (fontsLoaded || Boolean(fontError)) && localeReady && !isPending;
