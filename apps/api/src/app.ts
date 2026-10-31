@@ -11,6 +11,7 @@ import { instrumentHistoryRoutes } from "./routes/instrument-history";
 import { instrumentNewsRoutes } from "./routes/instrument-news";
 import { instrumentRoutes } from "./routes/instruments";
 import { marketRoutes } from "./routes/market";
+import { macroRoutes } from "./routes/macro";
 import { newsRoutes } from "./routes/news";
 import { statusRoutes } from "./routes/status";
 import { watchlistRoutes } from "./routes/watchlist";
@@ -58,6 +59,7 @@ app.route("/", instrumentRoutes);
 app.route("/", instrumentHistoryRoutes);
 app.route("/", instrumentNewsRoutes);
 app.route("/", marketRoutes);
+app.route("/", macroRoutes);
 app.route("/", newsRoutes);
 app.route("/", watchlistRoutes);
 

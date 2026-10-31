@@ -637,6 +637,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/macro": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Economy strip quotes (USD/EGP, oil, gold) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Latest macro quotes with staleness flags */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                /** @enum {string} */
+                                key: "usd_egp" | "brent" | "wti" | "gold_oz" | "gold_egp_24k" | "gold_egp_21k";
+                                value: number | null;
+                                change: number | null;
+                                changePct: number | null;
+                                currency: string | null;
+                                unit: string | null;
+                                source: string;
+                                /** Format: date-time */
+                                asOf: string | null;
+                                stale: boolean;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Unexpected error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                code: string;
+                                message: string;
+                                requestId?: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/news": {
         parameters: {
             query?: never;

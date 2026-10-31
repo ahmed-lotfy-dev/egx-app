@@ -203,7 +203,9 @@
     "version": "Version {{version}}",
     "restartTitle": "Restart required",
     "restartBody": "Close and reopen the app to apply the interface direction.",
-    "languageNote": "Changing language requires a restart."
+    "languageNote": "Changing language requires a restart.",
+    "economyStrip": "Economy strip",
+    "economyStripNote": "Choose which cards appear on the home screen"
   },
   "newsTab": {
     "title": "News",
@@ -288,5 +290,15 @@
     "notFound": "List not found",
     "addSelected": "Add {{count}} stocks",
     "dragHint": "Long-press & drag to reorder"
+  },
+  "macro": {
+    "usdEgp": "US Dollar / EGP",
+    "brent": "Brent Oil",
+    "wti": "WTI Oil",
+    "goldOz": "Gold (ounce)",
+    "gold_egp_24k": "Egypt Gold 24K (gram)",
+    "gold_egp_21k": "Egypt Gold 21K (gram)",
+    "stale": "outdated",
+    "estimatedNote": "The Egyptian gram price is estimated from the global ounce price and USD/EGP"
   }
 }

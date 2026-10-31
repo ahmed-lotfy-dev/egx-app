@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { colors } from "@/constants/theme";
 import { authClient } from "@/lib/auth-client";
+import { useMacroPrefsStore } from "@/stores/macro-prefs";
 import { useLocaleStore } from "@/stores/locale";
 
 void SplashScreen.preventAutoHideAsync();
@@ -58,6 +59,7 @@ export default function RootLayout() {
       .hydrate()
       .catch(() => undefined)
       .finally(() => setLocaleReady(true));
+    void useMacroPrefsStore.getState().hydrate().catch(() => undefined);
   }, []);
 
   const ready = (fontsLoaded || Boolean(fontError)) && localeReady && !isPending;

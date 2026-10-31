@@ -9,6 +9,7 @@ import { colors } from "@/constants/theme";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import type { Locale } from "@/lib/i18n";
+import { MACRO_CARD_KEYS, useMacroPrefsStore, type MacroCardKey } from "@/stores/macro-prefs";
 import { useLocaleStore } from "@/stores/locale";
 
 export default function ProfileScreen() {
@@ -17,6 +18,8 @@ export default function ProfileScreen() {
   const { data: session } = authClient.useSession();
   const locale = useLocaleStore((state) => state.locale);
   const setLocale = useLocaleStore((state) => state.setLocale);
+  const macroHidden = useMacroPrefsStore((state) => state.hidden);
+  const toggleMacroCard = useMacroPrefsStore((state) => state.toggle);
 
   const status = useQuery({
     queryKey: ["status"],
@@ -116,6 +119,42 @@ export default function ProfileScreen() {
           <Text className="mt-2 font-body text-[12px] text-text-muted">
             {t("profile.languageNote")}
           </Text>
+        </View>
+
+        <View className="mt-6 px-5">
+          <Text className="font-label text-[10px] uppercase tracking-[0.08em] text-text-muted">
+            {t("profile.economyStrip")}
+          </Text>
+          <Text className="mt-1 font-body text-[12px] text-text-muted">
+            {t("profile.economyStripNote")}
+          </Text>
+
+          <View className="mt-3 overflow-hidden rounded-2xl border border-border bg-surface">
+            {MACRO_CARD_KEYS.map((key: MacroCardKey, index) => {
+              const visible = !macroHidden[key];
+
+              return (
+                <Pressable
+                  key={key}
+                  accessibilityRole="switch"
+                  accessibilityState={{ selected: visible }}
+                  onPress={() => void toggleMacroCard(key, !visible)}
+                  className={`flex-row items-center justify-between px-4 py-3.5 active:opacity-80 ${
+                    index > 0 ? "border-t border-border/60" : ""
+                  }`}
+                >
+                  <Text className="font-body text-[14px] text-text">
+                    {t(`macro.${key}`)}
+                  </Text>
+                  <Ionicons
+                    name={visible ? "checkbox" : "checkbox-outline"}
+                    size={20}
+                    color={visible ? colors.gold : colors.textMuted}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         <View className="mt-6 px-5">

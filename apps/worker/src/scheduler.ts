@@ -1,5 +1,6 @@
 import { closeDb } from "@egx/api/db";
 
+import { syncMacro } from "./jobs/macro";
 import { syncBars } from "./jobs/bars";
 import { syncFundamentals } from "./jobs/fundamentals";
 import { processAnalysisQueue, syncNews } from "./jobs/news";
@@ -26,6 +27,7 @@ const TRADING_DAYS = new Set(["Sun", "Mon", "Tue", "Wed", "Thu"]);
 
 const QUOTES_INTERVAL_MARKET_MS = 3 * 60_000;
 const QUOTES_INTERVAL_OFF_MS = 30 * 60_000;
+const MACRO_INTERVAL_MS = 30 * 60_000;
 const NEWS_INTERVAL_MS = 30 * 60_000;
 const ANALYSIS_INTERVAL_MS = 20 * 60_000;
 const TICK_MS = 60_000;
@@ -71,6 +73,7 @@ function isMarketTime(time: CairoTime): boolean {
 
 const state = {
   lastQuotesAt: 0,
+  lastMacroAt: 0,
   lastNewsAt: 0,
   lastAnalysisAt: 0,
   lastUniverseDate: "",
@@ -115,6 +118,12 @@ async function tick(now: Date): Promise<void> {
   if (Date.now() - state.lastQuotesAt >= quotesInterval) {
     state.lastQuotesAt = Date.now();
     void runJob("quotes", syncQuotes);
+  }
+
+  // Macro indicators (USD/EGP, oil, gold) — refresh around the clock.
+  if (Date.now() - state.lastMacroAt >= MACRO_INTERVAL_MS) {
+    state.lastMacroAt = Date.now();
+    void runJob("macro", syncMacro);
   }
 
   // News + AI analysis around the clock, in small batches.

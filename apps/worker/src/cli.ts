@@ -2,6 +2,7 @@ import { closeDb } from "@egx/api/db";
 
 import { syncBars, type BarsOptions } from "./jobs/bars";
 import { syncFundamentals } from "./jobs/fundamentals";
+import { syncMacro } from "./jobs/macro";
 import { processAnalysisQueue, syncNews, syncNewsWithAnalysis } from "./jobs/news";
 import { syncQuotes } from "./jobs/quotes";
 import { syncUniverse } from "./jobs/universe";
@@ -63,6 +64,9 @@ async function main(): Promise<void> {
     case "quotes":
       print("quotes", await syncQuotes());
       break;
+    case "macro":
+      print("macro", await syncMacro());
+      break;
     case "bars":
       print("bars", await syncBars(readBarsOptions()));
       break;
@@ -99,7 +103,7 @@ async function main(): Promise<void> {
     default:
       console.error(
         [
-          "Usage: bun src/cli.ts <universe|quotes|bars|symbols|fundamentals|news|news:analyze|news:full|all|schedule> [options]",
+          "Usage: bun src/cli.ts <universe|quotes|macro|bars|symbols|fundamentals|news|news:analyze|news:full|all|schedule> [options]",
           "",
           "Bars options:",
           "  --tickers COMI,HRHO   limit to specific tickers",

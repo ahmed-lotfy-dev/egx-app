@@ -1700,6 +1700,125 @@
         }
       }
     },
+    "/api/macro": {
+      "get": {
+        "tags": [
+          "market"
+        ],
+        "summary": "Economy strip quotes (USD/EGP, oil, gold)",
+        "responses": {
+          "200": {
+            "description": "Latest macro quotes with staleness flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string",
+                            "enum": [
+                              "usd_egp",
+                              "brent",
+                              "wti",
+                              "gold_oz",
+                              "gold_egp_24k",
+                              "gold_egp_21k"
+                            ]
+                          },
+                          "value": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "change": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "changePct": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "currency": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "unit": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "asOf": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time"
+                          },
+                          "stale": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "key",
+                          "value",
+                          "change",
+                          "changePct",
+                          "currency",
+                          "unit",
+                          "source",
+                          "asOf",
+                          "stale"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/news": {
       "get": {
         "tags": [

@@ -343,3 +343,38 @@ export type CreateWatchlistRequest = z.infer<typeof CreateWatchlistRequestSchema
 export type RenameWatchlistRequest = z.infer<typeof RenameWatchlistRequestSchema>;
 export type AddWatchlistItemRequest = z.infer<typeof AddWatchlistItemRequestSchema>;
 export type ReorderWatchlistItemsRequest = z.infer<typeof ReorderWatchlistItemsRequestSchema>;
+
+/** Economy-strip indicators tracked by the worker (USD/EGP, oil, gold). */
+export const MACRO_KEYS = [
+  "usd_egp",
+  "brent",
+  "wti",
+  "gold_oz",
+  "gold_egp_24k",
+  "gold_egp_21k",
+] as const;
+
+export const MacroKeySchema = z.enum(MACRO_KEYS);
+
+export type MacroKey = z.infer<typeof MacroKeySchema>;
+
+export const MacroQuoteSchema = z.object({
+  key: MacroKeySchema,
+  value: z.number().nullable(),
+  change: z.number().nullable(),
+  changePct: z.number().nullable(),
+  currency: z.string().nullable(),
+  unit: z.string().nullable(),
+  source: z.string(),
+  asOf: z.iso.datetime().nullable(),
+  /** True when the quote is too old to trust (worker has not refreshed it). */
+  stale: z.boolean(),
+});
+
+export type MacroQuote = z.infer<typeof MacroQuoteSchema>;
+
+export const MacroQuotesResponseSchema = z.object({
+  data: z.array(MacroQuoteSchema),
+});
+
+export type MacroQuotesResponse = z.infer<typeof MacroQuotesResponseSchema>;

@@ -20,6 +20,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { Screen } from "@/components/Screen";
+import { MacroStrip } from "@/components/MacroStrip";
 import { Sparkline } from "@/components/Sparkline";
 import { colors } from "@/constants/theme";
 import { api } from "@/lib/api";
@@ -210,6 +211,8 @@ export default function MarketsScreen() {
   return (
     <Screen>
       {header}
+
+      <MacroStrip />
 
       <FlatList
         data={instruments}

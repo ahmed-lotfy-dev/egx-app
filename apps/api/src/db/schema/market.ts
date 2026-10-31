@@ -352,3 +352,20 @@ export const watchlistItemRelations = relations(watchlistItems, ({ one }) => ({
     references: [instruments.id],
   }),
 }));
+
+/**
+ * Economy-strip quotes (USD/EGP, oil, gold). Keys are semantic, not per
+ * instrument, so the worker can also store derived rows such as the Egyptian
+ * gold gram price computed from the global ounce price and USD/EGP.
+ */
+export const macroQuotes = pgTable("macro_quotes", {
+  key: text("key").primaryKey(),
+  value: numeric("value", { precision: 18, scale: 6 }),
+  change: numeric("change", { precision: 18, scale: 6 }),
+  changePct: numeric("change_pct", { precision: 12, scale: 4 }),
+  currency: text("currency"),
+  unit: text("unit"),
+  source: text("source").notNull(),
+  asOf: timestamp("as_of", tz).notNull(),
+  fetchedAt: timestamp("fetched_at", tz).defaultNow().notNull(),
+});
