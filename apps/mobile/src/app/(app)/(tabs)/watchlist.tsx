@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
+import * as SecureStore from "expo-secure-store";
 import {
   Alert,
   FlatList,
@@ -35,6 +36,8 @@ type WatchlistInstrument = Watchlist["instruments"][number];
 type InstrumentSearchResult =
   paths["/api/instruments"]["get"]["responses"][200]["content"]["application/json"]["data"][number];
 
+const WATCHLIST_SELECTION_KEY = "egx.watchlistSelectedId";
+
 export default function WatchlistScreen() {
   const { t } = useTranslation();
   const locale = useLocaleStore((state) => state.locale);
@@ -43,6 +46,7 @@ export default function WatchlistScreen() {
   const signedIn = !!session?.user;
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectionRestored, setSelectionRestored] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
@@ -64,11 +68,40 @@ export default function WatchlistScreen() {
 
   const lists = useMemo(() => query.data?.data ?? [], [query.data]);
 
+  // Restore the last-viewed list so the tab opens directly on the user's
+  // stocks instead of always resetting to the first pill.
   useEffect(() => {
-    if (!selectedId && lists.length > 0) {
-      setSelectedId(lists[0]?.id ?? null);
+    SecureStore.getItemAsync(WATCHLIST_SELECTION_KEY)
+      .then((stored) => {
+        if (stored) {
+          setSelectedId(stored);
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setSelectionRestored(true));
+  }, []);
+
+  useEffect(() => {
+    if (!selectionRestored || lists.length === 0) {
+      return;
     }
-  }, [lists, selectedId]);
+
+    if (lists.some((list) => list.id === selectedId)) {
+      return;
+    }
+
+    // Missing (deleted list, signed out): prefer the user's own first list.
+    const own = lists.find((list) => list.kind === "custom");
+
+    setSelectedId(own?.id ?? lists[0]?.id ?? null);
+  }, [selectionRestored, lists, selectedId]);
+
+  const selectList = (id: string) => {
+    setSelectedId(id);
+    void SecureStore.setItemAsync(WATCHLIST_SELECTION_KEY, id).catch(
+      () => undefined,
+    );
+  };
 
   const selected = lists.find((l) => l.id === selectedId) ?? lists[0] ?? null;
   const instruments = selected?.instruments ?? [];
@@ -93,7 +126,7 @@ export default function WatchlistScreen() {
         },
       });
       const created = fresh.data.find((l) => l.name === name && l.kind === "custom");
-      if (created) setSelectedId(created.id);
+      if (created) selectList(created.id);
     },
     onError: () => {
       Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
@@ -316,7 +349,7 @@ export default function WatchlistScreen() {
         key={list.id}
         accessibilityRole="button"
         accessibilityState={{ selected: active }}
-        onPress={() => setSelectedId(list.id)}
+        onPress={() => selectList(list.id)}
         onLongPress={() => {
           if (list.editable) confirmDeleteList(list);
         }}
