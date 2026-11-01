@@ -5,6 +5,9 @@ import { fetchWithRetry } from "../lib/http";
 import { withIngestRun } from "../lib/runs";
 
 const GLOBAL_SCAN_URL = "https://scanner.tradingview.com/global/scan";
+const FXRATES_URL = "https://api.fxratesapi.com/latest";
+const CURRENCY_API_URL =
+  "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json";
 
 const TROY_OUNCE_GRAMS = 31.103474;
 
@@ -15,8 +18,12 @@ type MacroSymbol = {
   unit: string | null;
 };
 
+/**
+ * TradingView covers oil and metals well. USD/EGP is deliberately NOT taken
+ * from TradingView: its `FX_IDC:USDEGP` feed is a static reference rate (0%
+ * change, days-old timestamp), so it is fetched from a real FX feed instead.
+ */
 const MACRO_SYMBOLS: MacroSymbol[] = [
-  { key: "usd_egp", tvSymbol: "FX_IDC:USDEGP", currency: "EGP", unit: null },
   { key: "brent", tvSymbol: "ICEEUR:BRN1!", currency: "USD", unit: "bbl" },
   { key: "wti", tvSymbol: "NYMEX:CL1!", currency: "USD", unit: "bbl" },
   { key: "gold_oz", tvSymbol: "OANDA:XAUUSD", currency: "USD", unit: "oz" },
@@ -61,11 +68,113 @@ async function scanGlobal(
   return rows;
 }
 
+type UsdEgp = { value: number; source: string };
+
+/**
+ * USD/EGP from a real FX feed, updated roughly every minute. fxratesapi is the
+ * primary; the jsDelivr currency-api snapshot is the fallback. Both are free
+ * and keyless.
+ */
+async function fetchUsdEgp(): Promise<UsdEgp | null> {
+  try {
+    const response = await fetchWithRetry(`${FXRATES_URL}?base=USD&symbols=EGP`);
+
+    if (response.ok) {
+      const payload = (await response.json()) as {
+        rates?: Record<string, number>;
+      };
+      const value = num(payload.rates?.EGP);
+
+      if (value !== null) {
+        return { value, source: "fxratesapi" };
+      }
+    }
+  } catch {
+    // Fall through to the secondary source.
+  }
+
+  try {
+    const response = await fetchWithRetry(CURRENCY_API_URL);
+
+    if (response.ok) {
+      const payload = (await response.json()) as {
+        usd?: { egp?: number };
+      };
+      const value = num(payload.usd?.egp);
+
+      if (value !== null) {
+        return { value, source: "currency-api" };
+      }
+    }
+  } catch {
+    // No FX source available this cycle.
+  }
+
+  return null;
+}
+
+async function upsertMacro(values: {
+  key: string;
+  value: number | null;
+  change: number | null;
+  changePct: number | null;
+  currency: string;
+  unit: string | null;
+  source: string;
+  asOf: Date;
+}) {
+  await db
+    .insert(macroQuotes)
+    .values({
+      key: values.key,
+      value: values.value?.toString() ?? null,
+      change: values.change?.toString() ?? null,
+      changePct: values.changePct?.toString() ?? null,
+      currency: values.currency,
+      unit: values.unit,
+      source: values.source,
+      asOf: values.asOf,
+    })
+    .onConflictDoUpdate({
+      target: macroQuotes.key,
+      set: {
+        value: values.value?.toString() ?? null,
+        change: values.change?.toString() ?? null,
+        changePct: values.changePct?.toString() ?? null,
+        currency: values.currency,
+        unit: values.unit,
+        source: values.source,
+        asOf: values.asOf,
+        fetchedAt: new Date(),
+      },
+    });
+}
+
 export async function syncMacro() {
   return withIngestRun("macro", "tradingview", async () => {
-    const rows = await scanGlobal(MACRO_SYMBOLS.map((s) => s.tvSymbol));
     const asOf = new Date();
+
+    const [rows, usdEgp] = await Promise.all([
+      scanGlobal(MACRO_SYMBOLS.map((s) => s.tvSymbol)),
+      fetchUsdEgp(),
+    ]);
+
     const values = new Map<string, number>();
+
+    // FX first — gold-gram derivation below depends on it.
+    if (usdEgp) {
+      values.set("usd_egp", usdEgp.value);
+      await upsertMacro({
+        key: "usd_egp",
+        value: usdEgp.value,
+        change: null,
+        changePct: null,
+        currency: "EGP",
+        unit: null,
+        source: usdEgp.source,
+        asOf,
+      });
+    }
 
     for (const macro of MACRO_SYMBOLS) {
       const row = rows.get(macro.tvSymbol);
@@ -75,81 +184,61 @@ export async function syncMacro() {
         values.set(macro.key, close);
       }
 
-      await db
-        .insert(macroQuotes)
-        .values({
-          key: macro.key,
-          value: close?.toString() ?? null,
-          change: row ? (num(row.d[3])?.toString() ?? null) : null,
-          changePct: row ? (num(row.d[2])?.toString() ?? null) : null,
-          currency: row
-            ? typeof row.d[4] === "string"
-              ? row.d[4]
-              : macro.currency
-            : macro.currency,
-          unit: macro.unit,
-          source: "tradingview",
-          asOf,
-        })
-        .onConflictDoUpdate({
-          target: macroQuotes.key,
-          set: {
-            value: close?.toString() ?? null,
-            change: row ? (num(row.d[3])?.toString() ?? null) : null,
-            changePct: row ? (num(row.d[2])?.toString() ?? null) : null,
-            currency: row
-              ? typeof row.d[4] === "string"
-                ? row.d[4]
-                : macro.currency
-              : macro.currency,
-            asOf,
-            fetchedAt: new Date(),
-          },
-        });
+      await upsertMacro({
+        key: macro.key,
+        value: close,
+        change: row ? num(row.d[3]) : null,
+        changePct: row ? num(row.d[2]) : null,
+        currency:
+          row && typeof row.d[4] === "string" ? row.d[4] : macro.currency,
+        unit: macro.unit,
+        source: "tradingview",
+        asOf,
+      });
     }
 
     // Egyptian gold gram prices derived from the global ounce price and
     // USD/EGP (24k = pure, 21k = 87.5%). Marked as derived, not an official
     // local market quote.
     const goldOz = values.get("gold_oz");
-    const usdEgp = values.get("usd_egp");
+    const usdEgpValue = values.get("usd_egp");
 
-    if (goldOz !== undefined && usdEgp !== undefined) {
-      const gram24 = (goldOz / TROY_OUNCE_GRAMS) * usdEgp;
+    if (goldOz !== undefined && usdEgpValue !== undefined) {
+      const gram24 = (goldOz / TROY_OUNCE_GRAMS) * usdEgpValue;
       const gram21 = gram24 * (21 / 24);
 
       for (const [key, value] of [
         ["gold_egp_24k", gram24],
         ["gold_egp_21k", gram21],
       ] as const) {
-        await db
-          .insert(macroQuotes)
-          .values({
-            key,
-            value: value.toString(),
-            change: null,
-            changePct: null,
-            currency: "EGP",
-            unit: "gram",
-            source: "derived",
-            asOf,
-          })
-          .onConflictDoUpdate({
-            target: macroQuotes.key,
-            set: { value: value.toString(), asOf, fetchedAt: new Date() },
-          });
+        await upsertMacro({
+          key,
+          value,
+          change: null,
+          changePct: null,
+          currency: "EGP",
+          unit: "gram",
+          source: "derived",
+          asOf,
+        });
       }
     }
 
+    const expected = MACRO_SYMBOLS.length + 1;
+
     if (values.size === 0) {
-      throw new Error("TradingView global scan returned no macro quotes");
+      throw new Error("Macro sync produced no quotes");
     }
 
     return {
       itemsOk: values.size,
-      itemsFailed: MACRO_SYMBOLS.length - values.size,
-      status: values.size < MACRO_SYMBOLS.length ? "partial" : "success",
-      metadata: { symbols: MACRO_SYMBOLS.map((s) => s.tvSymbol), values: Object.fromEntries(values) },
+      itemsFailed: Math.max(0, expected - values.size),
+      status: values.size < expected ? "partial" : "success",
+      metadata: {
+        symbols: MACRO_SYMBOLS.map((s) => s.tvSymbol),
+        fxSource: usdEgp?.source ?? null,
+        values: Object.fromEntries(values),
+      },
     };
   });
 }

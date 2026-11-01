@@ -65,4 +65,7 @@ jobs:
           script: |
             docker pull ghcr.io/ahmed-lotfy-dev/egx-worker:latest
             docker tag ghcr.io/ahmed-lotfy-dev/egx-worker:latest egx-worker:latest
-            cd ~/apps/egx-api && docker compose up -d egx-worker
+            # Drop any leftover container (compose can leave a `<hash>_egx-worker`
+            # that makes the next `up` fail with a name conflict).
+            docker rm -f $(docker ps -aq -f name=egx-worker) 2>/dev/null || true
+            cd ~/apps/egx-api && docker compose up -d --remove-orphans egx-worker

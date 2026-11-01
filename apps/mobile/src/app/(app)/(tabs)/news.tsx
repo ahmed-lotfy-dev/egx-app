@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/EmptyState";
 import { Screen } from "@/components/Screen";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors } from "@/constants/theme";
 import { api } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/format";
@@ -143,10 +144,8 @@ export default function NewsScreen() {
           />
         }
         ListHeaderComponent={
-          <View className="px-5 pb-4 pt-2">
-            <Text className="font-display text-[28px] leading-9 text-text">
-              {t("newsTab.title")}
-            </Text>
+          <>
+            <ScreenHeader title={t("newsTab.title")} />
 
             {/* Main segmented control: Market / Economy */}
             <View className="mt-3 self-start flex-row rounded-full border border-border bg-canvas p-1">
@@ -233,8 +232,7 @@ export default function NewsScreen() {
                 </View>
               </View>
             )}
-          </View>
-        }
+        </>}
         ListFooterComponent={
           <ListFooter
             feed={feed}
@@ -509,14 +507,9 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
       <View className="mt-3 flex-row items-center gap-2 flex-wrap">
         {item.sentiment && (
           <View className="flex-row items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: `${sentimentColor}15`, borderColor: `${sentimentColor}40` }}>
-            <Ionicons
-              name={
-                item.sentiment === "bullish" ? "trending-up" :
-                item.sentiment === "bearish" ? "trending-down" :
-                item.sentiment === "mixed" ? "swap-horizontal" : "remove"
-              }
-              size={10}
-              color={sentimentColor}
+            <View
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: sentimentColor }}
             />
             <Text className="font-body text-[10px]" style={{ color: sentimentColor }}>
               {t(`newsTab.sentiment.${item.sentiment}`)}
@@ -525,10 +518,9 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
         )}
         {item.impactLevel && (
           <View className="flex-row items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: `${impactColor}15`, borderColor: `${impactColor}40` }}>
-            <Ionicons
-              name={item.impactLevel === "critical" ? "alert-circle" : item.impactLevel === "high" ? "trending-up" : "remove"}
-              size={10}
-              color={impactColor}
+            <View
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: impactColor }}
             />
             <Text className="font-body text-[10px]" style={{ color: impactColor }}>
               {t(`newsTab.impact.${item.impactLevel}`)}
@@ -554,7 +546,7 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
 
       {/* Category chip */}
       {item.category && (
-        <View className="mt-2">
+        <View className="mt-2 flex-row">
           <View className="rounded-full border border-border bg-surface-elevated px-2 py-0.5">
             <Text className="font-body text-[10px] text-text-muted" numberOfLines={1}>
               {item.category}

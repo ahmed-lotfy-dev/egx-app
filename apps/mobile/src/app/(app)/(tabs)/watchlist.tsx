@@ -21,7 +21,8 @@ import DraggableFlatList, {
 import { useTranslation } from "react-i18next";
 
 import { Screen } from "@/components/Screen";
-import { colors } from "@/constants/theme";
+import { ScreenHeader } from "@/components/ScreenHeader";
+import { colors, tabular } from "@/constants/theme";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { formatPrice, formatPercent } from "@/lib/format";
@@ -276,7 +277,7 @@ export default function WatchlistScreen() {
       onPress={() => router.push({ pathname: "/(app)/stock/[ticker]", params: { ticker: item.ticker } })}
       onLongPress={onLongPress}
       delayLongPress={280}
-      className={`mx-5 border-t border-border/60 py-3 active:opacity-70 ${onLongPress ? "flex-row" : ""}`}
+      className={`mx-5 border-t border-border/60 py-3 active:opacity-70`}
     >
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1 min-w-0">
@@ -301,12 +302,14 @@ export default function WatchlistScreen() {
             {item.quote ? (
               <>
                 <Text
+                  style={tabular}
                   className={`font-display text-[22px] leading-7 ${item.quote.changePct !== null && item.quote.changePct > 0 ? "text-up" : item.quote.changePct !== null && item.quote.changePct < 0 ? "text-down" : "text-text"}`}
                 >
                   {formatPrice(item.quote.price ?? 0)}
                 </Text>
                 {item.quote.changePct !== null ? (
                   <Text
+                    style={tabular}
                     className={`font-body text-[12px] ${item.quote.changePct > 0 ? "text-up" : item.quote.changePct < 0 ? "text-down" : "text-text-muted"}`}
                   >
                     {formatPercent(item.quote.changePct)}
@@ -403,9 +406,7 @@ export default function WatchlistScreen() {
 
   const listHeader = (
     <View>
-      <View className="px-5 pb-3 pt-2">
-        <Text className="font-display text-[28px] leading-9 text-text">{t("watchlist.title")}</Text>
-      </View>
+      <ScreenHeader title={t("watchlist.title")} />
       {/* Telda-style pill tabs */}
       <ScrollView
         horizontal
@@ -678,11 +679,7 @@ export default function WatchlistScreen() {
 
 function Header() {
   const { t } = useTranslation();
-  return (
-    <View className="px-5 pb-4 pt-2">
-      <Text className="font-display text-[28px] leading-9 text-text">{t("watchlist.title")}</Text>
-    </View>
-  );
+  return <ScreenHeader title={t("watchlist.title")} />;
 }
 
 function NameModal({

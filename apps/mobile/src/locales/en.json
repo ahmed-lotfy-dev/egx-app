@@ -82,6 +82,7 @@
     "stale": "Stale price",
     "chartTitle": "Price action",
     "chartNote": "Daily candles in EGP · drag the chart to inspect a session",
+    "chartNoteIntraday": "5-minute candles in EGP · refreshes automatically during the session",
     "chartError": "Could not load price history.",
     "chartEmptyTitle": "Price history is not available yet",
     "chartEmptyBody": "There are not enough stored sessions for this stock ({{count}}). The chart needs at least two.",
@@ -242,6 +243,10 @@
     "filterHasAIOn": "On",
     "filterHasAIOff": "Off",
     "clearFilters": "Clear Filters",
+    "filters": "Filters",
+    "filterRegion": "Region",
+    "filterSentiment": "Sentiment",
+    "filterImpact": "Impact",
     "aiBadge": "AI",
     "aiSummary": "AI Summary",
     "sentiment": {
@@ -294,12 +299,12 @@
     "dragHint": "Long-press & drag to reorder"
   },
   "macro": {
-    "usdEgp": "US Dollar / EGP",
-    "brent": "Brent Oil",
-    "wti": "WTI Oil",
-    "goldOz": "Gold (ounce)",
-    "gold_egp_24k": "Egypt Gold 24K (gram)",
-    "gold_egp_21k": "Egypt Gold 21K (gram)",
+    "usd_egp": "US Dollar",
+    "brent": "Brent",
+    "wti": "WTI",
+    "gold_oz": "Gold",
+    "gold_egp_24k": "Egypt gold 24K",
+    "gold_egp_21k": "Egypt gold 21K",
     "stale": "outdated",
     "estimatedNote": "The Egyptian gram price is estimated from the global ounce price and USD/EGP"
   }

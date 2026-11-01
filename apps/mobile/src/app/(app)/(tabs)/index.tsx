@@ -21,8 +21,9 @@ import { useTranslation } from "react-i18next";
 
 import { Screen } from "@/components/Screen";
 import { MacroStrip } from "@/components/MacroStrip";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { Sparkline } from "@/components/Sparkline";
-import { colors } from "@/constants/theme";
+import { colors, tabular } from "@/constants/theme";
 import { api } from "@/lib/api";
 import {
   formatCairoTime,
@@ -143,26 +144,25 @@ export default function MarketsScreen() {
   }, [overviewQuery.refetch, instrumentsQuery.refetch]);
 
   const header = (
-    <View className="flex-row items-start justify-between px-5 pb-4 pt-2">
-      <View>
-        <Text className="font-label text-[10px] uppercase tracking-[0.18em] text-gold">
-          {t("markets.kicker")}
-        </Text>
-        <Text className="mt-1 font-display text-[28px] leading-9 text-text">
-          {t("markets.title")}
-        </Text>
-      </View>
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("markets.bell")}
-        accessibilityState={{ disabled: true }}
-        disabled
-        className="mt-1 h-11 w-11 items-center justify-center rounded-full border border-border bg-surface opacity-50"
-      >
-        <Ionicons name="notifications-outline" size={20} color={colors.textSecondary} />
-      </Pressable>
-    </View>
+    <ScreenHeader
+      title={t("markets.title")}
+      kicker={t("markets.kicker")}
+      right={
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("markets.bell")}
+          accessibilityState={{ disabled: true }}
+          disabled
+          className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface opacity-50"
+        >
+          <Ionicons
+            name="notifications-outline"
+            size={20}
+            color={colors.textSecondary}
+          />
+        </Pressable>
+      }
+    />
   );
 
   if (!overviewQuery.data) {
@@ -339,7 +339,10 @@ function MarketsHeader({
             <Text className="mt-1 font-body text-[12px] text-text-muted">
               {t("markets.indexName")}
             </Text>
-            <Text className="mt-3 font-display text-[34px] leading-[42px] text-text">
+            <Text
+              style={tabular}
+              className="mt-3 font-display text-[34px] leading-[42px] text-text"
+            >
               {formatPrice(indexQuote?.price)}
             </Text>
           </View>
@@ -349,11 +352,17 @@ function MarketsHeader({
               className={`flex-row items-center gap-1 rounded-full border px-3 py-1.5 ${indexTone.pill}`}
             >
               <Ionicons name={indexTone.icon} size={12} color={indexTone.color} />
-              <Text className={`font-title text-[13px] ${indexTone.text}`}>
+              <Text
+                style={tabular}
+                className={`font-title text-[13px] ${indexTone.text}`}
+              >
                 {formatPercent(indexQuote?.changePct)}
               </Text>
             </View>
-            <Text className={`mt-2 font-body text-[13px] ${indexTone.text}`}>
+            <Text
+              style={tabular}
+              className={`mt-2 font-body text-[13px] ${indexTone.text}`}
+            >
               {formatSigned(indexQuote?.change)}
             </Text>
             <Text className="mt-1 font-body text-[10px] text-text-muted">
@@ -519,7 +528,9 @@ function BreadthStat({
           className="h-1.5 w-1.5 rounded-full"
           style={{ backgroundColor: color }}
         />
-        <Text className="font-title text-[16px] text-text">{value}</Text>
+        <Text style={tabular} className="font-title text-[16px] text-text">
+          {value}
+        </Text>
       </View>
       <Text className="mt-1 font-body text-[11px] text-text-muted">{label}</Text>
     </View>
@@ -541,23 +552,31 @@ function MoverRow({ item, locale }: { item: Instrument; locale: Locale }) {
       onPress={() => openStock(item.ticker)}
       className="flex-row items-center gap-3 border-t border-border/60 py-2.5 active:opacity-70"
     >
+      {/* Name over ticker keeps long EGX symbols from squeezing the name. */}
+      <View className="flex-1 min-w-0">
+        <Text
+          numberOfLines={1}
+          className="font-body text-[12px] text-text-secondary"
+        >
+          {name}
+        </Text>
+        <Text
+          numberOfLines={1}
+          className="mt-0.5 font-label text-[9px] tracking-[0.04em] text-text-muted"
+        >
+          {item.ticker}
+        </Text>
+      </View>
       <Text
-        numberOfLines={1}
-        ellipsizeMode="tail"
-        className="w-14 font-label text-[10px] tracking-[0.04em] text-text-muted"
+        style={tabular}
+        className="w-16 text-end font-title text-[12px] text-text"
       >
-        {item.ticker}
-      </Text>
-      <Text
-        numberOfLines={1}
-        className="flex-1 font-body text-[12px] text-text-secondary"
-      >
-        {name}
-      </Text>
-      <Text className="w-16 text-end font-title text-[12px] text-text">
         {formatPrice(item.quote?.price)}
       </Text>
-      <Text className={`w-16 text-end font-title text-[12px] ${tone.text}`}>
+      <Text
+        style={tabular}
+        className={`w-16 text-end font-title text-[12px] ${tone.text}`}
+      >
         {formatPercent(item.quote?.changePct)}
       </Text>
     </Pressable>
@@ -606,7 +625,7 @@ function SectorChip({ sector }: { sector: Sector }) {
       <Text numberOfLines={1} className="font-title text-[12px] text-text">
         {t(`sectors.${sectorKey(sector.sector)}`)}
       </Text>
-      <Text className={`mt-2 font-display text-[18px] ${tone.text}`}>
+      <Text style={tabular} className={`mt-2 font-display text-[18px] ${tone.text}`}>
         {formatPercent(sector.changePct)}
       </Text>
       <Text className="mt-1 font-body text-[10px] text-text-muted">
@@ -670,7 +689,7 @@ function InstrumentRow({
       </View>
 
       <View className="items-end">
-        <Text className="font-title text-[15px] text-text">
+        <Text style={tabular} className="font-title text-[15px] text-text">
           {formatPrice(quote?.price)}
         </Text>
         <View className="mt-0.5 flex-row items-center gap-1.5">
@@ -680,7 +699,7 @@ function InstrumentRow({
               style={{ backgroundColor: colors.warning }}
             />
           ) : null}
-          <Text className={`font-title text-[12px] ${tone.text}`}>
+          <Text style={tabular} className={`font-title text-[12px] ${tone.text}`}>
             {formatPercent(quote?.changePct)}
           </Text>
         </View>
@@ -693,7 +712,7 @@ function StalePill({ label }: { label: string }) {
   return (
     <View className="flex-row items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-2.5 py-1">
       <Ionicons name="time-outline" size={11} color={colors.warning} />
-      <Text className="font-label text-[9px] uppercase tracking-[0.06em] text-warning">
+      <Text className="font-label text-[9px] text-warning">
         {label}
       </Text>
     </View>

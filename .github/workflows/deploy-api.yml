@@ -64,4 +64,5 @@ jobs:
           script: |
             docker pull ghcr.io/ahmed-lotfy-dev/egx-api:latest
             docker tag ghcr.io/ahmed-lotfy-dev/egx-api:latest egx-api:latest
-            cd ~/apps/egx-api && docker compose up -d
+            docker rm -f $(docker ps -aq -f name=egx-api) 2>/dev/null || true
+            cd ~/apps/egx-api && docker compose up -d --remove-orphans egx-api

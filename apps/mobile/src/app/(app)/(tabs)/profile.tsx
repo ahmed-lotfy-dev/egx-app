@@ -5,6 +5,7 @@ import { Alert, I18nManager, Pressable, ScrollView, Text, View } from "react-nat
 import { useTranslation } from "react-i18next";
 
 import { Screen } from "@/components/Screen";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors } from "@/constants/theme";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
@@ -71,11 +72,7 @@ export default function ProfileScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
-        <View className="px-5 pb-6 pt-2">
-          <Text className="font-display text-[28px] leading-9 text-text">
-            {t("profile.title")}
-          </Text>
-        </View>
+        <ScreenHeader title={t("profile.title")} />
 
         <View className="mx-5 rounded-3xl border border-border bg-surface p-5">
           <View className="flex-row items-center gap-4">
@@ -90,7 +87,7 @@ export default function ProfileScreen() {
         </View>
 
         <View className="mt-6 px-5">
-          <Text className="font-label text-[10px] uppercase tracking-[0.08em] text-text-muted">
+          <Text className="font-label text-[10px] text-text-muted">
             {t("profile.language")}
           </Text>
 
@@ -122,7 +119,7 @@ export default function ProfileScreen() {
         </View>
 
         <View className="mt-6 px-5">
-          <Text className="font-label text-[10px] uppercase tracking-[0.08em] text-text-muted">
+          <Text className="font-label text-[10px] text-text-muted">
             {t("profile.economyStrip")}
           </Text>
           <Text className="mt-1 font-body text-[12px] text-text-muted">
@@ -146,11 +143,17 @@ export default function ProfileScreen() {
                   <Text className="font-body text-[14px] text-text">
                     {t(`macro.${key}`)}
                   </Text>
-                  <Ionicons
-                    name={visible ? "checkbox" : "checkbox-outline"}
-                    size={20}
-                    color={visible ? colors.gold : colors.textMuted}
-                  />
+                  <View
+                    className={`h-6 w-6 items-center justify-center rounded-md border ${
+                      visible
+                        ? "border-gold bg-gold/15"
+                        : "border-border bg-transparent"
+                    }`}
+                  >
+                    {visible ? (
+                      <Ionicons name="checkmark" size={14} color={colors.gold} />
+                    ) : null}
+                  </View>
                 </Pressable>
               );
             })}
@@ -158,7 +161,7 @@ export default function ProfileScreen() {
         </View>
 
         <View className="mt-6 px-5">
-          <Text className="font-label text-[10px] uppercase tracking-[0.08em] text-text-muted">
+          <Text className="font-label text-[10px] text-text-muted">
             {t("profile.service")}
           </Text>
 

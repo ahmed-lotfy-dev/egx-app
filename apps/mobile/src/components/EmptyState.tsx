@@ -22,7 +22,7 @@ export function EmptyState({ icon, title, body, badge }: EmptyStateProps) {
       </Text>
       {badge ? (
         <View className="mt-6 rounded-full border border-border bg-surface px-4 py-2">
-          <Text className="font-label text-[10px] uppercase tracking-[0.08em] text-text-muted">
+          <Text className="font-label text-[10px] text-text-muted">
             {badge}
           </Text>
         </View>

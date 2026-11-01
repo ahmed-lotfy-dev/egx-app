@@ -14,6 +14,8 @@ import { resolveYahooSymbols } from "./jobs/yahoo-symbols";
  * - quotes: every 3 min during EGX market hours (Sun–Thu 09:30–15:00),
  *   every 30 min otherwise. One scanner request covers all instruments;
  *   TradingView's EGX feed is delayed ~15–20 min by the exchange itself.
+ * - macro (USD/EGP, oil, gold): every minute. USD/EGP comes from a live FX
+ *   feed (fxratesapi, jsDelivr fallback); oil/metal quotes from one TV scan.
  * - universe + yahoo symbols: daily 08:30 (before the session).
  * - bars: daily 15:15 (after the close) — Yahoo first, TradingView fallback.
  * - fundamentals: daily 04:30.
@@ -27,7 +29,9 @@ const TRADING_DAYS = new Set(["Sun", "Mon", "Tue", "Wed", "Thu"]);
 
 const QUOTES_INTERVAL_MARKET_MS = 3 * 60_000;
 const QUOTES_INTERVAL_OFF_MS = 30 * 60_000;
-const MACRO_INTERVAL_MS = 30 * 60_000;
+// FX (USD/EGP) and metals track the market closely; one scan + one FX request
+// per minute stays cheap for the micro instance.
+const MACRO_INTERVAL_MS = 60_000;
 const NEWS_INTERVAL_MS = 30 * 60_000;
 const ANALYSIS_INTERVAL_MS = 20 * 60_000;
 const TICK_MS = 60_000;

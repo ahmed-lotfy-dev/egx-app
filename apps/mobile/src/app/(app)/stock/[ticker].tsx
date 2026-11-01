@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 
 import { PriceChart } from "@/components/PriceChart";
 import { Screen } from "@/components/Screen";
-import { colors } from "@/constants/theme";
+import { colors, tabular } from "@/constants/theme";
 import { api } from "@/lib/api";
 import { useChartModeStore } from "@/stores/chart-mode";
 import {
@@ -275,7 +275,7 @@ export default function StockScreen() {
 
           <View className="mt-4 flex-row items-end justify-between gap-3">
             <View>
-              <Text className="font-display text-[34px] leading-[42px] text-text">
+              <Text style={tabular} className="font-display text-[34px] leading-[42px] text-text">
                 {formatPrice(quote?.price)}
               </Text>
               <View className="mt-1 flex-row items-center gap-2">
@@ -449,7 +449,9 @@ export default function StockScreen() {
           </View>
 
           <Text className="mt-3 font-body text-[10px] text-text-muted">
-            {t("stock.chartNote")}
+            {t(
+              range === "1D" ? "stock.chartNoteIntraday" : "stock.chartNote",
+            )}
           </Text>
         </View>
 
@@ -792,7 +794,7 @@ function StatCell({
   return (
     <View className="w-1/2 py-2 pe-2">
       <Text className="font-body text-[10px] text-text-muted">{label}</Text>
-      <Text className="mt-1 font-title text-[13px] text-text">
+      <Text style={tabular} className="mt-1 font-title text-[13px] text-text">
         {value ?? t("stock.notAvailable")}
       </Text>
     </View>
@@ -892,7 +894,7 @@ function FundamentalsCard({
 
       {groups.map((group) => (
         <View key={group.title} className="mt-4">
-          <Text className="font-label text-[10px] uppercase tracking-[0.1em] text-gold">
+          <Text className="font-label text-[10px] text-gold">
             {group.title}
           </Text>
           <View className="mt-1.5">
