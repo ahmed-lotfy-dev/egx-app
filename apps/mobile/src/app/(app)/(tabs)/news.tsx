@@ -147,55 +147,62 @@ export default function NewsScreen() {
           <>
             <ScreenHeader title={t("newsTab.title")} />
 
-            {/* Main segmented control: Market / Economy */}
-            <View className="mt-3 self-start flex-row rounded-full border border-border bg-canvas p-1">
-              {FEEDS.map((tab) => {
-                const selected = feed === tab;
-                return (
-                  <Pressable
-                    key={tab}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    onPress={() => setFeed(tab)}
-                    className={`rounded-full px-4 py-1.5 active:opacity-80 ${selected ? "bg-surface-elevated" : ""}`}
-                  >
-                    <Text
-                      className={`font-title text-[13px] ${selected ? "text-gold" : "text-text-muted"}`}
+            {/* Feed switch + filters share one row so the header stays tight */}
+            <View className="mt-2 flex-row items-center justify-between gap-3 px-5">
+              <View className="flex-row rounded-full border border-border bg-canvas p-1">
+                {FEEDS.map((tab) => {
+                  const selected = feed === tab;
+                  return (
+                    <Pressable
+                      key={tab}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
+                      onPress={() => setFeed(tab)}
+                      className={`rounded-full px-4 py-1.5 active:opacity-80 ${selected ? "bg-surface-elevated" : ""}`}
                     >
-                      {t(`newsTab.${tab}Tab`)}
+                      <Text
+                        className={`font-title text-[13px] ${selected ? "text-gold" : "text-text-muted"}`}
+                      >
+                        {t(`newsTab.${tab}Tab`)}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <View className="flex-row items-center gap-2">
+                <Pressable
+                  onPress={() => setShowFilters(!showFilters)}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: showFilters }}
+                  className={`rounded-full border px-3.5 py-1.5 active:opacity-80 ${
+                    showFilters
+                      ? "border-gold/40 bg-surface-elevated"
+                      : "border-border bg-canvas"
+                  }`}
+                >
+                  <View className="flex-row items-center gap-1.5">
+                    <Ionicons name="funnel-outline" size={15} color={colors.gold} />
+                    <Text className="font-title text-[12px] text-text">
+                      {t("newsTab.filters")}
+                    </Text>
+                    {hasActiveFilters && (
+                      <View className="h-1.5 w-1.5 rounded-full bg-gold" />
+                    )}
+                  </View>
+                </Pressable>
+
+                {hasActiveFilters && (
+                  <Pressable
+                    onPress={clearFilters}
+                    className="rounded-full border border-border bg-canvas px-3 py-1.5 active:opacity-80"
+                  >
+                    <Text className="font-title text-[11px] text-text-muted">
+                      {t("newsTab.clearFilters")}
                     </Text>
                   </Pressable>
-                );
-              })}
-            </View>
-
-            {/* Filter button row */}
-            <View className="mt-3 flex-row items-center gap-2">
-              <Pressable
-                onPress={() => setShowFilters(!showFilters)}
-                className={`rounded-full px-4 py-1.5 active:opacity-80 ${showFilters ? "bg-surface-elevated" : "bg-canvas border border-border"}`}
-              >
-                <View className="flex-row items-center gap-1.5">
-                  <Ionicons name="funnel-outline" size={16} color={colors.gold} />
-                  <Text className="font-title text-[12px] text-text">
-                    {t("newsTab.filters")}
-                  </Text>
-                  {hasActiveFilters && (
-                    <View className="h-4 w-4 rounded-full bg-gold" />
-                  )}
-                </View>
-              </Pressable>
-
-              {hasActiveFilters && (
-                <Pressable
-                  onPress={clearFilters}
-                  className="rounded-full px-3 py-1.5 active:opacity-80 bg-canvas border border-border"
-                >
-                  <Text className="font-title text-[11px] text-text-muted">
-                    {t("newsTab.clearFilters")}
-                  </Text>
-                </Pressable>
-              )}
+                )}
+              </View>
             </View>
 
             {/* Expanded filter chips */}
@@ -404,6 +411,15 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
       : item.source === "arabfinance"
       ? "newsTab.sourceArabFinance"
       : item.source;
+  // The ingester stamps every row with the run label "multi-source"; show the
+  // actual publisher derived from the article URL instead.
+  const publisher = publisherLabel(item.url, item.source);
+  const regionKey =
+    item.sourceRegion === "egypt"
+      ? "newsTab.filterEgypt"
+      : item.sourceRegion === "saudi"
+        ? "newsTab.filterSaudi"
+        : "newsTab.filterGlobal";
 
   const displayTitle = locale === "ar" && item.translatedTitle ? item.translatedTitle : item.title;
   const displaySummary = locale === "ar" && item.translatedSummary
@@ -438,14 +454,15 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
       {/* Header: source, time, region, AI badge */}
       <View className="flex-row items-center gap-2 mb-2">
         <Text className="flex-1 font-body text-[11px] text-text-muted" numberOfLines={1}>
-          {t(sourceLabel)}
+          {publisher ?? t(sourceLabel)}
           <Text> · </Text>
           {formatRelativeTime(item.publishedAt, locale)}
         </Text>
         {item.sourceRegion && (
           <View className="rounded-full border border-border bg-surface-elevated px-2 py-0.5">
             <Text className="font-body text-[10px] text-text-muted" numberOfLines={1}>
-              {item.sourceRegion === "egypt" ? "🇪🇬" : item.sourceRegion === "saudi" ? "🇸🇦" : "🌍"} {item.sourceRegion}
+              {item.sourceRegion === "egypt" ? "🇪🇬" : item.sourceRegion === "saudi" ? "🇸🇦" : "🌍"}{" "}
+              {t(regionKey)}
             </Text>
           </View>
         )}
@@ -556,6 +573,32 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
       )}
     </Pressable>
   );
+}
+
+/** Recognizable publisher names for the domains the ingester pulls from. */
+const PUBLISHER_NAMES: Record<string, string> = {
+  "arabfinance.com": "Arab Finance",
+  "bloomberg.com": "Bloomberg",
+  "cnbc.com": "CNBC",
+  "ft.com": "Financial Times",
+  "wsj.com": "WSJ",
+  "investing.com": "Investing.com",
+  "marketwatch.com": "MarketWatch",
+  "saudigazette.com.sa": "Saudi Gazette",
+};
+
+/** Publisher from the article URL when the row only carries the run label. */
+function publisherLabel(url: string, source: string): string | null {
+  if (source !== "multi-source") {
+    return null;
+  }
+
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    return PUBLISHER_NAMES[host] ?? host;
+  } catch {
+    return null;
+  }
 }
 
 async function openArticle(url: string, openingRef: { current: boolean }) {

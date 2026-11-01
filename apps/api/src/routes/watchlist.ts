@@ -14,6 +14,7 @@ import { auth } from "../lib/auth";
 import { SHARIA_TICKERS } from "../lib/sharia-tickers";
 import { db } from "../db/client";
 import { instruments, latestQuotes, watchlistItems, watchlists } from "../db/schema";
+import { cached, invalidateCache, READ_TTL_MS } from "../lib/cache";
 
 type WatchlistPayload = z.infer<typeof WatchlistsResponseSchema>["data"][number];
 type WatchlistInstrument = WatchlistPayload["instruments"][number];
@@ -458,15 +459,24 @@ export const watchlistRoutes = new OpenAPIHono();
 watchlistRoutes.openapi(listWatchlistsRoute, async (c) => {
   const userId = await getSessionUserId(c);
 
-  const rows = await selectQuoteRows();
-  const defaults = buildDefaultLists(rows);
-  const customs = userId ? await buildCustomLists(userId) : [];
+  // The default lists are the same for everyone, so cache them globally;
+  // custom lists are cached per user and dropped on every mutation.
+  const defaults = await cached("watchlists:defaults", READ_TTL_MS, async () => {
+    const rows = await selectQuoteRows();
+    return { lists: buildDefaultLists(rows), asOf: newestAsOf(rows) };
+  });
+
+  const customs = userId
+    ? await cached(`watchlists:custom:${userId}`, READ_TTL_MS, () =>
+        buildCustomLists(userId),
+      )
+    : [];
 
   return c.json(
     {
-      data: [...defaults, ...customs],
+      data: [...defaults.lists, ...customs],
       meta: {
-        asOf: newestAsOf(rows),
+        asOf: defaults.asOf,
       },
     },
     200,
@@ -490,6 +500,8 @@ watchlistRoutes.openapi(createWatchlistRoute, async (c) => {
     return c.json({ error: { code: "INTERNAL", message: "Failed to create watchlist." } }, 500);
   }
 
+  invalidateUserWatchlists(userId);
+
   return c.json(
     {
       data: {
@@ -504,6 +516,11 @@ watchlistRoutes.openapi(createWatchlistRoute, async (c) => {
     201,
   );
 });
+
+/** Drops the signed-in user's cached custom lists after a mutation. */
+function invalidateUserWatchlists(userId: string): void {
+  invalidateCache(`watchlists:custom:${userId}`);
+}
 
 async function requireOwnedWatchlist(userId: string, listId: number) {
   const [list] = await db
@@ -532,6 +549,8 @@ watchlistRoutes.openapi(renameWatchlistRoute, async (c) => {
     .set({ name, updatedAt: new Date() })
     .where(eq(watchlists.id, id));
 
+  invalidateUserWatchlists(userId);
+
   return c.json({ ok: true }, 200);
 });
 
@@ -548,6 +567,7 @@ watchlistRoutes.openapi(deleteWatchlistRoute, async (c) => {
   }
 
   await db.delete(watchlists).where(eq(watchlists.id, id));
+  invalidateUserWatchlists(userId);
   return c.json({ ok: true }, 200);
 });
 
@@ -586,6 +606,8 @@ watchlistRoutes.openapi(addWatchlistItemRoute, async (c) => {
     .values({ watchlistId: id, instrumentId: instrument.id, position: nextPosition })
     .onConflictDoNothing();
 
+  invalidateUserWatchlists(userId);
+
   return c.json({ ok: true }, 201);
 });
 
@@ -617,6 +639,8 @@ watchlistRoutes.openapi(removeWatchlistItemRoute, async (c) => {
   if (deleted.length === 0) {
     return c.json({ error: { code: "NOT_FOUND", message: "Item not in list." } }, 404);
   }
+
+  invalidateUserWatchlists(userId);
 
   return c.json({ ok: true }, 200);
 });
@@ -675,6 +699,8 @@ watchlistRoutes.openapi(reorderWatchlistItemsRoute, async (c) => {
     }
     await tx.update(watchlists).set({ updatedAt: new Date() }).where(eq(watchlists.id, id));
   });
+
+  invalidateUserWatchlists(userId);
 
   return c.json({ ok: true }, 200);
 });

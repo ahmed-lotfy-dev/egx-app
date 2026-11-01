@@ -27,5 +27,8 @@ COPY --from=builder /app ./
 WORKDIR /app/apps/worker
 
 # Run the ingest scheduler (quotes every 3 min in market hours, bars,
-# fundamentals and news on their daily schedules)
-CMD ["bun", "src/cli.ts", "schedule"]
+# fundamentals and news on their daily schedules).
+#
+# `nice` keeps the ingest worker at a lower CPU priority than the API: the
+# box is small and shared, so the API must win whenever both compete.
+CMD ["nice", "-n", "10", "bun", "src/cli.ts", "schedule"]

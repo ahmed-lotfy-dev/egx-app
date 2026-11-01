@@ -8,6 +8,7 @@ import { asc } from "drizzle-orm";
 
 import { db } from "../db/client";
 import { macroQuotes } from "../db/schema/market";
+import { cached } from "../lib/cache";
 
 /**
  * A macro quote older than this is considered stale — the card shows "—"
@@ -43,33 +44,36 @@ const macroRoute = createRoute({
 export const macroRoutes = new OpenAPIHono();
 
 macroRoutes.openapi(macroRoute, async (c) => {
-  const rows = await db
-    .select()
-    .from(macroQuotes)
-    .orderBy(asc(macroQuotes.key));
+  // Every client polls this endpoint; a short cache keeps the shared box calm.
+  const quotes = await cached("macro:quotes", 15_000, async () => {
+    const rows = await db
+      .select()
+      .from(macroQuotes)
+      .orderBy(asc(macroQuotes.key));
 
-  const now = Date.now();
-  const order = new Map(MACRO_KEYS.map((key, index) => [key, index]));
+    const now = Date.now();
+    const order = new Map(MACRO_KEYS.map((key, index) => [key, index]));
 
-  const data = rows
-    .map((row) => {
-      const asOf = row.asOf ? new Date(row.asOf).toISOString() : null;
-      const stale =
-        !row.asOf || now - new Date(row.asOf).getTime() > STALE_AFTER_MS;
+    return rows
+      .map((row) => {
+        const asOf = row.asOf ? new Date(row.asOf).toISOString() : null;
+        const stale =
+          !row.asOf || now - new Date(row.asOf).getTime() > STALE_AFTER_MS;
 
-      return {
-        key: row.key as (typeof MACRO_KEYS)[number],
-        value: row.value === null ? null : Number(row.value),
-        change: row.change === null ? null : Number(row.change),
-        changePct: row.changePct === null ? null : Number(row.changePct),
-        currency: row.currency,
-        unit: row.unit,
-        source: row.source,
-        asOf,
-        stale,
-      };
-    })
-    .sort((a, b) => (order.get(a.key) ?? 99) - (order.get(b.key) ?? 99));
+        return {
+          key: row.key as (typeof MACRO_KEYS)[number],
+          value: row.value === null ? null : Number(row.value),
+          change: row.change === null ? null : Number(row.change),
+          changePct: row.changePct === null ? null : Number(row.changePct),
+          currency: row.currency,
+          unit: row.unit,
+          source: row.source,
+          asOf,
+          stale,
+        };
+      })
+      .sort((a, b) => (order.get(a.key) ?? 99) - (order.get(b.key) ?? 99));
+  });
 
-  return c.json({ data }, 200);
+  return c.json({ data: quotes }, 200);
 });

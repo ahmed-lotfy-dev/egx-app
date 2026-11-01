@@ -26,6 +26,7 @@ import {
   latestQuotes,
 } from "../db/schema";
 import { marketColumns } from "../db/selects";
+import { cached, READ_TTL_MS } from "../lib/cache";
 import {
   latestQuoteAsOf,
   latestUniverseAsOf,
@@ -122,39 +123,48 @@ instrumentRoutes.openapi(listRoute, async (c) => {
     conditions.push(gt(instruments.ticker, cursor.toUpperCase()));
   }
 
-  const rows = await db
-    .select(marketColumns)
-    .from(instruments)
-    .leftJoin(latestQuotes, eq(latestQuotes.instrumentId, instruments.id))
-    .where(and(...conditions))
-    .orderBy(asc(instruments.ticker))
-    .limit(limit + 1);
+  const payload = await cached(
+    `instruments:list:${q ?? ""}|${sector ?? ""}|${kind ?? ""}|${limit}|${cursor ?? ""}`,
+    READ_TTL_MS,
+    async () => {
+      const rows = await db
+        .select(marketColumns)
+        .from(instruments)
+        .leftJoin(latestQuotes, eq(latestQuotes.instrumentId, instruments.id))
+        .where(and(...conditions))
+        .orderBy(asc(instruments.ticker))
+        .limit(limit + 1);
 
-  const page = rows.slice(0, limit);
-  const asOf = latestQuoteAsOf(page);
-  const universeAsOf = latestUniverseAsOf(page);
+      const page = rows.slice(0, limit);
+      const asOf = latestQuoteAsOf(page);
+      const universeAsOf = latestUniverseAsOf(page);
 
-  return c.json(
-    {
-      data: page.map((row) => toInstrumentSummary(row)),
-      meta: {
-        asOf: asOf?.toISOString() ?? null,
-        source: page.find((row) => row.quoteSource)?.quoteSource ?? "none",
-        stale: quoteIsStale(asOf),
-        universeAsOf: universeAsOf?.toISOString() ?? null,
-        nextCursor:
-          rows.length > limit
-            ? (page[page.length - 1]?.ticker ?? null)
-            : null,
-      },
+      return {
+        data: page.map((row) => toInstrumentSummary(row)),
+        meta: {
+          asOf: asOf?.toISOString() ?? null,
+          source: page.find((row) => row.quoteSource)?.quoteSource ?? "none",
+          stale: quoteIsStale(asOf),
+          universeAsOf: universeAsOf?.toISOString() ?? null,
+          nextCursor:
+            rows.length > limit
+              ? (page[page.length - 1]?.ticker ?? null)
+              : null,
+        },
+      };
     },
-    200,
   );
-});
 
+  return c.json(payload, 200);
+});
 instrumentRoutes.openapi(detailRoute, async (c) => {
   const { ticker } = c.req.valid("param");
-  const [row] = await db
+
+  const payload = await cached(
+    `instrument:detail:${ticker.toUpperCase()}`,
+    READ_TTL_MS,
+    async () => {
+      const [row] = await db
     .select({
       ...marketColumns,
       tvSymbol: instruments.tvSymbol,
@@ -167,19 +177,11 @@ instrumentRoutes.openapi(detailRoute, async (c) => {
     .where(eq(instruments.ticker, ticker.toUpperCase()))
     .limit(1);
 
-  if (!row) {
-    return c.json(
-      {
-        error: {
-          code: "INSTRUMENT_NOT_FOUND",
-          message: `No instrument matches ${ticker}`,
-        },
-      },
-      404,
-    );
-  }
+      if (!row) {
+        return null;
+      }
 
-  const [coverage] = await db
+      const [coverage] = await db
     .select({
       barCount: count(),
       firstDate: min(dailyBars.date),
@@ -199,56 +201,69 @@ instrumentRoutes.openapi(detailRoute, async (c) => {
     )
     .limit(1);
 
-  return c.json(
-    {
-      data: {
-        ...toInstrumentSummary(row),
-        tvSymbol: row.tvSymbol,
-        yahooSymbol: row.yahooSymbol,
-        isin: row.isin,
-        logoid: row.logoid,
-        history: {
-          barCount: coverage?.barCount ?? 0,
-          firstDate: coverage?.firstDate ?? null,
-          lastDate: coverage?.lastDate ?? null,
+      return {
+        data: {
+          ...toInstrumentSummary(row),
+          tvSymbol: row.tvSymbol,
+          yahooSymbol: row.yahooSymbol,
+          isin: row.isin,
+          logoid: row.logoid,
+          history: {
+            barCount: coverage?.barCount ?? 0,
+            firstDate: coverage?.firstDate ?? null,
+            lastDate: coverage?.lastDate ?? null,
+          },
+          fundamentals: fundamentalRow
+            ? {
+                source: fundamentalRow.source,
+                asOf: fundamentalRow.asOf,
+                observedAt: fundamentalRow.observedAt.toISOString(),
+                currency: fundamentalRow.currency,
+                marketCap: numberOrNull(fundamentalRow.marketCap),
+                pe: numberOrNull(fundamentalRow.pe),
+                pb: numberOrNull(fundamentalRow.pb),
+                eps: numberOrNull(fundamentalRow.eps),
+                roe: numberOrNull(fundamentalRow.roe),
+                roa: numberOrNull(fundamentalRow.roa),
+                debtToEquity: numberOrNull(fundamentalRow.debtToEquity),
+                dividendYield: numberOrNull(fundamentalRow.dividendYield),
+                revenueTtm: numberOrNull(fundamentalRow.revenueTtm),
+                netIncomeTtm: numberOrNull(fundamentalRow.netIncomeTtm),
+                fcfTtm: numberOrNull(fundamentalRow.fcfTtm),
+                currentRatio: numberOrNull(fundamentalRow.currentRatio),
+                beta: numberOrNull(fundamentalRow.beta),
+                grossMargin: numberOrNull(fundamentalRow.grossMargin),
+                netMargin: numberOrNull(fundamentalRow.netMargin),
+                totalDebt: numberOrNull(fundamentalRow.totalDebt),
+                totalAssets: numberOrNull(fundamentalRow.totalAssets),
+                bookValuePerShare: numberOrNull(
+                  fundamentalRow.bookValuePerShare,
+                ),
+                evEbitda: numberOrNull(fundamentalRow.evEbitda),
+              }
+            : null,
         },
-        fundamentals: fundamentalRow
-          ? {
-              source: fundamentalRow.source,
-              asOf: fundamentalRow.asOf,
-              observedAt: fundamentalRow.observedAt.toISOString(),
-              currency: fundamentalRow.currency,
-              marketCap: numberOrNull(fundamentalRow.marketCap),
-              pe: numberOrNull(fundamentalRow.pe),
-              pb: numberOrNull(fundamentalRow.pb),
-              eps: numberOrNull(fundamentalRow.eps),
-              roe: numberOrNull(fundamentalRow.roe),
-              roa: numberOrNull(fundamentalRow.roa),
-              debtToEquity: numberOrNull(fundamentalRow.debtToEquity),
-              dividendYield: numberOrNull(fundamentalRow.dividendYield),
-              revenueTtm: numberOrNull(fundamentalRow.revenueTtm),
-              netIncomeTtm: numberOrNull(fundamentalRow.netIncomeTtm),
-              fcfTtm: numberOrNull(fundamentalRow.fcfTtm),
-              currentRatio: numberOrNull(fundamentalRow.currentRatio),
-              beta: numberOrNull(fundamentalRow.beta),
-              grossMargin: numberOrNull(fundamentalRow.grossMargin),
-              netMargin: numberOrNull(fundamentalRow.netMargin),
-              totalDebt: numberOrNull(fundamentalRow.totalDebt),
-              totalAssets: numberOrNull(fundamentalRow.totalAssets),
-              bookValuePerShare: numberOrNull(
-                fundamentalRow.bookValuePerShare,
-              ),
-              evEbitda: numberOrNull(fundamentalRow.evEbitda),
-            }
-          : null,
-      },
-      meta: {
-        asOf: row.quoteAsOf?.toISOString() ?? null,
-        source: row.quoteSource ?? "none",
-        stale: quoteIsStale(row.quoteAsOf),
-        universeAsOf: row.updatedAt.toISOString(),
-      },
+        meta: {
+          asOf: row.quoteAsOf?.toISOString() ?? null,
+          source: row.quoteSource ?? "none",
+          stale: quoteIsStale(row.quoteAsOf),
+          universeAsOf: row.updatedAt.toISOString(),
+        },
+      };
     },
-    200,
   );
+
+  if (!payload) {
+    return c.json(
+      {
+        error: {
+          code: "INSTRUMENT_NOT_FOUND",
+          message: `No instrument matches ${ticker}`,
+        },
+      },
+      404,
+    );
+  }
+
+  return c.json(payload, 200);
 });

@@ -110,6 +110,28 @@ async function runJob(name: string, job: () => Promise<unknown>) {
   }
 }
 
+/**
+ * Heavy ingest jobs run one at a time.
+ *
+ * The worker shares a 1 GB box with the API and other apps; running the
+ * quotes, news and analysis jobs concurrently pushed the load average past
+ * 10 and made API requests take 40–90 s. `macro` stays outside this queue
+ * because it is one small request per minute and the user expects the
+ * dollar rate to keep moving.
+ */
+let heavyQueue: Promise<unknown> = Promise.resolve();
+
+function runHeavyJob(name: string, job: () => Promise<unknown>): void {
+  heavyQueue = heavyQueue
+    .then(() => runJob(name, job))
+    .catch((error) => {
+      console.error(
+        `[scheduler] ${name} queue error:`,
+        error instanceof Error ? error.message : error,
+      );
+    });
+}
+
 async function tick(now: Date): Promise<void> {
   const time = cairoTime(now);
   const market = isMarketTime(time);
@@ -121,7 +143,7 @@ async function tick(now: Date): Promise<void> {
 
   if (Date.now() - state.lastQuotesAt >= quotesInterval) {
     state.lastQuotesAt = Date.now();
-    void runJob("quotes", syncQuotes);
+    runHeavyJob("quotes", syncQuotes);
   }
 
   // Macro indicators (USD/EGP, oil, gold) — refresh around the clock.
@@ -133,12 +155,12 @@ async function tick(now: Date): Promise<void> {
   // News + AI analysis around the clock, in small batches.
   if (Date.now() - state.lastNewsAt >= NEWS_INTERVAL_MS) {
     state.lastNewsAt = Date.now();
-    void runJob("news", syncNews);
+    runHeavyJob("news", syncNews);
   }
 
   if (Date.now() - state.lastAnalysisAt >= ANALYSIS_INTERVAL_MS) {
     state.lastAnalysisAt = Date.now();
-    void runJob("news:analyze", () => processAnalysisQueue(25));
+    runHeavyJob("news:analyze", () => processAnalysisQueue(15));
   }
 
   // Once-daily jobs.
@@ -148,7 +170,7 @@ async function tick(now: Date): Promise<void> {
       state.lastUniverseDate !== time.dateKey
     ) {
       state.lastUniverseDate = time.dateKey;
-      void runJob("universe", async () => {
+      runHeavyJob("universe", async () => {
         await syncUniverse();
         await resolveYahooSymbols();
       });
@@ -156,13 +178,13 @@ async function tick(now: Date): Promise<void> {
 
     if (time.minutes >= 15 * 60 + 15 && state.lastBarsDate !== time.dateKey) {
       state.lastBarsDate = time.dateKey;
-      void runJob("bars", () => syncBars({ days: 400 }));
+      runHeavyJob("bars", () => syncBars({ days: 400 }));
     }
   }
 
   if (time.minutes >= 4 * 60 + 30 && state.lastFundamentalsDate !== time.dateKey) {
     state.lastFundamentalsDate = time.dateKey;
-    void runJob("fundamentals", syncFundamentals);
+    runHeavyJob("fundamentals", syncFundamentals);
   }
 
   if (!market) {
