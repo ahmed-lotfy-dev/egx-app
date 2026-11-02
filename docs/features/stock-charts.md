@@ -13,7 +13,7 @@ The stock-detail price chart (`apps/mobile/src/components/PriceChart.tsx`) is a 
 - **Baseline** dashed at the period's opening close for instant trend orientation.
 - **Pivot / R1 / S1 level lines** kept as clean dashed lines with small labels.
 - Timeframe pills (**1D**/1W/1M/3M/6M/1Y, **1D is the default**) select `?range=` on `GET /api/instruments/{ticker}/history`.
-- **1D intraday**: 5-minute bars of the latest Cairo session, x-axis labelled with Cairo clock times; polled every 60s while the screen is open (Thndr-style live feel).
+- **1D intraday**: 5-minute bars of the latest Cairo session, x-axis labelled with Cairo clock times; polled every 60s while the screen is open (Thndr-style live feel). A localized caption under the chart (`stock.chartNoteIntraday`, "تغيرات السعر خلال جلسة اليوم — تحديث كل دقيقة") explains that 1D shows today's session updating every minute, so the sparse after-hours 1D chart is not mistaken for missing data.
 
 ## 2. Why
 

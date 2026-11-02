@@ -333,7 +333,7 @@ function MarketsHeader({
       <View className="mx-5 overflow-hidden rounded-3xl border border-gold/30 bg-surface p-5">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="font-label text-[10px] uppercase tracking-[0.14em] text-gold">
+            <Text className="font-label text-[10px] text-gold">
               {t("markets.indexKicker")}
             </Text>
             <Text className="mt-1 font-body text-[12px] text-text-muted">

@@ -335,7 +335,7 @@ export default function StockScreen() {
             {stale ? (
               <View className="flex-row items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-2.5 py-1">
                 <Ionicons name="time-outline" size={11} color={colors.warning} />
-                <Text className="font-label text-[9px] uppercase tracking-[0.06em] text-warning">
+                <Text className="font-label text-[9px] text-warning">
                   {t("stock.stale")}
                 </Text>
               </View>
@@ -516,7 +516,7 @@ export default function StockScreen() {
                   {t("stock.aiTitle")}
                 </Text>
                 <View className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1">
-                  <Text className="font-label text-[9px] tracking-[0.06em] text-gold">
+                  <Text className="font-label text-[9px] text-gold">
                     {t("stock.aiBadge")}
                   </Text>
                 </View>
@@ -1030,7 +1030,7 @@ function AiSheet({
               {t("stock.aiSheetTitle")}
             </Text>
             <View className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1">
-              <Text className="font-label text-[9px] tracking-[0.06em] text-gold">
+              <Text className="font-label text-[9px] text-gold">
                 {t("stock.aiBadge")}
               </Text>
             </View>

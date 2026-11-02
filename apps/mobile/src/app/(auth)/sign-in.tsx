@@ -125,7 +125,7 @@ export default function SignInScreen() {
               <>
                 <View className="my-7 flex-row items-center gap-4">
                   <View className="h-px flex-1" style={{ backgroundColor: colors.border }} />
-                  <Text className="font-label text-[10px] uppercase tracking-[0.08em] text-text-muted">
+                  <Text className="font-label text-[10px] text-text-muted">
                     {t("common.continue")}
                   </Text>
                   <View className="h-px flex-1" style={{ backgroundColor: colors.border }} />
