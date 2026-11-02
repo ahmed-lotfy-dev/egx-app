@@ -60,8 +60,12 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          command_timeout: 20m
+          command_timeout: 45m
           script: |
+            # A failed/aborted run can leave orphaned pulls that thrash this
+            # small box; clear them before starting a fresh one.
+            pkill -f 'docker pull' 2>/dev/null || true
+            sleep 2
             docker pull ghcr.io/ahmed-lotfy-dev/egx-api:latest
             docker tag ghcr.io/ahmed-lotfy-dev/egx-api:latest egx-api:latest
             docker rm -f $(docker ps -aq -f name=egx-api) 2>/dev/null || true

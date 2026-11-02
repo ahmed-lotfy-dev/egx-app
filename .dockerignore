@@ -1,0 +1,12 @@
+# Keep host artifacts out of the build context. The API and worker images
+# install dependencies inside the builder stage, so local node_modules would
+# only poison the install with wrong-platform binaries.
+.git
+**/node_modules
+**/.expo
+apps/mobile
+docs
+.github
+.env*
+!.env.example
+*.log
