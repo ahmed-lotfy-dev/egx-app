@@ -130,7 +130,7 @@
     "aiBody": "Combines the quote, chart, support and resistance, financials, and this stock's news into a short analysis.",
     "aiBadge": "Coming soon",
     "aiSheetTitle": "AI analysis",
-    "aiSheetBody": "The engine is still being built. Once it ships it will read:",
+    "aiSheetBody": "The assistant reads this data about the stock and answers — tap any item to start from it:",
     "aiInputQuote": "Price, change, and last update",
     "aiInputChart": "Daily price action",
     "aiInputLevels": "Support and resistance",
@@ -150,7 +150,8 @@
     "footer": "Data is informational only and not investment advice.",
     "sourcesLabel": "Sources:",
     "chartLine": "Line chart",
-    "chartCandles": "Candles"
+    "chartCandles": "Candles",
+    "aiAskCta": "Ask the assistant about {{ticker}}"
   },
   "sectors": {
     "finance": "Finance",
@@ -187,12 +188,23 @@
   },
   "ai": {
     "title": "Assistant",
-    "emptyTitle": "Ask about any stock",
-    "emptyBody": "The assistant answers from market data and its sources.",
-    "capTitle": "The assistant answers from market data",
-    "capSearch": "Search stocks and current prices",
-    "capNews": "Summarise company news and market sentiment",
-    "capFundamentals": "Analyse fundamentals and financial statements"
+    "newChat": "New chat",
+    "greeting": "Hi! I'm the EGX assistant",
+    "greetingBody": "Ask me about any stock, the index, or the dollar — I answer from the app's live data and flag delays when they matter.",
+    "suggestMarket": "What happened in the market today?",
+    "suggestDollar": "How is the dollar doing?",
+    "suggestTop": "Top stocks today",
+    "suggestHelp": "Explain the P/E ratio",
+    "suggestTickerQuote": "How is {{ticker}} doing?",
+    "suggestTickerChart": "Explain {{ticker}}'s recent price action",
+    "suggestTickerLevels": "Support and resistance for {{ticker}}",
+    "suggestTickerFundamentals": "Analyse {{ticker}}'s fundamentals",
+    "suggestTickerNews": "Latest {{ticker}} news?",
+    "inputPlaceholder": "Ask about a stock or the index…",
+    "send": "Send",
+    "typing": "Assistant is typing…",
+    "error": "The assistant is unavailable right now. Try again.",
+    "clearContext": "Remove stock from chat"
   },
   "profile": {
     "title": "Profile",

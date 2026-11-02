@@ -11,6 +11,8 @@ const EnvSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default("EGX <no-reply@example.com>"),
+  NVIDIA_API_KEY: z.string().optional(),
+  NVIDIA_NIM_MODEL: z.string().optional(),
 });
 
 const parsed = EnvSchema.safeParse(process.env);

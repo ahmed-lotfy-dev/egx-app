@@ -511,16 +511,9 @@ export default function StockScreen() {
             </View>
 
             <View className="flex-1">
-              <View className="flex-row items-center gap-2">
-                <Text className="flex-1 font-title text-[15px] text-text">
-                  {t("stock.aiTitle")}
-                </Text>
-                <View className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1">
-                  <Text className="font-label text-[9px] text-gold">
-                    {t("stock.aiBadge")}
-                  </Text>
-                </View>
-              </View>
+              <Text className="flex-1 font-title text-[15px] text-text">
+                {t("stock.aiTitle")}
+              </Text>
               <Text className="mt-1.5 font-body text-[12px] leading-5 text-text-secondary">
                 {t("stock.aiBody")}
               </Text>
@@ -612,7 +605,12 @@ export default function StockScreen() {
         </View>
       </ScrollView>
 
-      <AiSheet visible={aiOpen} onClose={() => setAiOpen(false)} locale={locale} />
+      <AiSheet
+        visible={aiOpen}
+        onClose={() => setAiOpen(false)}
+        locale={locale}
+        ticker={ticker}
+      />
     </Screen>
   );
 }
@@ -987,19 +985,29 @@ function AiSheet({
   visible,
   onClose,
   locale,
+  ticker,
 }: {
   visible: boolean;
   onClose: () => void;
   locale: Locale;
+  ticker: string;
 }) {
   const { t } = useTranslation();
   const inputs = [
-    t("stock.aiInputQuote"),
-    t("stock.aiInputChart"),
-    t("stock.aiInputLevels"),
-    t("stock.aiInputFundamentals"),
-    t("stock.aiInputNews"),
+    { label: t("stock.aiInputQuote"), question: t("ai.suggestTickerQuote", { ticker }) },
+    { label: t("stock.aiInputChart"), question: t("ai.suggestTickerChart", { ticker }) },
+    { label: t("stock.aiInputLevels"), question: t("ai.suggestTickerLevels", { ticker }) },
+    { label: t("stock.aiInputFundamentals"), question: t("ai.suggestTickerFundamentals", { ticker }) },
+    { label: t("stock.aiInputNews"), question: t("ai.suggestTickerNews", { ticker }) },
   ];
+
+  const openChat = (question?: string) => {
+    onClose();
+    router.push({
+      pathname: "/(app)/(tabs)/ai",
+      params: question ? { ticker, q: question } : { ticker },
+    });
+  };
 
   return (
     <Modal
@@ -1029,11 +1037,6 @@ function AiSheet({
             <Text className="flex-1 font-title text-[17px] text-text">
               {t("stock.aiSheetTitle")}
             </Text>
-            <View className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1">
-              <Text className="font-label text-[9px] text-gold">
-                {t("stock.aiBadge")}
-              </Text>
-            </View>
           </View>
 
           <Text className="mt-3 font-body text-[13px] leading-6 text-text-secondary">
@@ -1042,12 +1045,19 @@ function AiSheet({
 
           <View className="mt-4 gap-2">
             {inputs.map((input) => (
-              <View key={input} className="flex-row items-center gap-2">
+              <Pressable
+                key={input.label}
+                accessibilityRole="button"
+                accessibilityLabel={input.question}
+                onPress={() => openChat(input.question)}
+                className="flex-row items-center gap-2 active:opacity-70"
+              >
                 <View className="h-1.5 w-1.5 rounded-full bg-gold" />
                 <Text className="flex-1 font-body text-[12px] text-text-secondary">
-                  {input}
+                  {input.label}
                 </Text>
-              </View>
+                <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+              </Pressable>
             ))}
           </View>
 
@@ -1059,11 +1069,11 @@ function AiSheet({
 
           <Pressable
             accessibilityRole="button"
-            onPress={onClose}
+            onPress={() => openChat()}
             className="mt-5 min-h-11 items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 active:opacity-80"
           >
             <Text className="font-title text-[14px] text-gold">
-              {t("stock.aiSheetClose")}
+              {t("stock.aiAskCta", { ticker })}
             </Text>
           </Pressable>
         </View>

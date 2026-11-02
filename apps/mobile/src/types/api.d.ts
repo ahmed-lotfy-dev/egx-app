@@ -1314,6 +1314,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask the market assistant (grounded in live app data) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        messages: {
+                            /** @enum {string} */
+                            role: "user" | "assistant";
+                            content: string;
+                        }[];
+                        ticker?: string;
+                        /**
+                         * @default ar
+                         * @enum {string}
+                         */
+                        locale?: "ar" | "en";
+                    };
+                };
+            };
+            responses: {
+                /** @description Assistant reply */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                message: {
+                                    /** @enum {string} */
+                                    role: "user" | "assistant";
+                                    content: string;
+                                };
+                                groundedTicker: string | null;
+                            };
+                            meta: {
+                                model: string;
+                                grounded: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Invalid conversation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                code: string;
+                                message: string;
+                                requestId?: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                code: string;
+                                message: string;
+                                requestId?: string;
+                            };
+                        };
+                    };
+                };
+                /** @description AI provider unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                code: string;
+                                message: string;
+                                requestId?: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
