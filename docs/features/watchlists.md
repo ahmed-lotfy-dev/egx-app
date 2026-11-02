@@ -59,7 +59,7 @@ Defaults (EGX30, sharia) are **computed, not stored** — see 2.2.
 ### 2.3 Mobile — `apps/mobile/src/app/(app)/(tabs)/watchlist.tsx`
 
 - Horizontal pill tab row (`ScrollView`): defaults + custom lists + dashed `+` pill.
-- Selected list rendered below: name (locale-aware), ticker, price + change% (up/down colors), tap → stock detail.
+- Selected list rendered below: gold ticker tile (first 4 chars), name (locale-aware), ticker + translated sector, price + change% (up/down colors), tap → stock detail. The tile + name row exists so two stocks never look alike — the user reported rows showing only a price.
 - Custom-list actions: rename ✏️, delete 🗑 (confirm dialog), remove stock ✕ per row, "+ إضافة سهم" → full-screen search modal (`/api/instruments?q=&kind=stock`, already-added stocks show ✓ and are disabled).
 - Guests tapping create/edit get a sign-in prompt (no forced auth wall on the tab).
 - Old `/watchlist/[listId]` screen removed (everything is on one screen now).

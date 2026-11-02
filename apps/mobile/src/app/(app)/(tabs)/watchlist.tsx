@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors, tabular } from "@/constants/theme";
+import { sectorKey } from "@/lib/sectors";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { formatPrice, formatPercent } from "@/lib/format";
@@ -277,61 +278,78 @@ export default function WatchlistScreen() {
       onPress={() => router.push({ pathname: "/(app)/stock/[ticker]", params: { ticker: item.ticker } })}
       onLongPress={onLongPress}
       delayLongPress={280}
-      className={`mx-5 border-t border-border/60 py-3 active:opacity-70`}
+      className="mx-5 border-t border-border/60 py-3 active:opacity-70"
     >
-      <View className="flex-row items-center justify-between gap-3">
+      <View className="flex-row items-center gap-3">
+        {/* Ticker tile — the fastest way to tell two EGX stocks apart. */}
+        <View className="h-11 w-11 items-center justify-center rounded-xl border border-gold/25 bg-surface-elevated">
+          <Text
+            numberOfLines={1}
+            className="font-title text-[11px] text-gold"
+          >
+            {item.ticker.slice(0, 4)}
+          </Text>
+        </View>
+
         <View className="flex-1 min-w-0">
-          <Text className="font-title text-[16px] text-text" numberOfLines={1}>
+          <Text className="font-title text-[15px] text-text" numberOfLines={1}>
             {locale === "ar" && item.nameAr ? item.nameAr : item.nameEn}
           </Text>
           <View className="mt-1 flex-row items-center gap-2">
             {onLongPress ? (
-              <Ionicons name="reorder-two" size={16} color={colors.textMuted} />
+              <Ionicons name="reorder-two" size={14} color={colors.textMuted} />
             ) : null}
-            <Text className="font-body text-[12px] text-text-muted">{item.ticker}</Text>
+            <Text className="font-body text-[12px] text-text-secondary">
+              {item.ticker}
+            </Text>
             {item.sector ? (
               <>
                 <Text className="font-body text-[12px] text-text-muted">·</Text>
-                <Text className="font-body text-[12px] text-text-muted">{item.sector}</Text>
+                <Text
+                  numberOfLines={1}
+                  className="flex-shrink font-body text-[12px] text-text-muted"
+                >
+                  {t(`sectors.${sectorKey(item.sector)}`)}
+                </Text>
               </>
             ) : null}
           </View>
         </View>
-        <View className="flex-row items-center gap-3">
-          <View className="items-end">
-            {item.quote ? (
-              <>
+
+        <View className="items-end">
+          {item.quote ? (
+            <>
+              <Text
+                style={tabular}
+                className={`font-display text-[20px] leading-7 ${item.quote.changePct !== null && item.quote.changePct > 0 ? "text-up" : item.quote.changePct !== null && item.quote.changePct < 0 ? "text-down" : "text-text"}`}
+              >
+                {formatPrice(item.quote.price ?? 0)}
+              </Text>
+              {item.quote.changePct !== null ? (
                 <Text
                   style={tabular}
-                  className={`font-display text-[22px] leading-7 ${item.quote.changePct !== null && item.quote.changePct > 0 ? "text-up" : item.quote.changePct !== null && item.quote.changePct < 0 ? "text-down" : "text-text"}`}
+                  className={`font-body text-[12px] ${item.quote.changePct > 0 ? "text-up" : item.quote.changePct < 0 ? "text-down" : "text-text-muted"}`}
                 >
-                  {formatPrice(item.quote.price ?? 0)}
+                  {formatPercent(item.quote.changePct)}
                 </Text>
-                {item.quote.changePct !== null ? (
-                  <Text
-                    style={tabular}
-                    className={`font-body text-[12px] ${item.quote.changePct > 0 ? "text-up" : item.quote.changePct < 0 ? "text-down" : "text-text-muted"}`}
-                  >
-                    {formatPercent(item.quote.changePct)}
-                  </Text>
-                ) : null}
-              </>
-            ) : (
-              <Text className="font-body text-[14px] text-text-muted">{t("watchlist.noQuote")}</Text>
-            )}
-          </View>
-          {selected?.editable ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("watchlist.removeItem")}
-              hitSlop={8}
-              onPress={() => item.quote !== null && removeItem.mutate({ id: selected.id, ticker: item.ticker })}
-              className="h-8 w-8 items-center justify-center rounded-full bg-surface-elevated"
-            >
-              <Ionicons name="close" size={16} color={colors.textMuted} />
-            </Pressable>
-          ) : null}
+              ) : null}
+            </>
+          ) : (
+            <Text className="font-body text-[14px] text-text-muted">{t("watchlist.noQuote")}</Text>
+          )}
         </View>
+
+        {selected?.editable ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("watchlist.removeItem")}
+            hitSlop={8}
+            onPress={() => item.quote !== null && removeItem.mutate({ id: selected.id, ticker: item.ticker })}
+            className="h-8 w-8 items-center justify-center rounded-full bg-surface-elevated"
+          >
+            <Ionicons name="close" size={16} color={colors.textMuted} />
+          </Pressable>
+        ) : null}
       </View>
     </Pressable>
   );

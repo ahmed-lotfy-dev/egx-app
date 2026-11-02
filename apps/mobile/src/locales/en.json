@@ -188,7 +188,11 @@
   "ai": {
     "title": "Assistant",
     "emptyTitle": "Ask about any stock",
-    "emptyBody": "The assistant answers from market data and its sources."
+    "emptyBody": "The assistant answers from market data and its sources.",
+    "capTitle": "The assistant answers from market data",
+    "capSearch": "Search stocks and current prices",
+    "capNews": "Summarise company news and market sentiment",
+    "capFundamentals": "Analyse fundamentals and financial statements"
   },
   "profile": {
     "title": "Profile",
