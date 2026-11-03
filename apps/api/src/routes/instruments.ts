@@ -46,6 +46,7 @@ const listRoute = createRoute({
       q: z.string().trim().max(80).optional(),
       sector: z.string().trim().max(80).optional(),
       kind: z.enum(["stock", "index"]).optional(),
+      market: z.enum(["EGX", "SAUDI"]).optional(),
       limit: z.coerce.number().int().min(1).max(100).default(50),
       cursor: z.string().trim().max(20).optional(),
     }),
@@ -95,7 +96,7 @@ const detailRoute = createRoute({
 export const instrumentRoutes = new OpenAPIHono();
 
 instrumentRoutes.openapi(listRoute, async (c) => {
-  const { q, sector, kind, limit, cursor } = c.req.valid("query");
+  const { q, sector, kind, market, limit, cursor } = c.req.valid("query");
   const conditions: SQL[] = [eq(instruments.isActive, true)];
 
   if (q) {
@@ -119,12 +120,16 @@ instrumentRoutes.openapi(listRoute, async (c) => {
     conditions.push(eq(instruments.kind, kind));
   }
 
+  if (market) {
+    conditions.push(eq(instruments.market, market));
+  }
+
   if (cursor) {
     conditions.push(gt(instruments.ticker, cursor.toUpperCase()));
   }
 
   const payload = await cached(
-    `instruments:list:${q ?? ""}|${sector ?? ""}|${kind ?? ""}|${limit}|${cursor ?? ""}`,
+    `instruments:list:${q ?? ""}|${sector ?? ""}|${kind ?? ""}|${market ?? ""}|${limit}|${cursor ?? ""}`,
     READ_TTL_MS,
     async () => {
       const rows = await db

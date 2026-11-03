@@ -59,6 +59,8 @@
     "sectorsTitle": "قطاعات السوق",
     "sectorCount": "{{count}} قطاع",
     "sectorBreadth": "{{up}} صاعد · {{down}} هابط",
+    "egx": "السوق المصري",
+    "saudi": "السوق السعودي",
     "allStocks": "جميع الأسهم",
     "stockCount": "{{count}} سهم",
     "noQuote": "غير متاح",

@@ -8,12 +8,65 @@ import type {
   FundamentalRecord,
   InstrumentRef,
   InstrumentSeed,
+  MarketCode,
   MarketDataProvider,
   QuoteRecord,
 } from "./types";
 
-const SCAN_URL = "https://scanner.tradingview.com/egypt/scan";
 const SYMBOL_URL = "https://scanner.tradingview.com/symbol";
+
+/**
+ * Per-market ingestion settings. TradingView's scanner exposes each exchange
+ * under a different market slug, and each exchange has its own symbol shape
+ * (EGX:TICKER vs TADAWUL:NNNN) and Yahoo suffix.
+ */
+export type TvMarketConfig = {
+  /** Scanner market slug. */
+  scanner: string;
+  /** Exchange prefix in scan symbols, e.g. EGX:KORA. */
+  exchange: string;
+  /** Yahoo Finance suffix for equities. */
+  yahooSuffix: string;
+  /** Default currency when the scan omits it. */
+  currency: string;
+  /** Benchmark index seeded into the universe. */
+  index: {
+    ticker: string;
+    tvSymbol: string;
+    yahooSymbol: string;
+    nameEn: string;
+    nameAr: string;
+  };
+};
+
+export const TV_MARKETS: Record<MarketCode, TvMarketConfig> = {
+  EGX: {
+    scanner: "egypt",
+    exchange: "EGX",
+    yahooSuffix: ".CA",
+    currency: "EGP",
+    index: {
+      ticker: "EGX30",
+      tvSymbol: "EGX:EGX30",
+      yahooSymbol: "^CASE30",
+      nameEn: "EGX 30 Index",
+      nameAr: "مؤشر EGX 30",
+    },
+  },
+  SAUDI: {
+    scanner: "ksa",
+    exchange: "TADAWUL",
+    yahooSuffix: ".SR",
+    currency: "SAR",
+    index: {
+      ticker: "TASI",
+      tvSymbol: "TADAWUL:TASI",
+      yahooSymbol: "^TASI.SR",
+      nameEn: "Tadawul All Share Index",
+      nameAr: "مؤشر تاسي",
+    },
+  },
+};
 
 const IDENTITY_COLUMNS = [
   "name",
@@ -94,8 +147,10 @@ function intOrNull(value: unknown): number | null {
 async function scan(
   columns: readonly string[],
   lang: "en" | "ar",
+  market: MarketCode,
 ): Promise<ScanRow[]> {
-  const response = await fetchWithRetry(SCAN_URL, {
+  const url = `https://scanner.tradingview.com/${TV_MARKETS[market].scanner}/scan`;
+  const response = await fetchWithRetry(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -111,7 +166,7 @@ async function scan(
         },
       ],
       options: { lang },
-      markets: ["egypt"],
+      markets: [TV_MARKETS[market].scanner],
       columns,
       sort: { sortBy: "name", sortOrder: "asc" },
       range: [0, 600],
@@ -131,28 +186,32 @@ async function scan(
   return payload.data;
 }
 
-function indexSeed(): InstrumentSeed {
+function indexSeed(market: MarketCode): InstrumentSeed {
+  const config = TV_MARKETS[market];
+
   return {
-    ticker: "EGX30",
-    tvSymbol: "EGX:EGX30",
-    yahooSymbol: "^CASE30",
-    nameEn: "EGX 30 Index",
-    nameAr: "مؤشر EGX 30",
+    ticker: config.index.ticker,
+    tvSymbol: config.index.tvSymbol,
+    yahooSymbol: config.index.yahooSymbol,
+    nameEn: config.index.nameEn,
+    nameAr: config.index.nameAr,
     sector: "Index",
     industry: null,
     logoid: null,
     kind: "index",
-    currency: "EGP",
+    market,
+    currency: config.currency,
   };
 }
 
 export class TradingViewProvider implements MarketDataProvider {
   readonly name = "tradingview";
 
-  async fetchUniverse(): Promise<InstrumentSeed[]> {
+  async fetchUniverse(market: MarketCode): Promise<InstrumentSeed[]> {
+    const config = TV_MARKETS[market];
     const [englishRows, arabicRows] = await Promise.all([
-      scan(IDENTITY_COLUMNS, "en"),
-      scan(IDENTITY_COLUMNS, "ar"),
+      scan(IDENTITY_COLUMNS, "en", market),
+      scan(IDENTITY_COLUMNS, "ar", market),
     ]);
     const arabicBySymbol = new Map(
       arabicRows.map((row) => [row.s, row] as const),
@@ -160,7 +219,9 @@ export class TradingViewProvider implements MarketDataProvider {
     const seeds: InstrumentSeed[] = [];
 
     for (const row of englishRows) {
-      const ticker = text(row.d[0]);
+      // Scan symbols carry the exchange prefix (EGX:KORA, TADAWUL:2222);
+      // the ticker is the part our app addresses instruments by.
+      const ticker = text(row.s.split(":")[1]) ?? text(row.d[0]);
       const tvSymbol = row.s;
 
       if (!ticker || !tvSymbol) {
@@ -177,18 +238,19 @@ export class TradingViewProvider implements MarketDataProvider {
       seeds.push({
         ticker,
         tvSymbol,
-        yahooSymbol: kind === "stock" ? `${ticker}.CA` : null,
+        yahooSymbol: kind === "stock" ? `${ticker}${config.yahooSuffix}` : null,
         nameEn: text(row.d[1]) ?? ticker,
         nameAr,
         sector: text(row.d[2]),
         industry: text(row.d[3]),
         logoid: text(row.d[4]),
         kind,
-        currency: text(row.d[5]) ?? "EGP",
+        market,
+        currency: text(row.d[5]) ?? config.currency,
       });
     }
 
-    const index = indexSeed();
+    const index = indexSeed(market);
     const existingIndex = seeds.find((seed) => seed.ticker === index.ticker);
 
     if (existingIndex) {
@@ -203,8 +265,26 @@ export class TradingViewProvider implements MarketDataProvider {
   }
 
   async fetchQuotes(instruments: InstrumentRef[]): Promise<QuoteRecord[]> {
-    const rows = await scan(QUOTE_COLUMNS, "en");
-    const byTicker = new Map(rows.map((row) => [text(row.d[0]), row] as const));
+    // One scanner request per market; instruments from several markets can be
+    // synced in a single pass.
+    const byMarket = new Map<MarketCode, InstrumentRef[]>();
+    for (const instrument of instruments) {
+      const list = byMarket.get(instrument.market) ?? [];
+      list.push(instrument);
+      byMarket.set(instrument.market, list);
+    }
+
+    const rowsByTicker = new Map<string, ScanRow>();
+    await Promise.all(
+      [...byMarket.keys()].map(async (market) => {
+        const rows = await scan(QUOTE_COLUMNS, "en", market);
+        for (const row of rows) {
+          const ticker = row.s.split(":")[1] ?? text(row.d[0]);
+          if (ticker) rowsByTicker.set(ticker, row);
+        }
+      }),
+    );
+
     const asOf = new Date();
     const quotes: QuoteRecord[] = [];
 
@@ -214,7 +294,7 @@ export class TradingViewProvider implements MarketDataProvider {
         continue;
       }
 
-      const row = byTicker.get(instrument.ticker);
+      const row = rowsByTicker.get(instrument.ticker);
 
       if (!row) {
         continue;
@@ -239,8 +319,23 @@ export class TradingViewProvider implements MarketDataProvider {
   async fetchFundamentals(
     instruments: InstrumentRef[],
   ): Promise<FundamentalRecord[]> {
-    const rows = await scan(FUNDAMENTAL_COLUMNS, "en");
-    const byTicker = new Map(rows.map((row) => [text(row.d[0]), row] as const));
+    const byMarket = new Map<MarketCode, InstrumentRef[]>();
+    for (const instrument of instruments) {
+      const list = byMarket.get(instrument.market) ?? [];
+      list.push(instrument);
+      byMarket.set(instrument.market, list);
+    }
+
+    const rowsByTicker = new Map<string, ScanRow>();
+    await Promise.all(
+      [...byMarket.keys()].map(async (market) => {
+        const rows = await scan(FUNDAMENTAL_COLUMNS, "en", market);
+        for (const row of rows) {
+          const ticker = row.s.split(":")[1] ?? text(row.d[0]);
+          if (ticker) rowsByTicker.set(ticker, row);
+        }
+      }),
+    );
     const observedAt = new Date();
     const asOf = cairoDate(observedAt);
     const records: FundamentalRecord[] = [];
@@ -250,7 +345,7 @@ export class TradingViewProvider implements MarketDataProvider {
         continue;
       }
 
-      const row = byTicker.get(instrument.ticker);
+      const row = rowsByTicker.get(instrument.ticker);
 
       if (!row) {
         continue;

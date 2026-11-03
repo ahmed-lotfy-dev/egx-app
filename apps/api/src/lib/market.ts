@@ -120,6 +120,7 @@ export type MarketRow = {
   sector: string | null;
   industry: string | null;
   kind: string;
+  market: string | null;
   currency: string;
   updatedAt: Date;
   price: string | null;
@@ -161,6 +162,7 @@ export function toInstrumentSummary(
     sector: row.sector,
     industry: row.industry,
     kind: row.kind === "index" ? "index" : "stock",
+    market: (row.market as "EGX" | "SAUDI") ?? "EGX",
     currency: row.currency,
     quote: mapQuote(row, now),
   };

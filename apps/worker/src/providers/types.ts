@@ -1,3 +1,5 @@
+export type MarketCode = "EGX" | "SAUDI";
+
 export type InstrumentKind = "stock" | "index";
 
 export type InstrumentSeed = {
@@ -10,12 +12,13 @@ export type InstrumentSeed = {
   industry: string | null;
   logoid: string | null;
   kind: InstrumentKind;
+  market: MarketCode;
   currency: string;
 };
 
 export type InstrumentRef = Pick<
   InstrumentSeed,
-  "ticker" | "tvSymbol" | "yahooSymbol" | "kind" | "currency"
+  "ticker" | "tvSymbol" | "yahooSymbol" | "kind" | "market" | "currency"
 >;
 
 export type QuoteRecord = {
@@ -73,7 +76,7 @@ export type DailyBarRecord = {
 
 export interface MarketDataProvider {
   readonly name: string;
-  fetchUniverse?(): Promise<InstrumentSeed[]>;
+  fetchUniverse?(market: MarketCode): Promise<InstrumentSeed[]>;
   fetchQuotes?(instruments: InstrumentRef[]): Promise<QuoteRecord[]>;
   fetchFundamentals?(
     instruments: InstrumentRef[],

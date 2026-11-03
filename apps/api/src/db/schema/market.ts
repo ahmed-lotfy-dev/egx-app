@@ -33,6 +33,7 @@ export const instruments = pgTable(
     industry: text("industry"),
     logoid: text("logoid"),
     kind: text("kind").notNull().default("stock"),
+    market: text("market").notNull().default("EGX"),
     currency: text("currency").notNull().default("EGP"),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", tz).defaultNow().notNull(),
@@ -44,6 +45,7 @@ export const instruments = pgTable(
   (table) => [
     index("instruments_sector_idx").on(table.sector),
     index("instruments_kind_idx").on(table.kind),
+    index("instruments_market_idx").on(table.market),
   ],
 );
 

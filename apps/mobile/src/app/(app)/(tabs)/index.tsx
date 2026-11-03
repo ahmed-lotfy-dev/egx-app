@@ -88,11 +88,14 @@ export default function MarketsScreen() {
   const locale = useLocaleStore((state) => state.locale);
   const [moverTab, setMoverTab] = useState<MoverTab>("gainers");
   const [manualRefreshing, setManualRefreshing] = useState(false);
+  const [market, setMarket] = useState<"EGX" | "SAUDI">("EGX");
 
   const overviewQuery = useQuery({
-    queryKey: ["market", "overview"],
+    queryKey: ["market", "overview", market],
     queryFn: async () => {
-      const { data, error } = await api.GET("/api/market/overview");
+      const { data, error } = await api.GET("/api/market/overview", {
+        params: { query: { market } },
+      });
 
       if (error) {
         throw new Error("Market overview unavailable");
@@ -105,13 +108,14 @@ export default function MarketsScreen() {
   });
 
   const instrumentsQuery = useInfiniteQuery({
-    queryKey: ["instruments", "list"],
+    queryKey: ["instruments", "list", market],
     queryFn: async ({ pageParam }) => {
       const { data, error } = await api.GET("/api/instruments", {
         params: {
           query: {
             limit: PAGE_SIZE,
             cursor: pageParam ?? undefined,
+            market,
           },
         },
       });
@@ -165,6 +169,33 @@ export default function MarketsScreen() {
     />
   );
 
+  const marketSelector = (
+    <View className="px-4 py-2">
+      <View className="flex-row items-center justify-center gap-2">
+        <Pressable
+          onPress={() => setMarket("EGX")}
+          className={`px-4 py-2 rounded-2xl text-sm font-medium ${
+            market === "EGX"
+              ? "bg-gold text-background"
+              : "bg-surface border border-border text-text-secondary"
+          }`}
+        >
+          {t("markets.egx")}
+        </Pressable>
+        <Pressable
+          onPress={() => setMarket("SAUDI")}
+          className={`px-4 py-2 rounded-2xl text-sm font-medium ${
+            market === "SAUDI"
+              ? "bg-gold text-background"
+              : "bg-surface border border-border text-text-secondary"
+          }`}
+        >
+          {t("markets.saudi")}
+        </Pressable>
+      </View>
+    </View>
+  );
+
   if (!overviewQuery.data) {
     return (
       <Screen>
@@ -211,7 +242,7 @@ export default function MarketsScreen() {
   return (
     <Screen>
       {header}
-
+      {marketSelector}
       <MacroStrip />
 
       <FlatList

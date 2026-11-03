@@ -75,6 +75,45 @@ function isMarketTime(time: CairoTime): boolean {
   );
 }
 
+type RiyadhTime = CairoTime;
+
+const riyadhFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Riyadh",
+  weekday: "short",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+function riyadhTime(now: Date): RiyadhTime {
+  const parts = riyadhFormatter.formatToParts(now);
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  const hour = Number(get("hour")) % 24;
+  const minute = Number(get("minute"));
+
+  return {
+    weekday: get("weekday"),
+    minutes: hour * 60 + minute,
+    dateKey: `${get("year")}-${get("month")}-${get("day")}`,
+  };
+}
+
+// Tadawul: Sun–Thu 10:00–15:00 Riyadh (UTC+3, no DST).
+const SAUDI_OPEN_MINUTES = 10 * 60;
+const SAUDI_CLOSE_MINUTES = 15 * 60;
+
+function isSaudiMarketTime(time: RiyadhTime): boolean {
+  return (
+    TRADING_DAYS.has(time.weekday) &&
+    time.minutes >= SAUDI_OPEN_MINUTES &&
+    time.minutes <= SAUDI_CLOSE_MINUTES
+  );
+}
+
 const state = {
   lastQuotesAt: 0,
   lastMacroAt: 0,
@@ -134,7 +173,7 @@ function runHeavyJob(name: string, job: () => Promise<unknown>): void {
 
 async function tick(now: Date): Promise<void> {
   const time = cairoTime(now);
-  const market = isMarketTime(time);
+  const market = isMarketTime(time) || isSaudiMarketTime(riyadhTime(now));
 
   // Quotes — the hot path for live prices.
   const quotesInterval = market

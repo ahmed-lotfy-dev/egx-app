@@ -59,6 +59,8 @@
     "sectorsTitle": "Sector performance",
     "sectorCount": "{{count}} sectors",
     "sectorBreadth": "{{up}} up · {{down}} down",
+    "egx": "Egyptian Market",
+    "saudi": "Saudi Market",
     "allStocks": "All stocks",
     "stockCount": "{{count}} stocks",
     "noQuote": "Not available",

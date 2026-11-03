@@ -5,6 +5,7 @@ import { instruments, latestQuotes, quoteSnapshots } from "@egx/api/schema";
 
 import { withIngestRun } from "../lib/runs";
 import { TradingViewProvider } from "../providers/tradingview";
+import type { MarketCode } from "../providers/types";
 
 export async function syncQuotes() {
   return withIngestRun("quotes", "tradingview", async () => {
@@ -15,6 +16,7 @@ export async function syncQuotes() {
         tvSymbol: instruments.tvSymbol,
         yahooSymbol: instruments.yahooSymbol,
         kind: instruments.kind,
+        market: instruments.market,
         currency: instruments.currency,
       })
       .from(instruments)
@@ -27,6 +29,7 @@ export async function syncQuotes() {
     const universe = universeRows.map((row) => ({
       ...row,
       kind: row.kind === "index" ? ("index" as const) : ("stock" as const),
+      market: row.market as MarketCode,
     }));
 
     const provider = new TradingViewProvider();

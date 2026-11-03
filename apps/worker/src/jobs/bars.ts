@@ -7,6 +7,7 @@ import { sleep } from "../lib/http";
 import { withIngestRun } from "../lib/runs";
 import { TradingViewProvider } from "../providers/tradingview";
 import { YahooProvider } from "../providers/yahoo";
+import type { MarketCode } from "../providers/types";
 
 export type BarsOptions = {
   tickers?: string[];
@@ -51,6 +52,7 @@ export async function syncBars(options: BarsOptions = {}) {
         tvSymbol: instruments.tvSymbol,
         yahooSymbol: instruments.yahooSymbol,
         kind: instruments.kind,
+        market: instruments.market,
         currency: instruments.currency,
       })
       .from(instruments)
@@ -69,6 +71,7 @@ export async function syncBars(options: BarsOptions = {}) {
     const universe = universeRows.map((row) => ({
       ...row,
       kind: row.kind === "index" ? ("index" as const) : ("stock" as const),
+      market: row.market as MarketCode,
     }));
 
     const provider = new YahooProvider();

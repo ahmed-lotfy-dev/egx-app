@@ -12,6 +12,7 @@ export const marketColumns = {
   sector: instruments.sector,
   industry: instruments.industry,
   kind: instruments.kind,
+  market: instruments.market,
   currency: instruments.currency,
   updatedAt: instruments.updatedAt,
   price: latestQuotes.price,

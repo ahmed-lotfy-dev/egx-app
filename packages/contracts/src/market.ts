@@ -31,6 +31,7 @@ export const InstrumentSummarySchema = z.object({
   sector: z.string().nullable(),
   industry: z.string().nullable(),
   kind: z.enum(["stock", "index"]),
+  market: z.enum(["EGX", "SAUDI"]).default("EGX"),
   currency: z.string(),
   quote: QuoteSchema.nullable(),
 });
