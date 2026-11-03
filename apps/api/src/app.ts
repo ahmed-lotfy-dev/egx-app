@@ -6,6 +6,7 @@ import { env } from "./config/env";
 import { auth } from "./lib/auth";
 import { logger } from "./lib/logger";
 import { OPENAPI_CONFIG } from "./openapi";
+import { adminDocumentRoutes } from "./routes/admin-documents";
 import { aiRoutes } from "./routes/ai";
 import { dataStatusRoutes } from "./routes/data-status";
 import { instrumentHistoryRoutes } from "./routes/instrument-history";
@@ -64,6 +65,7 @@ app.route("/", macroRoutes);
 app.route("/", newsRoutes);
 app.route("/", watchlistRoutes);
 app.route("/", aiRoutes);
+app.route("/", adminDocumentRoutes);
 
 app.doc31("/openapi.json", OPENAPI_CONFIG);
 

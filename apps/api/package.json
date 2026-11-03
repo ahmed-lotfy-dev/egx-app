@@ -18,7 +18,8 @@
     "openapi:generate": "bun --env-file=../../.env src/scripts/generate-openapi.ts",
     "openapi:check": "bun --env-file=../../.env src/scripts/check-openapi.ts",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "seed:admin": "bun --env-file=../../.env src/scripts/seed-admin.ts"
   },
   "dependencies": {
     "@better-auth/expo": "^1.7.13",

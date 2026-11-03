@@ -13,6 +13,7 @@ const EnvSchema = z.object({
   EMAIL_FROM: z.string().default("EGX <no-reply@example.com>"),
   NVIDIA_API_KEY: z.string().optional(),
   NVIDIA_NIM_MODEL: z.string().optional(),
+  DOCUMENTS_DIR: z.string().default("./.data/egx"),
 });
 
 const parsed = EnvSchema.safeParse(process.env);
