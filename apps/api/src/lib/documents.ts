@@ -1,14 +1,27 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { env } from "../config/env";
 
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 const PDF_MAGIC = Buffer.from("%PDF-");
 
+/**
+ * Absolute root for uploaded PDFs, extraction artifacts and logs.
+ *
+ * A relative `DOCUMENTS_DIR` is resolved against the process cwd. When it is
+ * unset we use `<repo>/.data/egx`, computed from this module's location so the
+ * API and the worker (which import this file) always agree, no matter which
+ * directory each process was started from.
+ */
 export function documentsRoot(): string {
-  return env.DOCUMENTS_DIR;
+  const configured = env.DOCUMENTS_DIR?.trim();
+  if (configured) {
+    return isAbsolute(configured) ? configured : resolve(process.cwd(), configured);
+  }
+  return fileURLToPath(new URL("../../../../.data/egx", import.meta.url));
 }
 
 export function documentPath(sha256: string): string {

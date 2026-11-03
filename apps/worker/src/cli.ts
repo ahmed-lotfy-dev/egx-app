@@ -1,6 +1,8 @@
 import { closeDb } from "@egx/api/db";
 
 import { syncBars, type BarsOptions } from "./jobs/bars";
+import { extractDocuments } from "./jobs/extract-document";
+import { stageDocument } from "./jobs/stage-document";
 import { syncFundamentals } from "./jobs/fundamentals";
 import { syncMacro } from "./jobs/macro";
 import { processAnalysisQueue, syncNews, syncNewsWithAnalysis } from "./jobs/news";
@@ -85,6 +87,35 @@ async function main(): Promise<void> {
     case "news:full":
       print("news:full", await syncNewsWithAnalysis());
       break;
+    case "extract-document":
+      print(
+        "extract-document",
+        await extractDocuments({
+          id: positiveNumber("id"),
+          sha256: option("sha"),
+          limit: positiveNumber("limit") ?? 1,
+        }),
+      );
+      break;
+    case "stage-document":
+      print(
+        "stage-document",
+        await stageDocument(positiveNumber("id")!),
+      );
+      break;
+    case "extract-and-stage":
+      print(
+        "extract-and-stage",
+        await (async () => {
+          const id = positiveNumber("id");
+          const ext = await extractDocuments({ id, limit: 1 });
+          if (ext.extracted > 0) {
+            return await stageDocument(id!);
+          }
+          return { staged: 0, matched: 0, unmatched: 0, issues: 0 };
+        })(),
+      );
+      break;
     case "all": {
       const barsOptions = readBarsOptions();
       print("universe", await syncUniverse());
@@ -103,7 +134,7 @@ async function main(): Promise<void> {
     default:
       console.error(
         [
-          "Usage: bun src/cli.ts <universe|quotes|macro|bars|symbols|fundamentals|news|news:analyze|news:full|all|schedule> [options]",
+          "Usage: bun src/cli.ts <universe|quotes|macro|bars|symbols|fundamentals|news|news:analyze|news:full|extract-document|stage-document|extract-and-stage|all|schedule> [options]",
           "",
           "Bars options:",
           "  --tickers COMI,HRHO   limit to specific tickers",
@@ -111,6 +142,17 @@ async function main(): Promise<void> {
           "  --days 365            history window in days",
           "  --missing             only instruments with no stored bars",
           "  --provider tradingview|yahoo",
+          "Extract options:",
+          "  --id 12               extract one document by id (retry allowed)",
+          "  --sha <sha256>        extract one document by content hash",
+          "  --limit 5             process up to N pending documents",
+          "",
+          "Stage options:",
+          "  --id 12               stage one document by id",
+          "",
+          "Extract + Stage:",
+          "  --id 12               extract and stage one document by id",
+          "",
           "schedule:               run the ingest scheduler loop (quotes every 3 min",
           "                        in market hours, bars/fundamentals/news daily)",
         ].join("\n"),

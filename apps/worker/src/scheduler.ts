@@ -2,6 +2,7 @@ import { closeDb } from "@egx/api/db";
 
 import { syncMacro } from "./jobs/macro";
 import { syncBars } from "./jobs/bars";
+import { extractDocuments } from "./jobs/extract-document";
 import { syncFundamentals } from "./jobs/fundamentals";
 import { processAnalysisQueue, syncNews } from "./jobs/news";
 import { syncQuotes } from "./jobs/quotes";
@@ -34,6 +35,9 @@ const QUOTES_INTERVAL_OFF_MS = 30 * 60_000;
 const MACRO_INTERVAL_MS = 60_000;
 const NEWS_INTERVAL_MS = 30 * 60_000;
 const ANALYSIS_INTERVAL_MS = 20 * 60_000;
+// Admin uploads a PDF by hand; pick it up within a minute so the dashboard
+// shows progress without a manual "run extraction" step.
+const EXTRACT_INTERVAL_MS = 60_000;
 const TICK_MS = 60_000;
 
 type CairoTime = {
@@ -80,6 +84,7 @@ const state = {
   lastMacroAt: 0,
   lastNewsAt: 0,
   lastAnalysisAt: 0,
+  lastExtractAt: 0,
   lastUniverseDate: "",
   lastBarsDate: "",
   lastFundamentalsDate: "",
@@ -161,6 +166,12 @@ async function tick(now: Date): Promise<void> {
   if (Date.now() - state.lastAnalysisAt >= ANALYSIS_INTERVAL_MS) {
     state.lastAnalysisAt = Date.now();
     runHeavyJob("news:analyze", () => processAnalysisQueue(15));
+  }
+
+  // Admin PDFs: extract one pending document per tick.
+  if (Date.now() - state.lastExtractAt >= EXTRACT_INTERVAL_MS) {
+    state.lastExtractAt = Date.now();
+    runHeavyJob("extract-document", () => extractDocuments({ limit: 1 }));
   }
 
   // Once-daily jobs.

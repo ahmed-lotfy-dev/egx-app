@@ -63,7 +63,6 @@ export const stockSnapshots = pgTable(
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     instrumentId: bigint("instrument_id", { mode: "number" })
-      .notNull()
       .references(() => instruments.id, { onDelete: "cascade" }),
     periodEnd: date("period_end", { mode: "string" }).notNull(),
     close: numeric("close", { precision: 18, scale: 4 }),

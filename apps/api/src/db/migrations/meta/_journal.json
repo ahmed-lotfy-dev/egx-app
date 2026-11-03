@@ -78,6 +78,13 @@
       "when": 1793736413137,
       "tag": "0010_purple_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793738999289,
+      "tag": "0011_low_leper_queen",
+      "breakpoints": true
     }
   ]
 }

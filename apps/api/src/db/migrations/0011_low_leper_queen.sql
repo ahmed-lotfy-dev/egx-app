@@ -1,0 +1,1 @@
+ALTER TABLE "stock_snapshots" ALTER COLUMN "instrument_id" DROP NOT NULL;
