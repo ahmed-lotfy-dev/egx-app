@@ -11,6 +11,7 @@ import {
   newsItems,
 } from "../db/schema";
 import { marketColumns } from "../db/selects";
+import { cached } from "./cache";
 import { computeHistoryStats, computeSupportResistance } from "./levels";
 import { normalizeSearch } from "./text";
 import { MACRO_KEYS } from "@egx/contracts";
@@ -213,6 +214,31 @@ export async function buildMarketContext(): Promise<Grounding> {
   lines.push(`MACRO: ${macroParts.join(", ") || "—"}`);
 
   return { text: lines.join("\n"), ticker: null };
+}
+
+/**
+ * Compact list of every active listing (ticker = English name, Arabic name
+ * when present). Injected into market-wide chats so the model can map a
+ * user's phrasing — including Arabic names we have no `nameAr` for — onto a
+ * ticker, which the route then re-grounds on. Cached: the universe changes
+ * rarely and this runs on every market-wide request.
+ */
+export async function buildCatalog(): Promise<string> {
+  return cached("ai:catalog", 10 * 60_000, async () => {
+    const rows = await db
+      .select({
+        ticker: instruments.ticker,
+        en: instruments.nameEn,
+        ar: instruments.nameAr,
+      })
+      .from(instruments)
+      .where(eq(instruments.isActive, true))
+      .orderBy(instruments.ticker);
+
+    return rows
+      .map((row) => `${row.ticker}=${row.en}${row.ar ? ` | ${row.ar}` : ""}`)
+      .join("\n");
+  });
 }
 
 function escapeRegex(value: string): string {

@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { AiChatRequestSchema, AiChatResponseSchema, ErrorResponseSchema } from "@egx/contracts";
 
-import { buildMarketContext, buildTickerContext, resolveMentionedTicker } from "../lib/ai-context";
+import { buildCatalog, buildMarketContext, buildTickerContext, resolveMentionedTicker } from "../lib/ai-context";
 import { aiConfigured, chat as nimChat, type NIMMessage } from "../lib/nim";
 
 /**
@@ -139,6 +139,18 @@ aiRoutes.openapi(chatRoute, async (c) => {
   const mentioned = lastUser ? await resolveMentionedTicker(lastUser.content) : null;
   const effectiveTicker = mentioned ?? ticker;
 
+  // Market-wide chats carry the full listing catalog so the model can map a
+  // user's phrasing (Arabic names we have no nameAr for, transliterations,
+  // typos) onto a ticker and ask for a grounded re-run via [[GROUND:TICKER]].
+  const catalog = effectiveTicker ? null : await buildCatalog();
+
+  const systemPromptFor = (groundingText: string, withCatalog: boolean) =>
+    `${SYSTEM_PROMPT_BASE}\n\nlocale=${locale}\n\nMARKET DATA (app snapshot, may be delayed):\n${groundingText}${
+      withCatalog
+        ? `\n\nINSTRUMENT CATALOG (every listing the app has, ticker=English name | Arabic name):\n${catalog}\n\nIf the user asks about a stock that is in the CATALOG but NOT in MARKET DATA above, reply with exactly [[GROUND:TICKER]] (the ticker from the catalog) and nothing else — the app will then load that stock's data and ask you again. This is an internal protocol; never mention it to the user.`
+        : ""
+    }`;
+
   let grounding: Awaited<ReturnType<typeof buildMarketContext>>;
   if (effectiveTicker) {
     grounding = (await buildTickerContext(effectiveTicker)) ?? {
@@ -149,17 +161,32 @@ aiRoutes.openapi(chatRoute, async (c) => {
     grounding = await buildMarketContext();
   }
 
-  const systemPrompt = `${SYSTEM_PROMPT_BASE}\n\nlocale=${locale}\n\nMARKET DATA (app snapshot, may be delayed):\n${grounding.text}`;
-
-  try {
-    const response = await nimChat({
-      messages: [{ role: "system", content: systemPrompt }, ...history],
+  const callModel = (groundingText: string, withCatalog: boolean) =>
+    nimChat({
+      messages: [{ role: "system", content: systemPromptFor(groundingText, withCatalog) }, ...history],
       maxTokens: 1200,
       temperature: 0.4,
       timeoutMs: 60_000,
     });
 
-    if (!response.content.trim()) {
+  try {
+    let response = await callModel(grounding.text, catalog !== null);
+    let groundedTicker = grounding.ticker;
+
+    // The model asked for a different stock than the one we grounded — load
+    // its data and answer for real. One re-ground pass, no loops.
+    const requested = response.content.match(/\[\[GROUND:([A-Za-z0-9]{1,10})\]\]/);
+    if (requested && requested[1]!.toUpperCase() !== groundedTicker) {
+      const wanted = requested[1]!.toUpperCase();
+      const context = await buildTickerContext(wanted);
+      if (context) {
+        response = await callModel(context.text, false);
+        groundedTicker = context.ticker;
+      }
+    }
+
+    const content = response.content.replace(/\[\[GROUND:[A-Za-z0-9]+\]\]/g, "").trim();
+    if (!content) {
       return c.json(
         { error: { code: "AI_EMPTY", message: "The assistant returned an empty answer." } },
         503,
@@ -169,8 +196,8 @@ aiRoutes.openapi(chatRoute, async (c) => {
     return c.json(
       {
         data: {
-          message: { role: "assistant" as const, content: response.content.trim() },
-          groundedTicker: grounding.ticker,
+          message: { role: "assistant" as const, content },
+          groundedTicker,
         },
         meta: { model: response.model, grounded: effectiveTicker !== undefined },
       },
