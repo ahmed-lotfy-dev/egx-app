@@ -28,13 +28,6 @@ type NewsFeed = "market" | "economy";
 
 const FEEDS = ["market", "economy"] as const;
 
-const REGIONS = [
-  { id: "all", labelKey: "newsTab.filterAllRegions" },
-  { id: "egypt", labelKey: "newsTab.filterEgypt" },
-  { id: "saudi", labelKey: "newsTab.filterSaudi" },
-  { id: "international", labelKey: "newsTab.filterInternational" },
-] as const;
-
 const SENTIMENTS = [
   { id: "all", labelKey: "newsTab.filterAllSentiments" },
   { id: "bullish", labelKey: "newsTab.filterBullish", color: "up" },
@@ -52,7 +45,6 @@ const IMPACT_LEVELS = [
 ] as const;
 
 type FilterState = {
-  region: "all" | "egypt" | "saudi" | "international";
   sentiment: "all" | "bullish" | "bearish" | "neutral" | "mixed";
   impactLevel: "all" | "critical" | "high" | "medium" | "low";
   hasAI: boolean;
@@ -63,7 +55,6 @@ export default function NewsScreen() {
   const locale = useLocaleStore((state) => state.locale);
   const [feed, setFeed] = useState<NewsFeed>("market");
   const [filters, setFilters] = useState<FilterState>({
-  region: "all",
   sentiment: "all",
   impactLevel: "all",
   hasAI: false,
@@ -72,7 +63,6 @@ export default function NewsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const buildQuery = (pageParam?: string) => ({
-    region: filters.region !== "all" ? filters.region : undefined,
     limit: 20,
     cursor: pageParam,
     sentiment: filters.sentiment !== "all" ? filters.sentiment : undefined,
@@ -111,11 +101,10 @@ export default function NewsScreen() {
   };
 
   const clearFilters = () => {
-    setFilters({ region: "all", sentiment: "all", impactLevel: "all", hasAI: false });
+    setFilters({ sentiment: "all", impactLevel: "all", hasAI: false });
   };
 
   const hasActiveFilters =
-    filters.region !== "all" ||
     filters.sentiment !== "all" ||
     filters.impactLevel !== "all" ||
     filters.hasAI;
@@ -208,12 +197,6 @@ export default function NewsScreen() {
             {/* Expanded filter chips */}
             {showFilters && (
               <View className="mt-3">
-                <FilterChipGroup
-                  label={t("newsTab.filterRegion")}
-                  options={REGIONS}
-                  value={filters.region}
-                  onChange={(v) => handleFilterChange("region", v)}
-                />
                 <FilterChipGroup
                   label={t("newsTab.filterSentiment")}
                   options={SENTIMENTS}
@@ -414,12 +397,7 @@ function NewsCard({ item, locale }: { item: FeedItem; locale: "ar" | "en" }) {
   // The ingester stamps every row with the run label "multi-source"; show the
   // actual publisher derived from the article URL instead.
   const publisher = publisherLabel(item.url, item.source);
-  const regionKey =
-    item.sourceRegion === "egypt"
-      ? "newsTab.filterEgypt"
-      : item.sourceRegion === "saudi"
-        ? "newsTab.filterSaudi"
-        : "newsTab.filterGlobal";
+  const regionKey = "newsTab.filterEgypt";
 
   const displayTitle = locale === "ar" && item.translatedTitle ? item.translatedTitle : item.title;
   const displaySummary = locale === "ar" && item.translatedSummary

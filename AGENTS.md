@@ -1,6 +1,6 @@
 # AGENTS.md — EGX App
 
-Arabic-first EGX/Saudi market app. Read this before changing anything.
+Arabic-first EGX market app. Read this before changing anything.
 
 ## Repo map
 
@@ -35,8 +35,8 @@ Worker jobs: `bun run --cwd apps/worker src/cli.ts <job>` (see `apps/worker/src/
 - **No secrets in git.** A gitleaks pre-commit hook runs; never commit `.env`.
 - **No fabricated numbers.** The AI only states values returned by tools/SQL and
   must cite the source document and page.
-- **Market is explicit.** Instruments carry `market` (`EGX` | `SAUDI`); every
-  query that could mix markets must filter by it.
+- **EGX only.** Saudi and international instruments/news were removed. Do not
+  reintroduce a `market` column or cross-market queries without a new design.
 - **Migrations are reviewed, not auto-applied.** Generate, read the SQL, then migrate.
 
 ## Data model (core)

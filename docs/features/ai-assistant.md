@@ -87,15 +87,18 @@ Files: `apps/api/src/routes/ai.ts`, `apps/api/src/lib/ai-context.ts`,
   Consider raising `command_timeout` in both deploy workflows.
 - NIM latency observed: ~3–10s per answer.
 
-## Saudi multi-market grounding
+## Grounding (EGX only)
 
-The AI now also resolves Saudi instruments via DB RAG (not web search):
-
-- **Two-pass grounding:** (1) exact ticker → `resolveMentionedTicker`; (2) when no exact match, normalized Arabic/English name search across both EGX and SAUDI instruments → catalog injection (`buildCatalog`) → final `[[GROUND:TICKER]]` re-ground before the response. No inventing of numbers.
-- **Live verification:** `سهم كوره` → KORA (EGX, after 60-ticker backfill); `أرامكو` → `2222` (SAUDI, SAR 26.08). Verified against DB `instruments.market='SAUDI'`.
-- **Sources:** SAUDI universe from TradingView `ksa` universe via `apps/worker/src/providers/tradingview.ts` (407 listings, official Arabic names); matched by ticker where possible; `coalesce(excluded.name_ar, instruments.name_ar)` in upsert protects existing `name_ar`.
-- **Provider:** same NVIDIA NIM endpoint (`integrate.api.nvidia.com/v1`, model `nvidia/nemotron-3-ultra-550b-a55b`) and shared `NVIDIA_API_KEY`; chat route consumes only what it needs (`apps/api/src/routes/ai.ts` → `lib/nim.ts` + `lib/ai-context.ts`), and is **never** bootstrapped from localhost.
-- **Deploy:** prod image rebuilt locally, `docker load -i /tmp/egx-api-only.tar.gz` running server-side (`egx-api Up 3h`); restart pending. Worker image (`egx-worker`) rebuild succeeded earlier.
+- **Two-pass grounding:** (1) exact ticker → `resolveMentionedTicker`; (2) when no
+  exact match, normalized Arabic/English name search over EGX instruments →
+  catalog injection (`buildCatalog`) → final `[[GROUND:TICKER]]` re-ground before
+  the response. No inventing of numbers.
+- **Verified:** `سهم كوره` → KORA after the Arabic-name backfill.
+- **Provider:** NVIDIA NIM (`integrate.api.nvidia.com/v1`, model
+  `nvidia/nemotron-3-ultra-550b-a55b`) with the shared `NVIDIA_API_KEY`; chat uses
+  `apps/api/src/routes/ai.ts` → `lib/nim.ts` + `lib/ai-context.ts`.
+- **Scope:** EGX only. Saudi and international instruments were removed on
+  2026-11-03; the catalog and entity resolution only see EGX rows.
 
 ## Prod ops notes
 

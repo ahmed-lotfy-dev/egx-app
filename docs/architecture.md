@@ -44,11 +44,12 @@ NVIDIA NIM  ──► news analysis (queue) ────────────
 AI chat is read-only over the same tables plus `ai-context.ts` builders. The model
 never writes to the database.
 
-## 3. Markets
+## 3. Market scope
 
-`instruments.market` is `EGX` or `SAUDI`. The TradingView provider maps
-`EGX → egypt`, `SAUDI → ksa`. Quotes are in EGP or SAR respectively. Macro strip
-is Egypt-only. Mobile has a market selector that scopes lists, charts and news.
+**EGX only.** Saudi and international instruments, news regions and UI were
+removed on 2026-11-03; the `instruments.market` column was dropped in migration
+`0010`. The worker fetches the TradingView `egypt` universe, quotes are in EGP,
+news is Egypt-only, and there is no market selector in the app.
 
 ## 4. Database
 

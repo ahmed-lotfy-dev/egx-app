@@ -709,11 +709,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** News feed for EGX, Saudi, or International markets */
+        /** EGX news feed */
         get: {
             parameters: {
                 query?: {
-                    region?: "egypt" | "saudi" | "international";
                     limit?: number | null;
                     cursor?: string;
                     lang?: "ar" | "en";
@@ -775,8 +774,6 @@ export interface paths {
                             meta: {
                                 nextCursor: string | null;
                                 limit: number;
-                                /** @enum {string} */
-                                region: "egypt" | "saudi" | "international";
                                 /** Format: date-time */
                                 asOf: string | null;
                             };

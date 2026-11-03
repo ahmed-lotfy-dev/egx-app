@@ -280,7 +280,6 @@ export const NewsFeedResponseSchema = z.object({
   meta: z.object({
     nextCursor: z.string().nullable(),
     limit: z.number().int(),
-    region: z.enum(["egypt", "saudi", "international"]),
     asOf: z.iso.datetime().nullable(),
   }),
 });

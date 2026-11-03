@@ -1825,22 +1825,8 @@
         "tags": [
           "market"
         ],
-        "summary": "News feed for EGX, Saudi, or International markets",
+        "summary": "EGX news feed",
         "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "egypt",
-                "saudi",
-                "international"
-              ],
-              "default": "egypt"
-            },
-            "required": false,
-            "name": "region",
-            "in": "query"
-          },
           {
             "schema": {
               "type": "integer",
@@ -2123,14 +2109,6 @@
                         "limit": {
                           "type": "integer"
                         },
-                        "region": {
-                          "type": "string",
-                          "enum": [
-                            "egypt",
-                            "saudi",
-                            "international"
-                          ]
-                        },
                         "asOf": {
                           "type": "string",
                           "nullable": true,
@@ -2140,7 +2118,6 @@
                       "required": [
                         "nextCursor",
                         "limit",
-                        "region",
                         "asOf"
                       ]
                     }

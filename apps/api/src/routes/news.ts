@@ -25,10 +25,9 @@ const newsFeedRoute = createRoute({
   method: "get",
   path: "/api/news",
   tags: ["market"],
-  summary: "News feed for EGX, Saudi, or International markets",
+  summary: "EGX news feed",
   request: {
     query: z.object({
-      region: z.enum(["egypt", "saudi", "international"]).default("egypt"),
       limit: z.coerce.number().int().default(20),
       cursor: z.string().trim().min(1).optional(),
       lang: z.enum(["ar", "en"]).optional(),
@@ -101,7 +100,7 @@ const linkedSubquery = db
 export const newsRoutes = new OpenAPIHono();
 
 newsRoutes.openapi(newsFeedRoute, async (c) => {
-  const { region, cursor, lang, sentiment, impactMin, impactLevel, sourceCategory, hasAI, entities } = c.req.valid("query");
+  const { cursor, lang, sentiment, impactMin, impactLevel, sourceCategory, hasAI, entities } = c.req.valid("query");
   const limit = Math.min(30, Math.max(1, c.req.valid("query").limit));
 
   let cursorData: Cursor | null = null;
@@ -122,17 +121,7 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
     }
   }
 
-  const regionMap: Record<string, readonly string[]> = {
-    egypt: ["egypt"] as const,
-    saudi: ["saudi"] as const,
-    international: ["global", "mena", "gcc"] as const,
-  };
-
-  const regionValues = (regionMap[region] ?? regionMap.egypt) as readonly string[];
-
-  const conditions = [
-    inArray(newsItems.sourceRegion, regionValues),
-  ];
+  const conditions = [eq(newsItems.sourceRegion, "egypt")];
 
   if (sentiment) {
     conditions.push(eq(newsItems.sentiment, sentiment));
@@ -246,7 +235,6 @@ newsRoutes.openapi(newsFeedRoute, async (c) => {
       meta: {
         nextCursor,
         limit,
-        region,
         asOf: asOf?.toISOString() ?? null,
       },
     },

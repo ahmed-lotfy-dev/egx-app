@@ -1,3 +1,7 @@
+> **Status (2026-11-03):** Saudi and international markets were removed. News is
+> Egypt-only; the Saudi/international tabs and feeds described below no longer exist.
+> See `docs/architecture.md`.
+
 # News AI Analysis Feature
 
 ## Overview

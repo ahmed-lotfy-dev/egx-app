@@ -21,8 +21,6 @@ import {
 import { withIngestRun } from "../lib/runs";
 import { analyzeNews, chat, translateText, type NewsAnalysisResult } from "../lib/nim";
 import { fetchEgyptNews, EGYPT_NEWS_SOURCES } from "../providers/egypt-news";
-import { fetchSaudiNews, SAUDI_NEWS_SOURCES } from "../providers/saudi-news";
-import { fetchGlobalNews, GLOBAL_NEWS_SOURCES } from "../providers/global-news";
 
 const NEWS_USER_AGENT =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -59,7 +57,7 @@ export type Article = {
   sourceName: string;
   sourceWeight: number;
   sourceCategory: string;
-  sourceRegion: "egypt" | "saudi" | "global" | "mena" | "gcc";
+  sourceRegion: "egypt";
   matchText?: string;
 };
 
@@ -357,18 +355,6 @@ async function fetchAllSources(): Promise<Article[]> {
   for (const a of egyptArticles) allArticles.set(a.url, a);
   console.log(`[news] Egypt: ${egyptArticles.length} articles`);
 
-  // 2. Saudi sources
-  console.log("[news] Fetching Saudi sources...");
-  const saudiArticles = await fetchSaudiNews();
-  for (const a of saudiArticles) allArticles.set(a.url, a);
-  console.log(`[news] Saudi: ${saudiArticles.length} articles`);
-
-  // 3. Global sources
-  console.log("[news] Fetching Global sources...");
-  const globalArticles = await fetchGlobalNews();
-  for (const a of globalArticles) allArticles.set(a.url, a);
-  console.log(`[news] Global: ${globalArticles.length} articles`);
-
   // 4. Arab Finance (legacy - keep for backward compat)
   console.log("[news] Fetching Arab Finance...");
   const afArticles = await fetchArabFinance();
@@ -471,8 +457,6 @@ export async function syncNews() {
       metadata: {
         sources: {
           egypt: EGYPT_NEWS_SOURCES.length,
-          saudi: SAUDI_NEWS_SOURCES.length,
-          global: GLOBAL_NEWS_SOURCES.length,
           arabfinance: FEEDS.length,
         },
         parsed: result.itemsOk,
@@ -585,7 +569,7 @@ export async function syncNewsWithAnalysis() {
   // 1. Fetch and ingest
   const syncResult = await syncNews();
   const metadata = syncResult.metadata as {
-    sources: { egypt: number; saudi: number; global: number; arabfinance: number };
+    sources: { egypt: number; arabfinance: number };
     parsed: number;
     linked: number;
     queuedForAnalysis: number;

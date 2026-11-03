@@ -10,7 +10,7 @@ A long-running worker (`apps/worker/src/scheduler.ts`, `bun src/cli.ts schedule`
 | universe + yahoo symbols | daily 08:30 | TradingView scan |
 | bars | daily 15:15 (after close) | Yahoo first, TradingView websocket fallback |
 | fundamentals | daily 04:30 | TradingView scan |
-| news sync | every 30 min | google news / saudi / global sources |
+| news sync | every 30 min | Egypt sources (Arab Finance, Egyptian outlets) |
 | news AI analysis | every 20 min, batch 25 | NVIDIA NIM (small batches to respect rate limits) |
 
 Each job has an overlap guard (a still-running job skips its tick), and every run is logged with duration.
