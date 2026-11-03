@@ -1,6 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { MarketOverviewResponseSchema } from "@egx/contracts";
-import { z } from "zod";
 import { and, asc, desc, eq } from "drizzle-orm";
 
 import { db } from "../db/client";
@@ -20,11 +19,6 @@ const overviewRoute = createRoute({
   path: "/api/market/overview",
   tags: ["market"],
   summary: "Market index, breadth, movers, and sector performance",
-  request: {
-    query: z.object({
-      market: z.enum(["EGX", "SAUDI"]).default("EGX"),
-    }),
-  },
   responses: {
     200: {
       description: "Market overview",
@@ -40,19 +34,13 @@ const overviewRoute = createRoute({
 export const marketRoutes = new OpenAPIHono();
 
 marketRoutes.openapi(overviewRoute, async (c) => {
-  const { market } = c.req.valid("query");
-  const payload = await cached(
-    `market:overview:${market}`,
-    READ_TTL_MS,
-    async () => {
-      const rows = await db
-        .select(marketColumns)
-        .from(instruments)
-        .leftJoin(latestQuotes, eq(latestQuotes.instrumentId, instruments.id))
-        .where(
-          and(eq(instruments.isActive, true), eq(instruments.market, market)),
-        )
-        .orderBy(asc(instruments.ticker));
+  const payload = await cached("market:overview", READ_TTL_MS, async () => {
+    const rows = await db
+      .select(marketColumns)
+      .from(instruments)
+      .leftJoin(latestQuotes, eq(latestQuotes.instrumentId, instruments.id))
+      .where(and(eq(instruments.isActive, true)))
+      .orderBy(asc(instruments.ticker));
 
     const now = new Date();
     const stockRows = rows.filter((row) => row.kind !== "index");
@@ -150,9 +138,8 @@ marketRoutes.openapi(overviewRoute, async (c) => {
         return b.changePct - a.changePct;
       });
 
-    const indexTicker = market === "SAUDI" ? "TASI" : "EGX30";
     const indexRow =
-      indexRows.find((row) => row.ticker === indexTicker) ?? indexRows[0];
+      indexRows.find((row) => row.ticker === "EGX30") ?? indexRows[0];
     const asOf = latestQuoteAsOf(rows);
     const universeAsOf = latestUniverseAsOf(rows);
 

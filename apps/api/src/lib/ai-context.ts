@@ -230,17 +230,13 @@ export async function buildCatalog(): Promise<string> {
         ticker: instruments.ticker,
         en: instruments.nameEn,
         ar: instruments.nameAr,
-        market: instruments.market,
       })
       .from(instruments)
       .where(eq(instruments.isActive, true))
       .orderBy(instruments.ticker);
 
     return rows
-      .map(
-        (row) =>
-          `${row.ticker}=${row.en}${row.ar ? ` | ${row.ar}` : ""} [${row.market}]`,
-      )
+      .map((row) => `${row.ticker}=${row.en}${row.ar ? ` | ${row.ar}` : ""}`)
       .join("\n");
   });
 }

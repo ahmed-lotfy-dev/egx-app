@@ -6,27 +6,15 @@ import { normalizeArabic, normalizeEnglish } from "@egx/api/text";
 
 import { withIngestRun } from "../lib/runs";
 import { TradingViewProvider } from "../providers/tradingview";
-import type { MarketCode } from "../providers/types";
-
-const UNIVERSE_MARKETS: MarketCode[] = ["EGX", "SAUDI"];
-const MIN_UNIVERSE_SIZE: Record<MarketCode, number> = { EGX: 200, SAUDI: 300 };
 
 export async function syncUniverse() {
   return withIngestRun("universe", "tradingview", async () => {
     const provider = new TradingViewProvider();
+    const seeds = await provider.fetchUniverse();
 
-    const perMarket = await Promise.all(
-      UNIVERSE_MARKETS.map(async (market) => {
-        const seeds = await provider.fetchUniverse(market);
-        if (seeds.length < MIN_UNIVERSE_SIZE[market]) {
-          throw new Error(
-            `Universe too small for ${market}: ${seeds.length} instruments`,
-          );
-        }
-        return seeds;
-      }),
-    );
-    const seeds = perMarket.flat();
+    if (seeds.length < 200) {
+      throw new Error(`Universe too small: ${seeds.length} instruments`);
+    }
 
     const now = new Date();
     const rows = seeds.map((seed) => ({
@@ -41,7 +29,6 @@ export async function syncUniverse() {
       industry: seed.industry,
       logoid: seed.logoid,
       kind: seed.kind,
-      market: seed.market,
       currency: seed.currency,
       isActive: true,
       updatedAt: now,
@@ -56,17 +43,13 @@ export async function syncUniverse() {
           tvSymbol: sql`excluded.tv_symbol`,
           yahooSymbol: sql`excluded.yahoo_symbol`,
           nameEn: sql`excluded.name_en`,
-          // TradingView has no Arabic name for some listings (backfilled from
-          // the exchange's own site) — keep the stored name when the feed
-          // returns null instead of wiping it on every sync.
-          nameAr: sql`coalesce(excluded.name_ar, ${instruments.nameAr})`,
+          nameAr: sql`excluded.name_ar`,
           searchNameEn: sql`excluded.search_name_en`,
-          searchNameAr: sql`coalesce(excluded.search_name_ar, ${instruments.searchNameAr})`,
+          searchNameAr: sql`excluded.search_name_ar`,
           sector: sql`excluded.sector`,
           industry: sql`excluded.industry`,
           logoid: sql`excluded.logoid`,
           kind: sql`excluded.kind`,
-          market: sql`excluded.market`,
           currency: sql`excluded.currency`,
           isActive: sql`excluded.is_active`,
           updatedAt: sql`excluded.updated_at`,

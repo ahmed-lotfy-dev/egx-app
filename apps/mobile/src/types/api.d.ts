@@ -149,7 +149,6 @@ export interface paths {
                     q?: string;
                     sector?: string;
                     kind?: "stock" | "index";
-                    market?: "EGX" | "SAUDI";
                     limit?: number;
                     cursor?: string;
                 };
@@ -174,11 +173,6 @@ export interface paths {
                                 industry: string | null;
                                 /** @enum {string} */
                                 kind: "stock" | "index";
-                                /**
-                                 * @default EGX
-                                 * @enum {string}
-                                 */
-                                market: "EGX" | "SAUDI";
                                 currency: string;
                                 quote: {
                                     price: number | null;
@@ -249,11 +243,6 @@ export interface paths {
                                 industry: string | null;
                                 /** @enum {string} */
                                 kind: "stock" | "index";
-                                /**
-                                 * @default EGX
-                                 * @enum {string}
-                                 */
-                                market: "EGX" | "SAUDI";
                                 currency: string;
                                 quote: {
                                     price: number | null;
@@ -529,9 +518,7 @@ export interface paths {
         /** Market index, breadth, movers, and sector performance */
         get: {
             parameters: {
-                query?: {
-                    market?: "EGX" | "SAUDI";
-                };
+                query?: never;
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -554,11 +541,6 @@ export interface paths {
                                     industry: string | null;
                                     /** @enum {string} */
                                     kind: "stock" | "index";
-                                    /**
-                                     * @default EGX
-                                     * @enum {string}
-                                     */
-                                    market: "EGX" | "SAUDI";
                                     currency: string;
                                     quote: {
                                         price: number | null;
@@ -588,11 +570,6 @@ export interface paths {
                                     industry: string | null;
                                     /** @enum {string} */
                                     kind: "stock" | "index";
-                                    /**
-                                     * @default EGX
-                                     * @enum {string}
-                                     */
-                                    market: "EGX" | "SAUDI";
                                     currency: string;
                                     quote: {
                                         price: number | null;
@@ -615,11 +592,6 @@ export interface paths {
                                     industry: string | null;
                                     /** @enum {string} */
                                     kind: "stock" | "index";
-                                    /**
-                                     * @default EGX
-                                     * @enum {string}
-                                     */
-                                    market: "EGX" | "SAUDI";
                                     currency: string;
                                     quote: {
                                         price: number | null;
