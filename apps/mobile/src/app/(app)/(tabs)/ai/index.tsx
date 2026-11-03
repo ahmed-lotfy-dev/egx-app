@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
+import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Dimensions,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
+  Keyboard,
   Pressable,
   Text,
   TextInput,
@@ -44,9 +45,15 @@ export default function AiScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [errorHint, setErrorHint] = useState(false);
+  // Extra bottom padding that lifts the composer above the keyboard. The
+  // window itself does not shrink under edge-to-edge Android, so we measure
+  // the overlap ourselves (see effect below).
+  const [kbPad, setKbPad] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const listRef = useRef<FlatList<ChatMessage>>(null);
   const lastNavKey = useRef("");
+  const baseWindowHeight = useRef(Dimensions.get("window").height);
 
   const locale = i18n.language.startsWith("ar") ? "ar" : "en";
 
@@ -73,6 +80,12 @@ export default function AiScreen() {
         ...prev,
         { role: "assistant", content: plainText(data.data.message.content) },
       ]);
+      // If the server grounded on a stock the user named in the message (no
+      // chip was set), adopt it so the follow-up questions stay on that stock.
+      const grounded = data.data.groundedTicker;
+      if (grounded && !ticker) {
+        setTicker(grounded.toUpperCase());
+      }
     },
     onError: () => {
       setErrorHint(true);
@@ -130,6 +143,34 @@ export default function AiScreen() {
     return () => clearTimeout(timer);
   }, [messages, sending]);
 
+  useEffect(() => {
+    // Under edge-to-edge Android the window keeps its height when the keyboard
+    // opens, so the composer would be hidden behind it. If the window did not
+    // shrink (edge-to-edge, or iOS), pad by the keyboard height; if it did
+    // shrink (adjustResize), the layout already moved and no padding is needed.
+    const show = Keyboard.addListener("keyboardDidShow", (event) => {
+      const shrunk = baseWindowHeight.current - Dimensions.get("window").height > 40;
+      setKbPad(shrunk ? 0 : event.endCoordinates.height + 8);
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 120);
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => setKbPad(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  const copyMessage = async (content: string) => {
+    await Clipboard.setStringAsync(content);
+    setCopied(true);
+  };
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1400);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
   const suggestions = ticker
     ? [
         t("ai.suggestTickerQuote", { ticker }),
@@ -150,7 +191,11 @@ export default function AiScreen() {
         key={`${index}-${message.role}`}
         className={`px-5 ${isUser ? "items-end" : "items-start"}`}
       >
-        <View
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("ai.copyMessage")}
+          onLongPress={() => copyMessage(message.content)}
+          delayLongPress={300}
           className={`max-w-[85%] rounded-2xl border px-4 py-3 ${
             isUser
               ? "border-gold/30 bg-gold/10"
@@ -166,7 +211,22 @@ export default function AiScreen() {
           >
             {message.content}
           </Text>
-        </View>
+        </Pressable>
+
+        {!isUser && !message.failed ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("ai.copyMessage")}
+            hitSlop={8}
+            onPress={() => copyMessage(message.content)}
+            className="mt-1 flex-row items-center gap-1 self-start rounded-full px-2 py-1 active:opacity-70"
+          >
+            <Ionicons name="copy-outline" size={13} color={colors.textMuted} />
+            <Text className="font-body text-[11px] text-text-muted">
+              {t("ai.copy")}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
     );
   };
@@ -175,10 +235,7 @@ export default function AiScreen() {
 
   return (
     <Screen>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        className="flex-1"
-      >
+      <View className="flex-1">
         <ScreenHeader
           title={t("ai.title")}
           right={
@@ -216,9 +273,12 @@ export default function AiScreen() {
         {hasMessages || sending ? (
           <FlatList
             ref={listRef}
+            style={{ flex: 1 }}
             data={sending ? [...messages, { role: "assistant" as const, content: "__typing__" }] : messages}
             keyExtractor={(_, index) => String(index)}
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
             contentContainerStyle={{ paddingBottom: 12, gap: 10, paddingTop: 4 }}
             renderItem={({ item, index }) =>
               item.content === "__typing__" ? (
@@ -238,7 +298,9 @@ export default function AiScreen() {
         ) : (
           <FlatList
             data={[]}
+            style={{ flex: 1 }}
             keyExtractor={(_, index) => String(index)}
+            keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ flexGrow: 1 }}
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center px-6">
@@ -286,9 +348,20 @@ export default function AiScreen() {
           </View>
         ) : null}
 
+        {copied ? (
+          <View pointerEvents="none" className="items-center pb-1">
+            <View className="flex-row items-center gap-1.5 rounded-full border border-gold/40 bg-surface px-3 py-1.5">
+              <Ionicons name="checkmark-circle" size={14} color={colors.gold} />
+              <Text className="font-body text-[12px] text-gold">
+                {t("ai.copied")}
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
         <View
           className="flex-row items-end gap-2 border-t border-border/60 bg-canvas px-3 pt-2"
-          style={{ paddingBottom: Math.max(insets.bottom, 8) }}
+          style={{ paddingBottom: kbPad > 0 ? kbPad : Math.max(insets.bottom, 8) }}
         >
           <TextInput
             value={input}
@@ -316,7 +389,7 @@ export default function AiScreen() {
             )}
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }

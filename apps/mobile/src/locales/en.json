@@ -204,7 +204,10 @@
     "send": "Send",
     "typing": "Assistant is typing…",
     "error": "The assistant is unavailable right now. Try again.",
-    "clearContext": "Remove stock from chat"
+    "clearContext": "Remove stock from chat",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyMessage": "Copy message"
   },
   "profile": {
     "title": "Profile",

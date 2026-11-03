@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, or } from "drizzle-orm";
 
 import { db } from "../db/client";
 import {
@@ -12,6 +12,7 @@ import {
 } from "../db/schema";
 import { marketColumns } from "../db/selects";
 import { computeHistoryStats, computeSupportResistance } from "./levels";
+import { normalizeSearch } from "./text";
 import { MACRO_KEYS } from "@egx/contracts";
 
 /**
@@ -212,4 +213,89 @@ export async function buildMarketContext(): Promise<Grounding> {
   lines.push(`MACRO: ${macroParts.join(", ") || "—"}`);
 
   return { text: lines.join("\n"), ticker: null };
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** True when `token` appears as a whole word inside a normalized name. */
+function wholeWord(token: string, haystack: string | null): boolean {
+  if (!haystack) return false;
+  return new RegExp(`(^|\\s)${escapeRegex(token)}(\\s|$)`).test(haystack);
+}
+
+/**
+ * Finds the instrument a free-text message is asking about, so a market-wide
+ * chat can still be grounded on the right stock. Matches an explicit ticker
+ * first (COMI), then Arabic/English names ("ابوقير", "Abou Kir"). Returns null
+ * when nothing matches or when the match is too ambiguous to trust — the
+ * caller then falls back to the provided ticker or the market overview.
+ */
+export async function resolveMentionedTicker(text: string): Promise<string | null> {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+
+  // 1) Explicit ticker symbol (Latin, 2–8 chars, standalone word).
+  const tickerTokens = Array.from(
+    new Set((trimmed.match(/(?<![A-Za-z0-9])[A-Za-z]{2,8}(?![A-Za-z0-9])/g) ?? []).map((t) => t.toUpperCase())),
+  );
+  if (tickerTokens.length > 0) {
+    const rows = await db
+      .select({ ticker: instruments.ticker })
+      .from(instruments)
+      .where(and(eq(instruments.isActive, true), inArray(instruments.ticker, tickerTokens)));
+    if (rows.length === 1) return rows[0]!.ticker;
+    if (rows.length > 1) {
+      const order = new Map(tickerTokens.map((t, index) => [t, index]));
+      rows.sort((a, b) => (order.get(a.ticker) ?? 99) - (order.get(b.ticker) ?? 99));
+      return rows[0]!.ticker;
+    }
+  }
+
+  // 2) Name search on the normalized message, longest (most specific) token
+  // first. A generic word like "مصر" matches many companies, so only accept a
+  // token when exactly one instrument matches, or the best match is a
+  // whole-word hit that is strictly better than the runner-up.
+  const normalized = normalizeSearch(trimmed);
+  const tokens = Array.from(new Set(normalized.split(" ").filter((word) => word.length >= 3))).sort(
+    (a, b) => b.length - a.length,
+  );
+
+  for (const token of tokens) {
+    const rows = await db
+      .select({
+        ticker: instruments.ticker,
+        en: instruments.searchNameEn,
+        ar: instruments.searchNameAr,
+      })
+      .from(instruments)
+      .where(
+        and(
+          eq(instruments.isActive, true),
+          eq(instruments.kind, "stock"),
+          or(
+            ilike(instruments.searchNameEn, `%${token}%`),
+            ilike(instruments.searchNameAr, `%${token}%`),
+          ),
+        ),
+      )
+      .limit(8);
+
+    if (rows.length === 0) continue;
+    if (rows.length === 1) return rows[0]!.ticker;
+
+    const scored = rows
+      .map((row) => {
+        const word = wholeWord(token, row.en) || wholeWord(token, row.ar);
+        return { ticker: row.ticker, score: (word ? 100 : 0) + token.length };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    if (scored[0]!.score >= 100 && scored[0]!.score > scored[1]!.score) {
+      return scored[0]!.ticker;
+    }
+  }
+
+  return null;
 }

@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { AiChatRequestSchema, AiChatResponseSchema, ErrorResponseSchema } from "@egx/contracts";
 
-import { buildMarketContext, buildTickerContext } from "../lib/ai-context";
+import { buildMarketContext, buildTickerContext, resolveMentionedTicker } from "../lib/ai-context";
 import { aiConfigured, chat as nimChat, type NIMMessage } from "../lib/nim";
 
 /**
@@ -40,6 +40,7 @@ const SYSTEM_PROMPT_BASE = `You are "مساعد EGX" — the in-app financial as
 Rules:
 - Reply in Arabic when locale=ar (clear Egyptian-friendly Modern Standard Arabic) and in English when locale=en.
 - Ground EVERY number in the MARKET DATA block provided below. Never invent prices, percentages, dates, or news. If the data block lacks something, say so plainly.
+- If the user asks about a stock that is NOT in the MARKET DATA block, do NOT claim it does not exist. Say you can only see the data the app gave you for this turn and ask them to open that stock's screen (or give its ticker) so the app loads its data — then answer from that.
 - EGX quotes are delayed ~15–20 minutes by the exchange; respect the asOf timestamps and mention freshness when it matters.
 - Be concise: at most ~180 words, prefer short bullet points, always use ticker symbols (e.g. COMI, EAST).
 - You may explain general financial concepts (P/E, support/resistance, dividend yield) without data.
@@ -131,10 +132,17 @@ aiRoutes.openapi(chatRoute, async (c) => {
       content: message.content.slice(0, MAX_MESSAGE_CHARS),
     }));
 
+  // The user may name a stock in the message itself ("KORA", "بوقير") even
+  // when no ticker context was passed. Resolve that mention so the answer is
+  // grounded on the right instrument instead of the generic market overview.
+  const lastUser = [...rawMessages].reverse().find((message) => message.role === "user");
+  const mentioned = lastUser ? await resolveMentionedTicker(lastUser.content) : null;
+  const effectiveTicker = mentioned ?? ticker;
+
   let grounding: Awaited<ReturnType<typeof buildMarketContext>>;
-  if (ticker) {
-    grounding = (await buildTickerContext(ticker)) ?? {
-      text: `The user asked about ticker "${ticker}" but it does not exist in the app's instrument database. Tell them politely (in their language) that no EGX listing matches it, and suggest checking the spelling.`,
+  if (effectiveTicker) {
+    grounding = (await buildTickerContext(effectiveTicker)) ?? {
+      text: `The user asked about ticker "${effectiveTicker}" but no matching EGX instrument was found in the app's database. Politely say (in their language) that the app has no data for it and suggest checking the spelling or opening the stock's screen.`,
       ticker: null,
     };
   } else {
@@ -164,7 +172,7 @@ aiRoutes.openapi(chatRoute, async (c) => {
           message: { role: "assistant" as const, content: response.content.trim() },
           groundedTicker: grounding.ticker,
         },
-        meta: { model: response.model, grounded: ticker !== undefined },
+        meta: { model: response.model, grounded: effectiveTicker !== undefined },
       },
       200,
     );
