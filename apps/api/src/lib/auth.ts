@@ -29,6 +29,18 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: false,
   },
+  user: {
+    additionalFields: {
+      // Exposed on the session user so the admin dashboard can decide whether
+      // to show the console. `input: false` stops clients setting it.
+      isAdmin: {
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+        input: false,
+      },
+    },
+  },
   ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
     ? {
         socialProviders: {
