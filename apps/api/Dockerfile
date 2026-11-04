@@ -14,9 +14,11 @@ COPY packages/contracts ./packages/contracts
 # Install dependencies with hoisted linker
 RUN bun install
 
-# Generate Drizzle migrations
+# Migrations are committed under src/db/migrations and applied at container
+# start. Never regenerate them during the build: drizzle hashes migration
+# files, and regenerating changes those hashes, which makes the production
+# migrator replay already-applied migrations.
 WORKDIR /app/apps/api
-RUN bun run db:generate
 
 # Production stage
 FROM oven/bun:1.3-alpine AS runner

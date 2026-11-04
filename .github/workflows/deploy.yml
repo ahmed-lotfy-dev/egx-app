@@ -72,6 +72,17 @@ jobs:
             set -e
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             cd /home/ubuntu/apps/egx-api
-            docker compose pull
+            # Registry pulls occasionally hit transient TLS timeouts; retry
+            # instead of failing the whole deploy.
+            ok=0
+            for i in 1 2 3 4 5; do
+              if docker compose pull; then ok=1; break; fi
+              echo "pull failed, retrying ($i/5)"
+              sleep 15
+            done
+            if [ "$ok" -ne 1 ]; then
+              echo "could not pull images after 5 attempts"
+              exit 1
+            fi
             docker compose up -d --remove-orphans
             docker image prune -f
