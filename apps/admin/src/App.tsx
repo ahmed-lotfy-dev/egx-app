@@ -83,7 +83,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [session, setSession] = useState<SessionData | null>(null);
   const navigate = useNavigate();
 
   const loadDocuments = async () => {
@@ -95,32 +94,16 @@ function AppRoutes() {
     }
   };
 
-  const checkAuth = async () => {
-    try {
-      const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
-        credentials: "include",
-      }).then((r) => r.json());
-      const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
-      if (user?.isAdmin) {
-        setSession(data as SessionData);
-        await loadDocuments();
-      } else {
-        setSession(null);
-        navigate("/login", { replace: true });
-      }
-    } catch {
-      setSession(null);
-      navigate("/login", { replace: true });
-    }
-  };
-
   const handleSendCode = (email: string) => {
     navigate("/otp", { state: { email } });
   };
 
   const handleVerify = async (_email: string, _otp: string) => {
     setError(null);
-    await checkAuth();
+    // OTPScreen already exchanged the code for a session cookie;
+    // ProtectedRoute will pick it up on the next render.
+    // Force a re-check by navigating to root (triggers ProtectedRoute checkAuth).
+    navigate("/", { replace: true });
   };
 
   const handleUpload = async (file: File, periodStart: string, periodEnd: string) => {
@@ -158,14 +141,9 @@ function AppRoutes() {
     } catch {
       // ignore
     }
-    setSession(null);
-    setDocuments([]);
-    navigate("/login", { replace: true });
+    // ProtectedRoute will detect signed-out session and redirect to login
+    navigate("/", { replace: true });
   };
-
-  useEffect(() => {
-    checkAuth();
-  }, [navigate]);
 
   return (
     <Routes>
@@ -186,7 +164,6 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardLayout
-              session={session!}
               documents={documents}
               error={error}
               onSetError={setError}
@@ -203,7 +180,6 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardLayout
-              session={session!}
               documents={documents}
               error={error}
               onSetError={setError}
@@ -220,7 +196,6 @@ function AppRoutes() {
 }
 
 function DashboardLayout({
-  session,
   documents,
   error,
   onSetError,
@@ -229,7 +204,6 @@ function DashboardLayout({
   onSignOut,
   onRefresh,
 }: {
-  session: SessionData;
   documents: Document[];
   error: string | null;
   onSetError: (error: string | null) => void;
@@ -238,10 +212,21 @@ function DashboardLayout({
   onSignOut: () => void;
   onRefresh: () => void;
 }) {
+  const [session, setSession] = useState<SessionData | null>(null);
   const location = useLocation();
   const isDetail = location.pathname.startsWith("/documents/");
   const docId = isDetail ? Number(location.pathname.split("/")[2]) : null;
   const selectedDoc = documents.find((d) => d.id === docId);
+
+  useEffect(() => {
+    fetch(`${OCI_API_BASE}/api/auth/get-session`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
+        if (user?.isAdmin) setSession(data as SessionData);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -249,7 +234,7 @@ function DashboardLayout({
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">لوحة تحكم EGX</h1>
           <div className="flex items-center gap-4">
-            {session.user?.email && (
+            {session?.user?.email && (
               <span className="text-sm text-gray-500">{session.user.email}</span>
             )}
             <button
