@@ -1,0 +1,6 @@
+{
+  "buildCommand": "bun run vercel-build",
+  "installCommand": "bun install",
+  "framework": null,
+  "outputDirectory": "apps/api/public/admin"
+}

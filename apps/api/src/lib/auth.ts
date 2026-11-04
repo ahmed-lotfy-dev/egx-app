@@ -17,6 +17,15 @@ export const auth = betterAuth({
     schema,
   }),
   trustedOrigins: env.trustedOrigins,
+  advanced: {
+    // The dashboard is served from a different origin than the API
+    // (egx.alotfy.site -> egx-api.alotfy.site, and the vercel.app alias).
+    // Session cookies must be sent on those cross-origin requests.
+    defaultCookieAttributes: {
+      sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+      secure: env.NODE_ENV === "production",
+    },
+  },
   emailAndPassword: {
     enabled: false,
   },

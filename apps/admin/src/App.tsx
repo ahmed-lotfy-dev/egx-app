@@ -1,14 +1,31 @@
 import { useState, useEffect } from "react";
-import type { Document } from "./types";
 import { DocumentsList } from "./components/DocumentsList";
 import { DocumentDetail } from "./components/DocumentDetail";
 import { LoginScreen } from "./components/LoginScreen";
+import { OTPScreen } from "./components/OTPScreen";
 import "./index.css";
+import "./types/auth";
 
-type View = "login" | "list" | "detail";
+export interface Document {
+  id: number;
+  sha256: string;
+  filename: string;
+  periodStart: string;
+  periodEnd: string;
+  pages: number;
+  status: string;
+  error: string | null;
+  uploadedBy: string;
+  uploadedAt: string;
+  publishedAt: string | null;
+}
+
+type View = "login" | "otp" | "list" | "detail";
+
+const OCI_API_BASE = "https://egx-api.alotfy.site";
 
 const api = (path: string, options?: RequestInit) =>
-  fetch(`/api${path}`, {
+  fetch(`${OCI_API_BASE}/api${path}`, {
     ...options,
     credentials: "include",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -24,60 +41,61 @@ export function App() {
   const [view, setView] = useState<View>("login");
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<{ user: { isAdmin: boolean; email: string } | null } | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
   void showUpload;
 
   const checkAuth = async () => {
     try {
-      await api("/admin/documents");
-      setView("list");
-      loadDocuments();
+      // better-auth's get-session returns { session, user } directly (or null).
+      const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
+        credentials: "include",
+      }).then((r) => r.json());
+      const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
+      if (user?.isAdmin) {
+        setSession(data as { user: { isAdmin: boolean; email: string } | null });
+        setView("list");
+        loadDocuments();
+      } else {
+        setSession(null);
+        setView("login");
+      }
     } catch {
       setView("login");
     }
   };
 
   const loadDocuments = async () => {
-    setLoading(true);
     try {
       const data = await api("/admin/documents");
       setDocuments(data.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "فشل التحميل");
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleLogin = async (email: string, otp: string) => {
-    setLoading(true);
+  const handleSendCode = (email: string) => {
+    setOtpEmail(email);
+    setView("otp");
+  };
+
+  const handleVerify = async (_email: string, _otp: string) => {
     setError(null);
-    try {
-      await fetch("/api/auth/sign-in/email-otp", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
-      });
-      await checkAuth();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل تسجيل الدخول");
-    } finally {
-      setLoading(false);
-    }
+    // OTPScreen already exchanged the code for a session cookie; just refresh
+    // the session here. Verifying twice would consume the OTP and fail.
+    await checkAuth();
   };
 
   const handleUpload = async (file: File, periodStart: string, periodEnd: string) => {
-    setLoading(true);
     setError(null);
     try {
       const form = new FormData();
       form.append("file", file);
       form.append("periodStart", periodStart);
       form.append("periodEnd", periodEnd);
-      const res = await fetch("/api/admin/documents", {
+      const res = await fetch(`${OCI_API_BASE}/api/admin/documents`, {
         method: "POST",
         credentials: "include",
         body: form,
@@ -89,8 +107,6 @@ export function App() {
       await loadDocuments();
     } catch (e) {
       setError(e instanceof Error ? e.message : "فشل الرفع");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -104,12 +120,25 @@ export function App() {
     setView("list");
   };
 
+
+
   useEffect(() => {
     checkAuth();
   }, []);
 
   if (view === "login") {
-    return <LoginScreen onLogin={handleLogin} loading={loading} error={error} />;
+    return <LoginScreen onLogin={handleSendCode} error={error} />;
+  }
+
+  if (view === "otp") {
+    return (
+      <OTPScreen
+        email={otpEmail}
+        onVerify={handleVerify}
+        onBack={() => { setView("login"); setOtpEmail(""); }}
+        error={error}
+      />
+    );
   }
 
   return (
@@ -119,9 +148,10 @@ export function App() {
           <h1 className="text-2xl font-bold text-gray-900">لوحة تحكم EGX</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">التقارير الربعية</span>
+            <span className="text-sm text-gray-500">{session?.user?.email || ""}</span>
             <button
               onClick={() => setShowUpload(true)}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+              className="px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition"
             >
               رفع تقرير جديد
             </button>
@@ -131,7 +161,7 @@ export function App() {
 
       <main className="max-w-7xl mx-auto px-6 py-6">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center justify-between">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center justify-between">
             <span>{error}</span>
             <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700">×</button>
           </div>
@@ -140,7 +170,6 @@ export function App() {
         {view === "list" && (
           <DocumentsList
             documents={documents}
-            loading={loading}
             onUpload={handleUpload}
             onSelect={handleSelect}
           />

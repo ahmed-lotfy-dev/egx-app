@@ -17,3 +17,7 @@ apps/mobile/.expo/
 # Generated files kept in the repo:
 # - apps/mobile/src/types/api.d.ts (verified by contracts:check)
 # - apps/mobile/src/uniwind-types.d.ts (regenerate with mobile uniwind:generate)
+.vercel
+.env
+.env.*
+!.env.example

@@ -1,10 +1,8 @@
 import type { Document } from "../types";
 import { useState, FormEvent } from "react";
 
-
 interface Props {
   documents: Document[];
-  loading: boolean;
   onUpload: (file: File, periodStart: string, periodEnd: string) => void;
   onSelect: (doc: Document) => void;
 }
@@ -29,7 +27,7 @@ const statusLabels: Record<string, string> = {
   published: "منشور",
 };
 
-export function DocumentsList({ documents, loading, onUpload, onSelect }: Props) {
+export function DocumentsList({ documents, onUpload, onSelect }: Props) {
   const [showUpload, setShowUpload] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [periodStart, setPeriodStart] = useState("");
@@ -51,7 +49,7 @@ export function DocumentsList({ documents, loading, onUpload, onSelect }: Props)
         <h2 className="text-xl font-semibold text-gray-900">التقارير المرفوعة</h2>
         <button
           onClick={() => setShowUpload(true)}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+          className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition"
         >
           رفع تقرير جديد
         </button>
@@ -105,7 +103,7 @@ export function DocumentsList({ documents, loading, onUpload, onSelect }: Props)
                 <button
                   type="submit"
                   disabled={!file || !periodStart || !periodEnd}
-                  className="flex-1 py-2 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  className="flex-1 py-2 px-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50"
                 >
                   رفع
                 </button>
@@ -161,7 +159,7 @@ export function DocumentsList({ documents, loading, onUpload, onSelect }: Props)
                   <td className="px-4 py-3">
                     <button
                       onClick={(e) => { e.stopPropagation(); onSelect(doc); }}
-                      className="px-3 py-1 text-sm bg-primary-100 text-primary-700 rounded hover:bg-primary-200"
+                      className="px-3 py-1 text-sm bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
                     >
                       عرض
                     </button>
@@ -171,9 +169,6 @@ export function DocumentsList({ documents, loading, onUpload, onSelect }: Props)
             </tbody>
           </table>
         </div>
-        {loading && (
-          <div className="p-4 text-center text-gray-500">جاري التحميل...</div>
-        )}
       </div>
     </div>
   );

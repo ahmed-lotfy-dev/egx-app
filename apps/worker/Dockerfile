@@ -20,6 +20,13 @@ FROM oven/bun:1.3-alpine AS runner
 
 WORKDIR /app
 
+# PDF extraction runs through pdfplumber (Python), so the runtime image needs
+# a Python interpreter with the library available.
+RUN apk add --no-cache python3 py3-pip \
+  && pip install --no-cache-dir --break-system-packages pdfplumber
+
+ENV EXTRACTOR_PYTHON=/usr/bin/python3
+
 # Copy entire workspace with node_modules
 COPY --from=builder /app ./
 

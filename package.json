@@ -7,7 +7,10 @@
   ],
   "scripts": {
     "dev:api": "bun run --cwd apps/api dev",
+    "dev:admin": "bun run --cwd apps/admin dev",
     "dev:mobile": "bun run --cwd apps/mobile start",
+    "build:admin": "bun run --cwd apps/admin build",
+    "vercel-build": "bun run --cwd apps/admin build && echo 'Admin built'",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:generate": "bun run --cwd apps/api db:generate",
