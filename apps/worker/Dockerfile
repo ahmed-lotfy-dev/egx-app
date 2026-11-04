@@ -22,8 +22,9 @@ WORKDIR /app
 
 # PDF extraction runs through pdfplumber (Python), so the runtime image needs
 # a Python interpreter with the library available.
+# Optimized extractor also uses pypdfium2 for fast page detection.
 RUN apk add --no-cache python3 py3-pip \
-  && pip install --no-cache-dir --break-system-packages pdfplumber
+  && pip install --no-cache-dir --break-system-packages pdfplumber pypdfium2
 
 ENV EXTRACTOR_PYTHON=/usr/bin/python3
 
