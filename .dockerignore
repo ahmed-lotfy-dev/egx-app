@@ -5,7 +5,9 @@
 **/node_modules
 **/.expo
 apps/mobile
+apps/admin
 docs
+scripts
 .github
 .env*
 !.env.example

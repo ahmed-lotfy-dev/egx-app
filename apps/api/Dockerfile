@@ -11,8 +11,10 @@ COPY package.json bun.lock bunfig.toml ./
 COPY apps/api ./apps/api
 COPY packages/contracts ./packages/contracts
 
-# Install dependencies with hoisted linker
-RUN bun install
+# Install production dependencies only. The runtime never needs TypeScript,
+# drizzle-kit or pino-pretty, and every extra file makes the layer slower to
+# extract on the small VPS.
+RUN bun install --production
 
 # Migrations are committed under src/db/migrations and applied at container
 # start. Never regenerate them during the build: drizzle hashes migration
