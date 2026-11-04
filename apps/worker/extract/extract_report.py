@@ -181,6 +181,10 @@ def detect_table_pages(pdf_path: str) -> list[tuple[int, str]]:
     """
     Use pypdfium2 (fast) to find pages containing stock tables.
     Returns list of (page_no, segment).
+    
+    EGX reports have two table header variants:
+    - SME tables (page 16): "P/E" + "DY"
+    - Main tables (pages 17-23): "Trailing" + "DY%" / "صافي الربح"
     """
     table_pages: list[tuple[int, str]] = []
     doc = pdfium.PdfDocument(pdf_path)
@@ -192,9 +196,17 @@ def detect_table_pages(pdf_path: str) -> list[tuple[int, str]]:
             textpage.close()
             page.close()
 
-            # Check for stock table markers
-            has_pe = "P/E" in text or "ع/س" in text
-            has_dy = "DY" in text or "عائد" in text
+            # Check for stock table markers (both header variants)
+            # Variant 1: SME tables - "P/E" + "DY"
+            # Variant 2: Main tables - "Trailing" + "DY%" / "صافي الربح"
+            has_pe = (
+                "P/E" in text or "ع/س" in text or
+                "Trailing" in text
+            )
+            has_dy = (
+                "DY" in text or "عائد" in text or
+                "DY%" in text or "صافي الربح" in text
+            )
             if has_pe and has_dy:
                 # Determine segment from page text
                 logical = arabic_logical_order(text)
