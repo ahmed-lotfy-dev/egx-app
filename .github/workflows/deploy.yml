@@ -76,17 +76,31 @@ jobs:
             set -e
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             cd /home/ubuntu/apps/egx-api
-            # Registry pulls occasionally hit transient TLS timeouts; retry
-            # instead of failing the whole deploy.
-            ok=0
-            for i in 1 2 3 4 5; do
-              if docker compose pull; then ok=1; break; fi
-              echo "pull failed, retrying ($i/5)"
-              sleep 15
-            done
-            if [ "$ok" -ne 1 ]; then
-              echo "could not pull images after 5 attempts"
-              exit 1
-            fi
-            docker compose up -d --remove-orphans
-            docker image prune -f
+
+            # Registry pulls occasionally hit transient TLS timeouts, and this
+            # box is small and shared, so retry and deploy the API first
+            # instead of blocking it behind the larger worker image.
+            pull() {
+              ok=0
+              for i in 1 2 3 4 5; do
+                if docker compose pull "$1"; then ok=1; break; fi
+                echo "pull of $1 failed, retrying ($i/5)"
+                sleep 15
+              done
+              if [ "$ok" -ne 1 ]; then
+                echo "could not pull $1 after 5 attempts"
+                exit 1
+              fi
+            }
+
+            pull egx-api
+            docker compose up -d egx-api
+
+            pull egx-worker
+            docker compose up -d egx-worker
+
+            # Pruning walks every layer on disk, which can take many minutes on
+            # this box. Run it detached so a slow prune never fails a deploy
+            # that already succeeded.
+            nohup docker image prune -f >/tmp/prune.log 2>&1 &
+            echo "deploy complete"
