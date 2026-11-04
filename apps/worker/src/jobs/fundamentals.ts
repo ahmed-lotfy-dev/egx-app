@@ -72,6 +72,13 @@ export async function syncFundamentals() {
         totalAssets: record.totalAssets?.toString() ?? null,
         bookValuePerShare: record.bookValuePerShare?.toString() ?? null,
         evEbitda: record.evEbitda?.toString() ?? null,
+        revenueFy: record.revenueFy?.toString() ?? null,
+        netIncomeFy: record.netIncomeFy?.toString() ?? null,
+        fcfFy: record.fcfFy?.toString() ?? null,
+        equityFy: record.equityFy?.toString() ?? null,
+        roeFy: record.roeFy?.toString() ?? null,
+        dividendYieldCurrent:
+          record.dividendYieldCurrent?.toString() ?? null,
         raw: record.raw,
       };
     });
@@ -104,6 +111,12 @@ export async function syncFundamentals() {
           totalAssets: sql`excluded.total_assets`,
           bookValuePerShare: sql`excluded.book_value_per_share`,
           evEbitda: sql`excluded.ev_ebitda`,
+          revenueFy: sql`excluded.revenue_fy`,
+          netIncomeFy: sql`excluded.net_income_fy`,
+          fcfFy: sql`excluded.fcf_fy`,
+          equityFy: sql`excluded.equity_fy`,
+          roeFy: sql`excluded.roe_fy`,
+          dividendYieldCurrent: sql`excluded.dividend_yield_current`,
           raw: sql`excluded.raw`,
         },
       });

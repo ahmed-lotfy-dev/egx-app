@@ -21,3 +21,6 @@ apps/mobile/.expo/
 .env
 .env.*
 !.env.example
+
+# FUSE mount artifacts (files deleted while still open)
+.fuse_hidden*

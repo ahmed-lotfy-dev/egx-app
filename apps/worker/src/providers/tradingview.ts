@@ -60,6 +60,17 @@ const FUNDAMENTAL_COLUMNS = [
   "total_assets",
   "book_value_per_share_fq",
   "enterprise_value_ebitda_ttm",
+  // Fiscal-year statements. Coverage on the EGX is roughly double the TTM
+  // columns, so they are worth fetching, but they stay in their own fields.
+  "total_revenue_fy",
+  "net_income_fy",
+  "free_cash_flow_fy",
+  "total_equity_fy",
+  "return_on_equity_fy",
+  "dividends_yield_current",
+  // Fallback for P/B: TradingView often has the quarterly ratio when the
+  // plain one is empty.
+  "price_book_fq",
 ] as const;
 
 type ScanRow = { s: string; d: unknown[] };
@@ -264,7 +275,6 @@ export class TradingViewProvider implements MarketDataProvider {
         marketCap: metric(row.d[3]),
         pe: metric(row.d[4]),
         eps: metric(row.d[5]),
-        pb: metric(row.d[6]),
         roe: metric(row.d[7]),
         roa: metric(row.d[8]),
         debtToEquity: metric(row.d[9]),
@@ -280,6 +290,15 @@ export class TradingViewProvider implements MarketDataProvider {
         totalAssets: metric(row.d[19]),
         bookValuePerShare: metric(row.d[20]),
         evEbitda: metric(row.d[21]),
+        revenueFy: metric(row.d[22]),
+        netIncomeFy: metric(row.d[23]),
+        fcfFy: metric(row.d[24]),
+        equityFy: metric(row.d[25]),
+        roeFy: metric(row.d[26]),
+        dividendYieldCurrent: metric(row.d[27]),
+        // Prefer the plain P/B ratio; fall back to the quarterly one, which is
+        // the same multiple computed from the latest quarter's book value.
+        pb: metric(row.d[6]) ?? metric(row.d[28]),
         raw: Object.fromEntries(
           FUNDAMENTAL_COLUMNS.map((column, index) => [column, row.d[index]]),
         ),

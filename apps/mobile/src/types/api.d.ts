@@ -290,6 +290,12 @@ export interface paths {
                                     totalAssets: number | null;
                                     bookValuePerShare: number | null;
                                     evEbitda: number | null;
+                                    revenueFy: number | null;
+                                    netIncomeFy: number | null;
+                                    fcfFy: number | null;
+                                    equityFy: number | null;
+                                    roeFy: number | null;
+                                    dividendYieldCurrent: number | null;
                                 } | null;
                             };
                             meta: {

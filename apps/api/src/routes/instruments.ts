@@ -240,6 +240,14 @@ instrumentRoutes.openapi(detailRoute, async (c) => {
                   fundamentalRow.bookValuePerShare,
                 ),
                 evEbitda: numberOrNull(fundamentalRow.evEbitda),
+                revenueFy: numberOrNull(fundamentalRow.revenueFy),
+                netIncomeFy: numberOrNull(fundamentalRow.netIncomeFy),
+                fcfFy: numberOrNull(fundamentalRow.fcfFy),
+                equityFy: numberOrNull(fundamentalRow.equityFy),
+                roeFy: numberOrNull(fundamentalRow.roeFy),
+                dividendYieldCurrent: numberOrNull(
+                  fundamentalRow.dividendYieldCurrent,
+                ),
               }
             : null,
         },

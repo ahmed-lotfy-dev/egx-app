@@ -700,6 +700,30 @@
                             "evEbitda": {
                               "type": "number",
                               "nullable": true
+                            },
+                            "revenueFy": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "netIncomeFy": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "fcfFy": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "equityFy": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "roeFy": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "dividendYieldCurrent": {
+                              "type": "number",
+                              "nullable": true
                             }
                           },
                           "required": [
@@ -725,7 +749,13 @@
                             "totalDebt",
                             "totalAssets",
                             "bookValuePerShare",
-                            "evEbitda"
+                            "evEbitda",
+                            "revenueFy",
+                            "netIncomeFy",
+                            "fcfFy",
+                            "equityFy",
+                            "roeFy",
+                            "dividendYieldCurrent"
                           ]
                         }
                       },

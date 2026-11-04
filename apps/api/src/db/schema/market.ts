@@ -143,6 +143,19 @@ export const fundamentals = pgTable(
       scale: 4,
     }),
     evEbitda: numeric("ev_ebitda", { precision: 18, scale: 4 }),
+    // Fiscal-year figures. TradingView covers Egyptian stocks far better on
+    // annual statements than on TTM, so these are stored separately rather
+    // than merged into the *_ttm columns — an annual figure is not a trailing
+    // twelve months figure and must never be labelled as one.
+    revenueFy: numeric("revenue_fy", { precision: 24, scale: 2 }),
+    netIncomeFy: numeric("net_income_fy", { precision: 24, scale: 2 }),
+    fcfFy: numeric("fcf_fy", { precision: 24, scale: 2 }),
+    equityFy: numeric("equity_fy", { precision: 24, scale: 2 }),
+    roeFy: numeric("roe_fy", { precision: 12, scale: 4 }),
+    dividendYieldCurrent: numeric("dividend_yield_current", {
+      precision: 12,
+      scale: 4,
+    }),
     raw: jsonb("raw"),
   },
   (table) => [primaryKey({ columns: [table.instrumentId, table.source] })],

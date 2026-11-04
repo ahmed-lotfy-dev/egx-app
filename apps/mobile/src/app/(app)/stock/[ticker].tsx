@@ -825,6 +825,8 @@ function FundamentalsCard({
   const ratio = (value: number | null) => formatRatio(value);
   const money = (value: number | null) => formatCompact(value, locale);
 
+  // Only render metrics that actually have a value. TradingView covers the
+  // EGX unevenly, and a wall of "غير متاح" reads as a broken screen.
   const groups = [
     {
       title: t("stock.groupValuation"),
@@ -841,11 +843,18 @@ function FundamentalsCard({
       rows: [
         { label: t("stock.roe"), value: percent(fundamentals.roe) },
         { label: t("stock.roa"), value: percent(fundamentals.roa) },
-        { label: t("stock.grossMargin"), value: percent(fundamentals.grossMargin) },
+        {
+          label: t("stock.grossMargin"),
+          value: percent(fundamentals.grossMargin),
+        },
         { label: t("stock.netMargin"), value: percent(fundamentals.netMargin) },
         {
           label: t("stock.dividendYield"),
           value: percent(fundamentals.dividendYield),
+        },
+        {
+          label: t("stock.dividendYieldCurrent"),
+          value: percent(fundamentals.dividendYieldCurrent),
         },
       ],
     },
@@ -875,7 +884,38 @@ function FundamentalsCard({
         },
       ],
     },
-  ];
+    {
+      title: t("stock.groupFiscalYear"),
+      rows: [
+        { label: t("stock.revenueFy"), value: money(fundamentals.revenueFy) },
+        {
+          label: t("stock.netIncomeFy"),
+          value: money(fundamentals.netIncomeFy),
+        },
+        { label: t("stock.fcfFy"), value: money(fundamentals.fcfFy) },
+        { label: t("stock.equityFy"), value: money(fundamentals.equityFy) },
+        { label: t("stock.roeFy"), value: percent(fundamentals.roeFy) },
+      ],
+    },
+  ]
+    .map((group) => ({
+      ...group,
+      rows: group.rows.filter((row) => row.value !== null),
+    }))
+    .filter((group) => group.rows.length > 0);
+
+  if (groups.length === 0) {
+    return (
+      <View className="mx-5 mt-4 rounded-3xl border border-border bg-surface p-5">
+        <Text className="font-title text-[15px] text-text">
+          {t("stock.fundamentalsTitle")}
+        </Text>
+        <Text className="mt-3 font-body text-[12px] text-text-secondary">
+          {t("stock.fundamentalsEmpty")}
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="mx-5 mt-4 rounded-3xl border border-border bg-surface p-5">
@@ -905,7 +945,7 @@ function FundamentalsCard({
                   {row.label}
                 </Text>
                 <Text className="font-title text-[12px] text-text">
-                  {row.value ?? t("stock.notAvailable")}
+                  {row.value}
                 </Text>
               </View>
             ))}

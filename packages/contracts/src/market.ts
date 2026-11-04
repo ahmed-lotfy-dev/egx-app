@@ -70,6 +70,13 @@ export const FundamentalsSchema = z.object({
   totalAssets: z.number().nullable(),
   bookValuePerShare: z.number().nullable(),
   evEbitda: z.number().nullable(),
+  // Fiscal-year figures (annual statements), kept separate from the TTM ones.
+  revenueFy: z.number().nullable(),
+  netIncomeFy: z.number().nullable(),
+  fcfFy: z.number().nullable(),
+  equityFy: z.number().nullable(),
+  roeFy: z.number().nullable(),
+  dividendYieldCurrent: z.number().nullable(),
 });
 
 export type Fundamentals = z.infer<typeof FundamentalsSchema>;
