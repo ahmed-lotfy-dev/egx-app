@@ -28,7 +28,7 @@ import { logDocument } from "../lib/doc-log";
 const EXTRACTOR_SCRIPT = fileURLToPath(
   new URL("../../extract/extract_report.py", import.meta.url),
 );
-const EXTRACTOR_TIMEOUT_MS = 5 * 60_000;
+const EXTRACTOR_TIMEOUT_MS = 15 * 60_000;
 
 export type ExtractedRow = {
   rank: number;
