@@ -32,15 +32,38 @@ export function DocumentsList({ documents, onUpload, onSelect }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!file || !periodStart || !periodEnd) return;
-    onUpload(file, periodStart, periodEnd);
-    setShowUpload(false);
-    setFile(null);
-    setPeriodStart("");
-    setPeriodEnd("");
+
+    setUploading(true);
+    setUploadProgress(0);
+    setUploadError(null);
+
+    try {
+      // Simulate progress for UX (real upload is streaming)
+      const progressInterval = setInterval(() => {
+        setUploadProgress((p) => Math.min(p + 10, 90));
+      }, 200);
+
+      await onUpload(file, periodStart, periodEnd);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      setShowUpload(false);
+      setFile(null);
+      setPeriodStart("");
+      setPeriodEnd("");
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "فشل الرفع");
+    } finally {
+      setUploading(false);
+      setTimeout(() => setUploadProgress(0), 500);
+    }
   };
 
   return (
@@ -67,9 +90,27 @@ export function DocumentsList({ documents, onUpload, onSelect }: Props) {
                   accept=".pdf"
                   onChange={(e) => e.target.files && setFile(e.target.files[0])}
                   required
+                  disabled={uploading}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 />
+                {uploading && file && (
+                  <div className="mt-2">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span>{file.name}</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-600 transition-all duration-300 ease-out"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
+              {uploadError && (
+                <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{uploadError}</p>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">بداية الفترة</label>
@@ -78,6 +119,7 @@ export function DocumentsList({ documents, onUpload, onSelect }: Props) {
                     value={periodStart}
                     onChange={(e) => setPeriodStart(e.target.value)}
                     required
+                    disabled={uploading}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -88,6 +130,7 @@ export function DocumentsList({ documents, onUpload, onSelect }: Props) {
                     value={periodEnd}
                     onChange={(e) => setPeriodEnd(e.target.value)}
                     required
+                    disabled={uploading}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -96,16 +139,17 @@ export function DocumentsList({ documents, onUpload, onSelect }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowUpload(false)}
-                  className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  disabled={uploading}
+                  className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  disabled={!file || !periodStart || !periodEnd}
+                  disabled={uploading || !file || !periodStart || !periodEnd}
                   className="flex-1 py-2 px-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50"
                 >
-                  رفع
+                  {uploading ? "جاري الرفع..." : "رفع"}
                 </button>
               </div>
             </form>

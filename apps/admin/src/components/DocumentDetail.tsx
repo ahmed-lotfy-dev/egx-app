@@ -1,14 +1,6 @@
 import type { Document, DetailData } from "../types";
 import { useState, useEffect, useRef } from "react";
-
-
-
-
-export interface Props {
-  document: Document;
-  onBack: () => void;
-  onRefresh: () => void;
-}
+import { Link } from "react-router-dom";
 
 const methodLabels: Record<string, string> = {
   exact_ticker: "مطابق بالكود",
@@ -20,18 +12,25 @@ const methodLabels: Record<string, string> = {
   unmatched: "غير مطابق",
 };
 
-export function DocumentDetail({ document, onBack, onRefresh }: Props) {
+const OCI_API_BASE = "https://egx-api.alotfy.site";
+
+export function DocumentDetail({ document, onRefresh }: {
+  document: Document;
+  onRefresh: () => void;
+}) {
   const [detail, setDetail] = useState<DetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [viewingFile, setViewingFile] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);
+  // navigate is available via onBack prop, not used directly here
 
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        const res = await fetch(`/api/admin/documents/${document.id}`, {
+        const res = await fetch(`${OCI_API_BASE}/api/admin/documents/${document.id}`, {
           credentials: "include",
         });
         const data = await res.json();
@@ -45,7 +44,7 @@ export function DocumentDetail({ document, onBack, onRefresh }: Props) {
     fetchDetail();
 
     // SSE for logs
-    const es = new EventSource(`/api/admin/documents/${document.id}/events`, {
+    const es = new EventSource(`${OCI_API_BASE}/api/admin/documents/${document.id}/events`, {
       withCredentials: true,
     });
     es.onmessage = (e) => {
@@ -72,7 +71,7 @@ export function DocumentDetail({ document, onBack, onRefresh }: Props) {
   const handlePublish = async () => {
     setPublishing(true);
     try {
-      const res = await fetch(`/api/admin/documents/${document.id}/publish`, {
+      const res = await fetch(`${OCI_API_BASE}/api/admin/documents/${document.id}/publish`, {
         method: "POST",
         credentials: "include",
       });
@@ -83,6 +82,13 @@ export function DocumentDetail({ document, onBack, onRefresh }: Props) {
     } finally {
       setPublishing(false);
     }
+  };
+
+  const handleViewFile = () => {
+    setViewingFile(true);
+    // Open in new tab for better UX
+    window.open(`${OCI_API_BASE}/api/admin/documents/${document.id}/file`, "_blank", "noopener,noreferrer");
+    setTimeout(() => setViewingFile(false), 1000);
   };
 
   if (loading) return <div className="p-8 text-center text-gray-500">جاري التحميل...</div>;
@@ -96,18 +102,27 @@ export function DocumentDetail({ document, onBack, onRefresh }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <button onClick={onBack} className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-          ← العودة للقائمة
-        </button>
+        <Link to="/" className="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center gap-1">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          العودة للقائمة
+        </Link>
         <div className="flex items-center gap-3">
-          <span className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded">
+          <span className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded font-mono">
             SHA: {document.sha256.slice(0, 12)}…
           </span>
+          <button
+            onClick={handleViewFile}
+            disabled={viewingFile}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition text-sm font-medium flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            عرض الملف
+          </button>
           {document.status === "validated" && (
             <button
               onClick={handlePublish}
               disabled={publishing}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition text-sm font-medium"
             >
               {publishing ? "جاري النشر..." : "نشر واعتماد"}
             </button>
@@ -118,7 +133,7 @@ export function DocumentDetail({ document, onBack, onRefresh }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-gray-200">
           <p className="text-sm text-gray-500">الملف</p>
-          <p className="font-medium text-gray-900">{document.filename}</p>
+          <p className="font-medium text-gray-900 truncate">{document.filename}</p>
         </div>
         <div className="bg-white p-4 rounded-xl border border-gray-200">
           <p className="text-sm text-gray-500">الفترة</p>

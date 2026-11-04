@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { DocumentsList } from "./components/DocumentsList";
 import { DocumentDetail } from "./components/DocumentDetail";
 import { LoginScreen } from "./components/LoginScreen";
@@ -20,7 +21,9 @@ export interface Document {
   publishedAt: string | null;
 }
 
-type View = "login" | "otp" | "list" | "detail";
+interface SessionData {
+  user: { isAdmin: boolean; email: string } | null;
+}
 
 const OCI_API_BASE = "https://egx-api.alotfy.site";
 
@@ -37,35 +40,51 @@ const api = (path: string, options?: RequestInit) =>
     return r.json();
   });
 
-export function App() {
-  const [view, setView] = useState<View>("login");
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [session, setSession] = useState<{ user: { isAdmin: boolean; email: string } | null } | null>(null);
-  const [showUpload, setShowUpload] = useState(false);
-  const [otpEmail, setOtpEmail] = useState("");
-  void showUpload;
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const [session, setSession] = useState<SessionData | null>(null);
+  const [checking, setChecking] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const checkAuth = async () => {
-    try {
-      // better-auth's get-session returns { session, user } directly (or null).
-      const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
-        credentials: "include",
-      }).then((r) => r.json());
-      const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
-      if (user?.isAdmin) {
-        setSession(data as { user: { isAdmin: boolean; email: string } | null });
-        setView("list");
-        loadDocuments();
-      } else {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
+          credentials: "include",
+        }).then((r) => r.json());
+        const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
+        if (user?.isAdmin) {
+          setSession(data as SessionData);
+        } else {
+          setSession(null);
+          navigate("/login", { state: { from: location }, replace: true });
+        }
+      } catch {
         setSession(null);
-        setView("login");
+        navigate("/login", { state: { from: location }, replace: true });
+      } finally {
+        setChecking(false);
       }
-    } catch {
-      setView("login");
-    }
-  };
+    };
+    checkAuth();
+  }, [navigate, location]);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return session ? <>{children}</> : null;
+}
+
+function AppRoutes() {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<SessionData | null>(null);
+  const navigate = useNavigate();
 
   const loadDocuments = async () => {
     try {
@@ -76,15 +95,31 @@ export function App() {
     }
   };
 
+  const checkAuth = async () => {
+    try {
+      const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
+        credentials: "include",
+      }).then((r) => r.json());
+      const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
+      if (user?.isAdmin) {
+        setSession(data as SessionData);
+        await loadDocuments();
+      } else {
+        setSession(null);
+        navigate("/login", { replace: true });
+      }
+    } catch {
+      setSession(null);
+      navigate("/login", { replace: true });
+    }
+  };
+
   const handleSendCode = (email: string) => {
-    setOtpEmail(email);
-    setView("otp");
+    navigate("/otp", { state: { email } });
   };
 
   const handleVerify = async (_email: string, _otp: string) => {
     setError(null);
-    // OTPScreen already exchanged the code for a session cookie; just refresh
-    // the session here. Verifying twice would consume the OTP and fail.
     await checkAuth();
   };
 
@@ -111,49 +146,117 @@ export function App() {
   };
 
   const handleSelect = (doc: Document) => {
-    setSelectedDoc(doc);
-    setView("detail");
+    navigate(`/documents/${doc.id}`);
   };
 
-  const handleBack = () => {
-    setSelectedDoc(null);
-    setView("list");
+  const handleSignOut = async () => {
+    try {
+      await fetch(`${OCI_API_BASE}/api/auth/sign-out`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // ignore
+    }
+    setSession(null);
+    setDocuments([]);
+    navigate("/login", { replace: true });
   };
-
-
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [navigate]);
 
-  if (view === "login") {
-    return <LoginScreen onLogin={handleSendCode} error={error} />;
-  }
-
-  if (view === "otp") {
-    return (
-      <OTPScreen
-        email={otpEmail}
-        onVerify={handleVerify}
-        onBack={() => { setView("login"); setOtpEmail(""); }}
-        error={error}
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginScreen onLogin={handleSendCode} error={error} />} />
+      <Route
+        path="/otp"
+        element={
+          <OTPScreen
+            email={useLocation().state?.email ?? ""}
+            onVerify={handleVerify}
+            onBack={() => navigate("/login", { replace: true })}
+            error={error}
+          />
+        }
       />
-    );
-  }
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout
+              session={session!}
+              documents={documents}
+              error={error}
+              onSetError={setError}
+              onUpload={handleUpload}
+              onSelect={handleSelect}
+              onSignOut={handleSignOut}
+              onRefresh={loadDocuments}
+            />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/documents/:id"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout
+              session={session!}
+              documents={documents}
+              error={error}
+              onSetError={setError}
+              onUpload={handleUpload}
+              onSelect={handleSelect}
+              onSignOut={handleSignOut}
+              onRefresh={loadDocuments}
+            />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
+
+function DashboardLayout({
+  session,
+  documents,
+  error,
+  onSetError,
+  onUpload,
+  onSelect,
+  onSignOut,
+  onRefresh,
+}: {
+  session: SessionData;
+  documents: Document[];
+  error: string | null;
+  onSetError: (error: string | null) => void;
+  onUpload: (file: File, periodStart: string, periodEnd: string) => void;
+  onSelect: (doc: Document) => void;
+  onSignOut: () => void;
+  onRefresh: () => void;
+}) {
+  const location = useLocation();
+  const isDetail = location.pathname.startsWith("/documents/");
+  const docId = isDetail ? Number(location.pathname.split("/")[2]) : null;
+  const selectedDoc = documents.find((d) => d.id === docId);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">لوحة تحكم EGX</h1>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">التقارير الربعية</span>
-            <span className="text-sm text-gray-500">{session?.user?.email || ""}</span>
+            {session.user?.email && (
+              <span className="text-sm text-gray-500">{session.user.email}</span>
+            )}
             <button
-              onClick={() => setShowUpload(true)}
-              className="px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition"
+              onClick={onSignOut}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition text-sm font-medium"
             >
-              رفع تقرير جديد
+              تسجيل الخروج
             </button>
           </div>
         </div>
@@ -163,26 +266,31 @@ export function App() {
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700">×</button>
+            <button onClick={() => onSetError(null)} className="text-red-500 hover:text-red-700">×</button>
           </div>
         )}
 
-        {view === "list" && (
-          <DocumentsList
-            documents={documents}
-            onUpload={handleUpload}
-            onSelect={handleSelect}
-          />
-        )}
-
-        {view === "detail" && selectedDoc && (
+        {isDetail && selectedDoc ? (
           <DocumentDetail
             document={selectedDoc}
-            onBack={handleBack}
-            onRefresh={loadDocuments}
+            onRefresh={onRefresh}
+          />
+        ) : (
+          <DocumentsList
+            documents={documents}
+            onUpload={onUpload}
+            onSelect={onSelect}
           />
         )}
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }

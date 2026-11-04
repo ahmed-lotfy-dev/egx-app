@@ -170,10 +170,12 @@ adminDocumentRoutes.get("/api/admin/documents/:id/file", async (c) => {
   }
 
   const safeName = document.filename.replace(/["\r\n]/g, "");
-  const blob = new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
+  // bytes is Uint8Array; create Blob directly from it
+  const blob = new Blob([bytes], { type: "application/pdf" });
   return c.body(blob, 200, {
     "Content-Type": "application/pdf",
     "Content-Disposition": `inline; filename="${safeName}"`,
+    "Content-Length": String(bytes.length),
     "Cache-Control": "private, max-age=0, must-revalidate",
   });
 });

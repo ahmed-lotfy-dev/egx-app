@@ -47,6 +47,9 @@ export const auth = betterAuth({
           google: {
             clientId: env.GOOGLE_CLIENT_ID,
             clientSecret: env.GOOGLE_CLIENT_SECRET,
+            // Explicit callback so the browser lands on the dashboard after Google,
+            // not on the API's /api/auth/callback/google (which has no UI).
+            callbackURL: "https://egx.alotfy.site",
           },
         },
       }

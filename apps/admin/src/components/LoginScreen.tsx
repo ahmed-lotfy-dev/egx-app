@@ -3,15 +3,10 @@ import { Button } from "./Button";
 import { TextField } from "./TextField";
 import { BrandMark } from "./BrandMark";
 
-interface Props {
-  onLogin: (email: string) => void;
-  error: string | null;
-}
-
 const OCI_API_BASE = "https://egx-api.alotfy.site";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function LoginScreen({ onLogin, error }: Props) {
+export function LoginScreen({ onLogin, error }: { onLogin: (email: string) => void; error: string | null }) {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -56,8 +51,6 @@ export function LoginScreen({ onLogin, error }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: "google",
-          // Where the browser lands after Google redirects back. This is the
-          // dashboard, not the API's callback route (better-auth handles that).
           callbackURL: window.location.origin,
           errorCallbackURL: window.location.origin,
         }),
@@ -66,7 +59,7 @@ export function LoginScreen({ onLogin, error }: Props) {
       if (!res.ok) throw new Error(data.error?.message || "فشل تسجيل الدخول بحساب جوجل");
       if (data.url) window.location.href = data.url;
     } catch (err) {
-      setLocalError(err instanceof Error ? err.message : "فشل تسجيل الدخول بحساب جوجл");
+      setLocalError(err instanceof Error ? err.message : "فشل تسجيل الدخول بحساب جوجل");
     } finally {
       setGoogleLoading(false);
     }
@@ -74,7 +67,7 @@ export function LoginScreen({ onLogin, error }: Props) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
         <div className="text-center mb-10">
           <BrandMark />
           <h1 className="mt-4 font-display text-[30px] leading-[38px] text-gray-900">
