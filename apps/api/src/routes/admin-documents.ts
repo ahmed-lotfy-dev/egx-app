@@ -309,15 +309,34 @@ adminDocumentRoutes.get("/api/admin/documents/:id", async (c) => {
     return c.json({ error: { code: "not_found", message: "Document not found" } }, 404);
   }
 
+  // Flat rows (snapshot fields + instrument identity) so the admin UI can read
+  // instrumentId/reviewNote directly. LEFT JOIN keeps unmatched rows visible.
   const rows = await db
     .select({
-      snapshot: stockSnapshots,
+      id: stockSnapshots.id,
+      instrumentId: stockSnapshots.instrumentId,
+      periodEnd: stockSnapshots.periodEnd,
+      close: stockSnapshots.close,
+      listedShares: stockSnapshots.listedShares,
+      marketCap: stockSnapshots.marketCap,
+      paidCapital: stockSnapshots.paidCapital,
+      peTrailing: stockSnapshots.peTrailing,
+      dividendYield: stockSnapshots.dividendYield,
+      netProfit: stockSnapshots.netProfit,
+      netProfitPeriodEnd: stockSnapshots.netProfitPeriodEnd,
+      lastCoupon: stockSnapshots.lastCoupon,
+      exDate: stockSnapshots.exDate,
+      documentId: stockSnapshots.documentId,
+      page: stockSnapshots.page,
+      rowIndex: stockSnapshots.rowIndex,
+      status: stockSnapshots.status,
+      reviewNote: stockSnapshots.reviewNote,
       ticker: instruments.ticker,
       nameAr: instruments.nameAr,
       nameEn: instruments.nameEn,
     })
     .from(stockSnapshots)
-    .innerJoin(instruments, eq(instruments.id, stockSnapshots.instrumentId))
+    .leftJoin(instruments, eq(instruments.id, stockSnapshots.instrumentId))
     .where(eq(stockSnapshots.documentId, id))
     .orderBy(stockSnapshots.page, stockSnapshots.rowIndex);
 
