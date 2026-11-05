@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "../db/client";
@@ -89,6 +89,111 @@ adminDocumentRoutes.delete("/api/admin/documents/:id", async (c) => {
   logger.info({ documentId: id, filename: document.filename }, "admin document deleted");
 
   return c.json({ data: { id, deleted: true } }, 200);
+});
+
+/**
+ * Publish a validated document's staged snapshots.
+ *
+ * Only rows matched to an instrument are published. Any live row for the same
+ * (instrument, period_end) from an older document is stamped `superseded_at`
+ * so exactly one live row remains per stock+period. Unmatched staged rows are
+ * left for review and counted in the response.
+ */
+adminDocumentRoutes.post("/api/admin/documents/:id/publish", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const id = Number(c.req.param("id"));
+  if (!Number.isInteger(id) || id <= 0) {
+    return c.json(badRequest("Invalid document id"), 400);
+  }
+
+  const [document] = await db
+    .select()
+    .from(sourceDocuments)
+    .where(eq(sourceDocuments.id, id))
+    .limit(1);
+
+  if (!document) {
+    return c.json({ error: { code: "not_found", message: "Document not found" } }, 404);
+  }
+
+  if (document.status !== "validated") {
+    return c.json(
+      badRequest(`Document is not ready to publish (status: ${document.status})`),
+      409,
+    );
+  }
+
+  const [counts] = await db
+    .select({
+      staged: sql<number>`count(*)::int`,
+      matched: sql<number>`count(${stockSnapshots.instrumentId})::int`,
+      withIssues: sql<number>`count(${stockSnapshots.reviewNote})::int`,
+    })
+    .from(stockSnapshots)
+    .where(and(eq(stockSnapshots.documentId, id), eq(stockSnapshots.status, "staged")));
+
+  if (!counts || counts.matched === 0) {
+    return c.json(
+      badRequest("No matched rows to publish — review matching first"),
+      409,
+    );
+  }
+
+  // Supersede live rows for the same (instrument, period_end) coming from
+  // other documents, then flip this document's matched rows to published.
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`
+      UPDATE stock_snapshots
+      SET superseded_at = now()
+      WHERE superseded_at IS NULL
+        AND document_id <> ${id}
+        AND (instrument_id, period_end) IN (
+          SELECT instrument_id, period_end
+          FROM stock_snapshots
+          WHERE document_id = ${id}
+            AND instrument_id IS NOT NULL
+            AND status = 'staged'
+        )
+    `);
+
+    await tx.execute(sql`
+      UPDATE stock_snapshots
+      SET status = 'published'
+      WHERE document_id = ${id}
+        AND status = 'staged'
+        AND instrument_id IS NOT NULL
+    `);
+
+    await tx
+      .update(sourceDocuments)
+      .set({ status: "published", publishedAt: new Date() })
+      .where(eq(sourceDocuments.id, id));
+  });
+
+  logger.info(
+    {
+      documentId: id,
+      published: counts.matched,
+      skippedUnmatched: counts.staged - counts.matched,
+      admin: admin.email,
+    },
+    "admin document published",
+  );
+
+  return c.json(
+    {
+      data: {
+        id,
+        status: "published",
+        published: counts.matched,
+        skippedUnmatched: counts.staged - counts.matched,
+        withIssues: counts.withIssues,
+      },
+    },
+    200,
+  );
 });
 
 adminDocumentRoutes.post("/api/admin/documents", async (c) => {

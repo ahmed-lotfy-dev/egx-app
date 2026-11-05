@@ -470,6 +470,17 @@ export async function stageDocument(documentId: number): Promise<{
     periodEnd: document.periodEnd,
   });
 
+  // Remove this document's own previous staged rows so a re-stage doesn't hit
+  // the live-unique index. Published rows are history and are never touched.
+  await db
+    .delete(stockSnapshots)
+    .where(
+      and(
+        eq(stockSnapshots.documentId, documentId),
+        eq(stockSnapshots.status, "staged"),
+      ),
+    );
+
   const instruments = await loadInstruments();
   let staged = 0;
   let matched = 0;
