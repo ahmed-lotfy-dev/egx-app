@@ -11,7 +11,7 @@ import { documentPath, extractionPath } from "@egx/api/documents";
 import { sourceDocuments } from "@egx/api/schema";
 import { and, asc, eq, type SQL } from "drizzle-orm";
 
-import { logDocument } from "../lib/doc-log";
+import { logDocument, logProgress, logExtractionComplete } from "../lib/doc-log";
 
 /**
  * Phase 3 — turn an uploaded PDF into a JSON artifact.
@@ -158,10 +158,12 @@ async function extractOne(document: DocumentRow): Promise<"extracted" | "failed"
     documentId: document.id,
     file: document.filename,
   });
+  await logProgress(sha, 10, "extracting", "تهيئة الملف");
 
   const exists = await stat(pdfPath).then(() => true).catch(() => false);
   if (!exists) {
     await fail(sha, document.id, `الملف غير موجود على القرص: ${pdfPath}`);
+    await logExtractionComplete(sha, false, "الملف غير موجود");
     return "failed";
   }
 
@@ -169,6 +171,7 @@ async function extractOne(document: DocumentRow): Promise<"extracted" | "failed"
     engine: "pdfplumber",
     python: process.env.EXTRACTOR_PYTHON?.trim() || "python3",
   });
+  await logProgress(sha, 30, "extracting", "تشغيل مستخرج pdfplumber");
 
   const result = await runExtractor(pdfPath, outPath);
 
@@ -181,14 +184,18 @@ async function extractOne(document: DocumentRow): Promise<"extracted" | "failed"
         ? `تعذر تشغيل مستخرج PDF: ${detail}`
         : `فشل استخراج الجداول (رمز ${result.code}): ${detail}`,
     );
+    await logExtractionComplete(sha, false, "فشل المستخرج");
     return "failed";
   }
+
+  await logProgress(sha, 70, "extracting", "معالجة البيانات المستخرجة");
 
   const raw = await readFile(outPath, "utf8");
   const artifact = JSON.parse(raw) as ExtractionArtifact;
 
   if (!Array.isArray(artifact.rows) || artifact.rows.length === 0) {
     await fail(sha, document.id, "لم يتم العثور على أي صفوف أسهم في الملف");
+    await logExtractionComplete(sha, false, "لا توجد صفوف");
     return "failed";
   }
 
@@ -201,6 +208,8 @@ async function extractOne(document: DocumentRow): Promise<"extracted" | "failed"
   const extractionHash = createHash("sha256").update(payload).digest("hex");
   const model = `${artifact.engine}@${artifact.engineVersion}`;
 
+  await logProgress(sha, 90, "extracting", "حفظ البيانات المستخرجة");
+
   await db
     .update(sourceDocuments)
     .set({
@@ -212,6 +221,9 @@ async function extractOne(document: DocumentRow): Promise<"extracted" | "failed"
       extractionModel: model,
     })
     .where(eq(sourceDocuments.id, document.id));
+
+  await logProgress(sha, 100, "completed", "اكتمل الاستخراج بنجاح");
+  await logExtractionComplete(sha, true, "تم بنجاح");
 
   await logDocument(sha, "info", "تم استخراج الجداول", {
     rows: artifact.rows.length,
@@ -235,6 +247,7 @@ async function fail(sha: string, id: number, message: string): Promise<void> {
     .set({ status: "failed", error: message.slice(0, 2000) })
     .where(eq(sourceDocuments.id, id));
   await logDocument(sha, "error", message, { documentId: id });
+  await logExtractionComplete(sha, false, message);
 }
 
 /**

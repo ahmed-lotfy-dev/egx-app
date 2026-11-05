@@ -43,3 +43,62 @@ export async function logDocument(
     );
   }
 }
+
+/**
+ * Logs an extraction progress event. The SSE endpoint watches for
+ * `type: "extraction_progress"` and converts it to a real-time progress
+ * event for the dashboard.
+ */
+export async function logProgress(
+  sha256: string,
+  progress: number,
+  status: "extracting" | "completed" | "failed",
+  message?: string,
+): Promise<void> {
+  const entry = {
+    ts: new Date().toISOString(),
+    level: "info" as const,
+    message: message || `استخراج: ${progress}%`,
+    type: "extraction_progress",
+    progress,
+    status,
+  };
+  const path = documentLogPath(sha256);
+
+  try {
+    await mkdir(dirname(path), { recursive: true });
+    await appendFile(path, `${JSON.stringify(entry)}\n`, "utf8");
+  } catch (error) {
+    console.error(
+      `[doc-log] could not write ${path}:`,
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+/**
+ * Logs extraction completion or failure.
+ */
+export async function logExtractionComplete(
+  sha256: string,
+  success: boolean,
+  message?: string,
+): Promise<void> {
+  const entry = {
+    ts: new Date().toISOString(),
+    level: success ? "info" : "error",
+    message: message || (success ? "استخراج مكتمل" : "فشل الاستخراج"),
+    type: success ? "extraction_complete" : "extraction_failed",
+  };
+  const path = documentLogPath(sha256);
+
+  try {
+    await mkdir(dirname(path), { recursive: true });
+    await appendFile(path, `${JSON.stringify(entry)}\n`, "utf8");
+  } catch (error) {
+    console.error(
+      `[doc-log] could not write ${path}:`,
+      error instanceof Error ? error.message : error,
+    );
+  }
+}

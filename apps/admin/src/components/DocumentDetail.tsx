@@ -23,6 +23,8 @@ export function DocumentDetail({ document, onRefresh }: {
   const [publishing, setPublishing] = useState(false);
   const [viewingFile, setViewingFile] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const [extractProgress, setExtractProgress] = useState<number | null>(null);
+  const [extractStatus, setExtractStatus] = useState<string>("idle");
   const eventSourceRef = useRef<EventSource | null>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);
   // navigate is available via onBack prop, not used directly here
@@ -43,7 +45,7 @@ export function DocumentDetail({ document, onRefresh }: {
     };
     fetchDetail();
 
-    // SSE for logs
+    // SSE for logs + extraction progress
     const es = new EventSource(`${OCI_API_BASE}/api/admin/documents/${document.id}/events`, {
       withCredentials: true,
     });
@@ -52,6 +54,25 @@ export function DocumentDetail({ document, onRefresh }: {
         const event = JSON.parse(e.data);
         if (event.ts && event.message) {
           setLogs((prev) => [...prev.slice(-200), `${event.ts} ${event.level}: ${event.message}`]);
+        }
+        // Extraction progress events
+        if (event.type === "extraction_progress") {
+          setExtractProgress(event.progress);
+          setExtractStatus(event.status);
+        } else if (event.type === "extraction_complete") {
+          setExtractProgress(100);
+          setExtractStatus("completed");
+          setTimeout(() => {
+            setExtractProgress(null);
+            setExtractStatus("idle");
+            onRefresh();
+          }, 2000);
+        } else if (event.type === "extraction_failed") {
+          setExtractProgress(0);
+          setExtractStatus("failed");
+        } else if (event.type === "status" && event.status === "extracting") {
+          setExtractStatus("extracting");
+          setExtractProgress(0);
         }
       } catch {}
     };
@@ -145,6 +166,24 @@ export function DocumentDetail({ document, onRefresh }: {
           <span className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded font-mono">
             SHA: {document.sha256.slice(0, 12)}…
           </span>
+          {extractProgress !== null && (
+            <div className="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  extractStatus === "failed" ? "bg-red-500" :
+                  extractStatus === "completed" ? "bg-emerald-500" : "bg-amber-500"
+                }`}
+                style={{ width: `${extractProgress}%` }}
+              />
+            </div>
+          )}
+          {extractProgress !== null && (
+            <span className="text-xs text-gray-500 w-14 text-left">
+              {extractStatus === "completed" ? "مكتمل" :
+               extractStatus === "failed" ? "فشل" :
+               extractStatus === "extracting" ? "جاري..." : `${extractProgress}%`}
+            </span>
+          )}
           <button
             onClick={handleViewFile}
             disabled={viewingFile || publishing}
