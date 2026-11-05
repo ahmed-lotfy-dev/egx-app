@@ -36,6 +36,22 @@ function positiveNumber(name: string): number | undefined {
   return parsed;
 }
 
+function parseUUID(name: string): string | undefined {
+  const raw = option(name);
+
+  if (!raw) {
+    return undefined;
+  }
+
+  // Accept any valid UUID format (v1-v8)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(raw)) {
+    throw new Error(`--${name} must be a valid UUID`);
+  }
+
+  return raw;
+}
+
 function readBarsOptions(): BarsOptions {
   const providerArg = option("provider");
 
@@ -91,7 +107,7 @@ async function main(): Promise<void> {
       print(
         "extract-document",
         await extractDocuments({
-          id: positiveNumber("id"),
+          id: parseUUID("id"),
           sha256: option("sha"),
           limit: positiveNumber("limit") ?? 1,
         }),
@@ -100,14 +116,14 @@ async function main(): Promise<void> {
     case "stage-document":
       print(
         "stage-document",
-        await stageDocument(positiveNumber("id")!),
+        await stageDocument(parseUUID("id")!),
       );
       break;
     case "extract-and-stage":
       print(
         "extract-and-stage",
         await (async () => {
-          const id = positiveNumber("id");
+          const id = parseUUID("id");
           const ext = await extractDocuments({ id, limit: 1 });
           if (ext.extracted > 0) {
             return await stageDocument(id!);
@@ -143,15 +159,15 @@ async function main(): Promise<void> {
           "  --missing             only instruments with no stored bars",
           "  --provider tradingview|yahoo",
           "Extract options:",
-          "  --id 12               extract one document by id (retry allowed)",
+          "  --id <uuid>           extract one document by id (retry allowed)",
           "  --sha <sha256>        extract one document by content hash",
           "  --limit 5             process up to N pending documents",
           "",
           "Stage options:",
-          "  --id 12               stage one document by id",
+          "  --id <uuid>           stage one document by id",
           "",
           "Extract + Stage:",
-          "  --id 12               extract and stage one document by id",
+          "  --id <uuid>           extract and stage one document by id",
           "",
           "schedule:               run the ingest scheduler loop (quotes every 3 min",
           "                        in market hours, bars/fundamentals/news daily)",

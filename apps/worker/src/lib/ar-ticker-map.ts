@@ -316,7 +316,6 @@ export const AR_TO_TICKER_MAP: Record<string, string> = {
   "بنك قطر الوطني": "QNBE",
   "بنك الكويت الوطني": "NBKE",
   "النصر للتعدين": "NMIN",
-  "النصر للزجاج والكريستال": "KNGC",
 
   // — Additional PDF variants from Q1 2026 & Q1 2025 DiscDoc —
   "حديد عز": "IRON",

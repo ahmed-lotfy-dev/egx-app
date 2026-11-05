@@ -119,7 +119,7 @@ function translateArabicToTicker(nameAr: string): string | null {
 }
 
 type InstrumentRow = {
-  id: number;
+  id: string;
   ticker: string;
   nameAr: string | null;
   nameEn: string;
@@ -130,7 +130,7 @@ type InstrumentRow = {
 };
 
 type MatchResult = {
-  instrumentId: number | null;
+  instrumentId: string | null;
   confidence: number;
   method:
     | "exact_ticker"
@@ -392,7 +392,7 @@ function buildReviewNote(checks: ValidationCheck[]): string | null {
 
 async function stageOne(
   sha: string,
-  documentId: number,
+  documentId: string,
   periodEnd: string,
   row: ExtractedRow,
   instruments: InstrumentRow[],
@@ -438,7 +438,7 @@ async function stageOne(
  * Stages all rows from an extracted document.
  * Returns a summary for the CLI/scheduler.
  */
-export async function stageDocument(documentId: number): Promise<{
+export async function stageDocument(documentId: string): Promise<{
   staged: number;
   matched: number;
   unmatched: number;
@@ -502,7 +502,7 @@ export async function stageDocument(documentId: number): Promise<{
 
   // Track which instruments we've already staged in this batch to avoid
   // unique constraint violations from duplicate rows in the PDF.
-  const stagedInstruments = new Set<number>();
+  const stagedInstruments = new Set<string>();
 
   for (const row of artifact.rows) {
     const match = matchRow(row, instruments);

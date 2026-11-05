@@ -65,7 +65,7 @@ export type ExtractionArtifact = {
 
 export type ExtractOptions = {
   /** Specific document id (CLI / admin retry). */
-  id?: number;
+  id?: string;
   /** Specific document hash (CLI). */
   sha256?: string;
   /** How many pending documents to process. Defaults to 1. */
@@ -241,7 +241,7 @@ async function extractOne(document: DocumentRow): Promise<"extracted" | "failed"
   return "extracted";
 }
 
-async function fail(sha: string, id: number, message: string): Promise<void> {
+async function fail(sha: string, id: string, message: string): Promise<void> {
   await db
     .update(sourceDocuments)
     .set({ status: "failed", error: message.slice(0, 2000) })

@@ -70,13 +70,13 @@ type Alias = {
 };
 
 type InstrumentAliases = {
-  id: number;
+  id: string;
   ticker: string;
   aliases: Alias[];
 };
 
 type Match = {
-  instrumentId: number;
+  instrumentId: string;
   matchType: MatchType;
   score: number;
 };
@@ -185,7 +185,7 @@ function matchesFor(
   normalizedText: string,
   instrumentsWithAliases: InstrumentAliases[],
 ): Match[] {
-  const best = new Map<number, Match>();
+  const best = new Map<string, Match>();
 
   for (const instrument of instrumentsWithAliases) {
     for (const alias of instrument.aliases) {
@@ -267,7 +267,7 @@ async function ingestArticles(
     sourceCategory: article.sourceCategory,
   }));
 
-  const idsByUrl = new Map<string, number>();
+  const idsByUrl = new Map<string, string>();
 
   for (const chunk of chunks(values, 100)) {
     const inserted = await db
@@ -295,8 +295,8 @@ async function ingestArticles(
   }
 
   const links: {
-    newsId: number;
-    instrumentId: number;
+    newsId: string;
+    instrumentId: string;
     matchType: MatchType;
     matchScore: number;
   }[] = [];
