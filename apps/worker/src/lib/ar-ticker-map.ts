@@ -1,10 +1,11 @@
 /**
  * Arabic name → EGX ticker mapping for disclosure-document matching.
  *
- * Sources:
- *   - instruments.name_ar from the production DB (ground truth for listed names)
- *   - known PDF name variants for stocks whose DB name_ar is empty or diverges
- *     from the name printed in EGX disclosure documents
+ * Sources (in priority order):
+ *   1. TradingView Arabic `description` field (ground truth — exact ticker match)
+ *   2. instruments.name_ar from production DB (used where TV has no Arabic)
+ *   3. Known PDF name variants for stocks whose TV/DB name diverges from
+ *      the name printed in EGX disclosure documents
  *
  * Keys are normalized at lookup time (diacritics/hamza folded, whitespace
  * collapsed) — see translateArabicToTicker() in jobs/stage-document.ts.
@@ -12,7 +13,7 @@
  */
 
 export const AR_TO_TICKER_MAP: Record<string, string> = {
-  // — DB name_ar → ticker —
+  // — TradingView Arabic names (ground truth, exact ticker match) —
   "العامة لاستصلاح الأراضي": "AALR",
   "ابوقير للاسمدة": "ABUK",
   "العربية لإدارة وتطوير الأصول": "ACAMD",
@@ -222,34 +223,8 @@ export const AR_TO_TICKER_MAP: Record<string, string> = {
   "الزيوت المستخلصة": "ZEOT",
   "زهراء المعادي": "ZMID",
 
-  // — PDF name variants (DB name_ar empty or divergent) —
-  "جهينة للصناعات الغذائية": "JUFO",
-  "كيما مصر": "EGCH",
-  "البنك التجاري الدولي (مصر) - قابضة": "COMI",
-  "فوري": "FWRY",
-  "فوري للخدمات المصرفية والتمويلية": "FWRY",
-  "ايجي فينانس": "EFIH",
-  "فاليو": "VALU",
-  "البنك المتحد": "UBEE",
-  "اسمنت السويس": "SUCE",
-  "ماكرو جروب للأدوية": "MCRO",
-  "راميدا": "RMDA",
-  "سيرا للتعليم": "CIRA",
-  "القاهرة للاستثمار والتنمية العقارية": "CIRA",
-  "العز الدخيلة للفولاذ": "IRAX",
-  "الشرقية للدخان": "EAST",
-  "اوراسكوم للمقاولات والانشاءات": "ORAS",
-  "اوراسكوم للتنمية والسياحة": "ORHD",
-  "النصر للزجاج والكريستال": "KNGC",
-  "الحديد والصلب للمناجم والمحاجر": "ISMQ",
-  "طاقة العربية": "TAQA",
-  "هيرميس القابضة": "HRHO",
-  "راية هولدنج": "RAYA",
-  "بنك قطر الوطني": "QNBE",
-  "بنك الكويت الوطني": "NBKE",
-  "النصر للتعدين": "NMIN",
-
-  // — Variants observed in DiscDoc PDFs (longer legal/brand forms) —
+  // — PDF disclosure-document variants (longer legal/brand forms seen in DiscDoc) —
+  // These map to the same tickers as their TradingView names above.
   "اراب ديرى باندا": "ADPC",
   "العربية للادوية والصناعات الكيماوية": "ADCI",
   "هيبكو للاستثمارات التجارية والتنمية العقارية": "HBCO",
@@ -316,4 +291,81 @@ export const AR_TO_TICKER_MAP: Record<string, string> = {
   "اية كابيتال القابضة": "ACAP",
   "جى بى اى للنمو العمرانى": "GPIM",
   "توسع للتخصيم": "TWSA",
+  "جهينة للصناعات الغذائية": "JUFO",
+  "كيما مصر": "EGCH",
+  "البنك التجاري الدولي (مصر) - قابضة": "COMI",
+  "فوري": "FWRY",
+  "فوري للخدمات المصرفية والتمويلية": "FWRY",
+  "ايجي فينانس": "EFIH",
+  "فاليو": "VALU",
+  "البنك المتحد": "UBEE",
+  "اسمنت السويس": "SUCE",
+  "ماكرو جروب للأدوية": "MCRO",
+  "راميدا": "RMDA",
+  "سيرا للتعليم": "CIRA",
+  "القاهرة للاستثمار والتنمية العقارية": "CIRA",
+  "العز الدخيلة للفولاذ": "IRAX",
+  "الشرقية للدخان": "EAST",
+  "اوراسكوم للمقاولات والانشاءات": "ORAS",
+  "اوراسكوم للتنمية والسياحة": "ORHD",
+  "النصر للزجاج والكريستال": "KNGC",
+  "الحديد والصلب للمناجم والمحاجر": "ISMQ",
+  "طاقة العربية": "TAQA",
+  "هيرميس القابضة": "HRHO",
+  "راية هولدنج": "RAYA",
+  "بنك قطر الوطني": "QNBE",
+  "بنك الكويت الوطني": "NBKE",
+  "النصر للتعدين": "NMIN",
+  "النصر للزجاج والكريستال": "KNGC",
 };
+
+export function translateArabicToTicker(name: string): string | null {
+  const norm = normalizeArabic(name);
+
+  // 1. Exact match
+  if (AR_TO_TICKER_MAP[norm]) {
+    return AR_TO_TICKER_MAP[norm];
+  }
+
+  // 2. Token-containment fallback (longest key wins)
+  const tokens = tokenSet(norm);
+  let best: string | null = null;
+  let bestLen = 0;
+
+  for (const [mapName, ticker] of Object.entries(AR_TO_TICKER_MAP)) {
+    const mapTokens = tokenSet(mapName);
+    if (tokens.size === 0 || mapTokens.size === 0) continue;
+
+    let contained = 0;
+    for (const t of mapTokens) {
+      if (tokens.has(t)) contained++;
+    }
+    if (contained === mapTokens.size && mapName.length > bestLen) {
+      best = ticker;
+      bestLen = mapName.length;
+    }
+  }
+
+  return best;
+}
+
+function normalizeArabic(s: string): string {
+  return s
+    .normalize("NFKD")
+    .replace(/[\u064B-\u065F]/g, "") // strip diacritics
+    .replace(/[أإآ]/g, "ا")
+    .replace(/[ى]/g, "ي")
+    .replace(/[ة]/g, "ه")
+    .replace(/[\(\{\[\]\}\)\<\>\'\"«»]/g, "") // strip brackets/quotes
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenSet(s: string): Set<string> {
+  return new Set(
+    s
+      .split(/\s+/)
+      .map((t) => t.replace(/^و/, "")) // drop leading waw
+      .filter((t) => t.length > 1) // drop standalone 'و'
+  );
+}
