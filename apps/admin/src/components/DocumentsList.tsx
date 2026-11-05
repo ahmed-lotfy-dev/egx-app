@@ -1,7 +1,7 @@
 import type { Document } from "../types";
 import { useState, FormEvent } from "react";
 
-const OCI_API_BASE = "https://egx-api.alotfy.site";
+import { OCI_API_BASE } from "../config";
 
 interface Props {
   documents: Document[];

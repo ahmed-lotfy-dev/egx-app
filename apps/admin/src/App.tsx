@@ -26,7 +26,7 @@ interface SessionData {
   user: { isAdmin: boolean; email: string } | null;
 }
 
-const OCI_API_BASE = "https://egx-api.alotfy.site";
+import { OCI_API_BASE } from "./config";
 
 const queryClient = new QueryClient({
   defaultOptions: {

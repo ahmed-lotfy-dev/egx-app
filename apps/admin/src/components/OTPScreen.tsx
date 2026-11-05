@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "./Button";
 import { BrandMark } from "./BrandMark";
 
-const OCI_API_BASE = "https://egx-api.alotfy.site";
+import { OCI_API_BASE } from "../config";
 const CODE_LENGTH = 6;
 const RESEND_SECONDS = 60;
 

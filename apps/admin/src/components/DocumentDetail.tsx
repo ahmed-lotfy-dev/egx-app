@@ -12,7 +12,7 @@ const methodLabels: Record<string, string> = {
   unmatched: "غير مطابق",
 };
 
-const OCI_API_BASE = "https://egx-api.alotfy.site";
+import { OCI_API_BASE } from "../config";
 
 export function DocumentDetail({ document, onRefresh }: {
   document: Document;

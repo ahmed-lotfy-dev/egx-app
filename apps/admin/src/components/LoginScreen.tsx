@@ -3,7 +3,7 @@ import { Button } from "./Button";
 import { TextField } from "./TextField";
 import { BrandMark } from "./BrandMark";
 
-const OCI_API_BASE = "https://egx-api.alotfy.site";
+import { OCI_API_BASE } from "../config";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginScreen({ onLogin, error }: { onLogin: (email: string) => void; error: string | null }) {
