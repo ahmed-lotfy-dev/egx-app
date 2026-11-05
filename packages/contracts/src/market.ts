@@ -81,6 +81,24 @@ export const FundamentalsSchema = z.object({
 
 export type Fundamentals = z.infer<typeof FundamentalsSchema>;
 
+export const EgxSnapshotSchema = z.object({
+  periodEnd: z.string(),
+  close: z.number().nullable(),
+  listedShares: z.number().nullable(),
+  marketCap: z.number().nullable(),
+  paidCapital: z.number().nullable(),
+  peTrailing: z.number().nullable(),
+  dividendYield: z.number().nullable(),
+  netProfit: z.number().nullable(),
+  netProfitPeriodEnd: z.string().nullable(),
+  lastCoupon: z.number().nullable(),
+  exDate: z.string().nullable(),
+  documentId: z.number(),
+  page: z.number().int(),
+  rowIndex: z.number().int(),
+  sourceDocument: z.number(),
+}).nullable();
+
 export const InstrumentDetailSchema = InstrumentSummarySchema.extend({
   tvSymbol: z.string(),
   yahooSymbol: z.string().nullable(),
@@ -92,6 +110,7 @@ export const InstrumentDetailSchema = InstrumentSummarySchema.extend({
     lastDate: z.string().nullable(),
   }),
   fundamentals: FundamentalsSchema.nullable(),
+  egxSnapshot: EgxSnapshotSchema,
 });
 
 export type InstrumentDetail = z.infer<typeof InstrumentDetailSchema>;

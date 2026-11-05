@@ -106,28 +106,6 @@ function AppRoutes() {
     navigate("/", { replace: true });
   };
 
-  const handleUpload = async (file: File, periodStart: string, periodEnd: string) => {
-    setError(null);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("periodStart", periodStart);
-      form.append("periodEnd", periodEnd);
-      const res = await fetch(`${OCI_API_BASE}/api/admin/documents`, {
-        method: "POST",
-        credentials: "include",
-        body: form,
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message || "فشل الرفع");
-      }
-      await loadDocuments();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل الرفع");
-    }
-  };
-
   const handleSelect = (doc: Document) => {
     navigate(`/documents/${doc.id}`);
   };
@@ -167,7 +145,6 @@ function AppRoutes() {
               documents={documents}
               error={error}
               onSetError={setError}
-              onUpload={handleUpload}
               onSelect={handleSelect}
               onSignOut={handleSignOut}
               onRefresh={loadDocuments}
@@ -183,7 +160,6 @@ function AppRoutes() {
               documents={documents}
               error={error}
               onSetError={setError}
-              onUpload={handleUpload}
               onSelect={handleSelect}
               onSignOut={handleSignOut}
               onRefresh={loadDocuments}
@@ -199,7 +175,6 @@ function DashboardLayout({
   documents,
   error,
   onSetError,
-  onUpload,
   onSelect,
   onSignOut,
   onRefresh,
@@ -207,7 +182,6 @@ function DashboardLayout({
   documents: Document[];
   error: string | null;
   onSetError: (error: string | null) => void;
-  onUpload: (file: File, periodStart: string, periodEnd: string) => void;
   onSelect: (doc: Document) => void;
   onSignOut: () => void;
   onRefresh: () => void;
@@ -263,7 +237,7 @@ function DashboardLayout({
         ) : (
           <DocumentsList
             documents={documents}
-            onUpload={onUpload}
+            onRefresh={onRefresh}
             onSelect={onSelect}
           />
         )}

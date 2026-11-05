@@ -1,9 +1,11 @@
 import type { Document } from "../types";
 import { useState, FormEvent } from "react";
 
+const OCI_API_BASE = "https://egx-api.alotfy.site";
+
 interface Props {
   documents: Document[];
-  onUpload: (file: File, periodStart: string, periodEnd: string) => void;
+  onRefresh: () => void;
   onSelect: (doc: Document) => void;
 }
 
@@ -27,7 +29,7 @@ const statusLabels: Record<string, string> = {
   published: "منشور",
 };
 
-export function DocumentsList({ documents, onUpload, onSelect }: Props) {
+export function DocumentsList({ documents, onRefresh, onSelect }: Props) {
   const [showUpload, setShowUpload] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [periodStart, setPeriodStart] = useState("");
@@ -45,19 +47,51 @@ export function DocumentsList({ documents, onUpload, onSelect }: Props) {
     setUploadError(null);
 
     try {
-      // Simulate progress for UX (real upload is streaming)
-      const progressInterval = setInterval(() => {
-        setUploadProgress((p) => Math.min(p + 10, 90));
-      }, 200);
+      // Real upload with progress tracking
+      const form = new FormData();
+      form.append("file", file);
+      form.append("periodStart", periodStart);
+      form.append("periodEnd", periodEnd);
 
-      await onUpload(file, periodStart, periodEnd);
+      // Use XMLHttpRequest for real upload progress
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `${OCI_API_BASE}/api/admin/documents`, true);
+        xhr.withCredentials = true;
 
-      clearInterval(progressInterval);
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(progress);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            try {
+              const err = JSON.parse(xhr.responseText);
+              reject(new Error(err.error?.message || "فشل الرفع"));
+            } catch {
+              reject(new Error("فشل الرفع"));
+            }
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("خطأ في الاتصال"));
+        xhr.ontimeout = () => reject(new Error("انتهت مهلة الرفع"));
+        xhr.timeout = 10 * 60 * 1000; // 10 minutes
+
+        xhr.send(form);
+      });
+
       setUploadProgress(100);
       setShowUpload(false);
       setFile(null);
       setPeriodStart("");
       setPeriodEnd("");
+      await onRefresh();
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : "فشل الرفع");
     } finally {

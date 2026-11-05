@@ -8,9 +8,11 @@ import {
   and,
   asc,
   count,
+  desc,
   eq,
   gt,
   ilike,
+  isNull,
   max,
   min,
   or,
@@ -24,6 +26,7 @@ import {
   fundamentals,
   instruments,
   latestQuotes,
+  stockSnapshots,
 } from "../db/schema";
 import { marketColumns } from "../db/selects";
 import { cached, READ_TTL_MS } from "../lib/cache";
@@ -201,6 +204,20 @@ instrumentRoutes.openapi(detailRoute, async (c) => {
     )
     .limit(1);
 
+  // Latest EGX quarterly snapshot (live, not superseded)
+  const [egxSnapshot] = await db
+    .select()
+    .from(stockSnapshots)
+    .where(
+      and(
+        eq(stockSnapshots.instrumentId, row.id),
+        eq(stockSnapshots.status, "published"),
+        isNull(stockSnapshots.supersededAt),
+      ),
+    )
+    .orderBy(desc(stockSnapshots.periodEnd))
+    .limit(1);
+
       return {
         data: {
           ...toInstrumentSummary(row),
@@ -248,6 +265,25 @@ instrumentRoutes.openapi(detailRoute, async (c) => {
                 dividendYieldCurrent: numberOrNull(
                   fundamentalRow.dividendYieldCurrent,
                 ),
+              }
+            : null,
+          egxSnapshot: egxSnapshot
+            ? {
+                periodEnd: egxSnapshot.periodEnd,
+                close: numberOrNull(egxSnapshot.close),
+                listedShares: numberOrNull(egxSnapshot.listedShares),
+                marketCap: numberOrNull(egxSnapshot.marketCap),
+                paidCapital: numberOrNull(egxSnapshot.paidCapital),
+                peTrailing: numberOrNull(egxSnapshot.peTrailing),
+                dividendYield: numberOrNull(egxSnapshot.dividendYield),
+                netProfit: numberOrNull(egxSnapshot.netProfit),
+                netProfitPeriodEnd: egxSnapshot.netProfitPeriodEnd,
+                lastCoupon: numberOrNull(egxSnapshot.lastCoupon),
+                exDate: egxSnapshot.exDate,
+                documentId: egxSnapshot.documentId,
+                page: egxSnapshot.page,
+                rowIndex: egxSnapshot.rowIndex,
+                sourceDocument: egxSnapshot.documentId,
               }
             : null,
         },
