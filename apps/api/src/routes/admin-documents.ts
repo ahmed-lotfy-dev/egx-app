@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "../db/client";
@@ -17,6 +17,79 @@ const badRequest = (message: string) =>
   ({ error: { code: "invalid_request", message } }) as const;
 
 const DateString = z.iso.date();
+
+/**
+ * Re-extract a document (reset status and re-run extraction).
+ */
+adminDocumentRoutes.post("/api/admin/documents/:id/extract", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const id = Number(c.req.param("id"));
+  if (!Number.isInteger(id) || id <= 0) {
+    return c.json(badRequest("Invalid document id"), 400);
+  }
+
+  const [document] = await db
+    .select()
+    .from(sourceDocuments)
+    .where(eq(sourceDocuments.id, id))
+    .limit(1);
+
+  if (!document) {
+    return c.json({ error: { code: "not_found", message: "Document not found" } }, 404);
+  }
+
+  // Reset status to uploaded so the extractor picks it up again
+  await db
+    .update(sourceDocuments)
+    .set({
+      status: "uploaded",
+      error: null,
+      extractionPath: null,
+      extractionHash: null,
+      extractionModel: null,
+      extractionVersion: 1,
+      pages: 0,
+    })
+    .where(eq(sourceDocuments.id, id));
+
+  logger.info({ documentId: id }, "admin document re-extract triggered");
+
+  return c.json({ data: { id, status: "uploaded" } }, 200);
+});
+
+/**
+ * Delete a document (and its staged snapshots).
+ */
+adminDocumentRoutes.delete("/api/admin/documents/:id", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const id = Number(c.req.param("id"));
+  if (!Number.isInteger(id) || id <= 0) {
+    return c.json(badRequest("Invalid document id"), 400);
+  }
+
+  const [document] = await db
+    .select()
+    .from(sourceDocuments)
+    .where(eq(sourceDocuments.id, id))
+    .limit(1);
+
+  if (!document) {
+    return c.json({ error: { code: "not_found", message: "Document not found" } }, 404);
+  }
+
+  // Delete staged snapshots first (FK cascade handles this)
+  await db.delete(stockSnapshots).where(eq(stockSnapshots.documentId, id));
+  // Delete document pages
+  await db.delete(sourceDocuments).where(eq(sourceDocuments.id, id));
+
+  logger.info({ documentId: id, filename: document.filename }, "admin document deleted");
+
+  return c.json({ data: { id, deleted: true } }, 200);
+});
 
 adminDocumentRoutes.post("/api/admin/documents", async (c) => {
   const admin = await getAdmin(c);
