@@ -35,6 +35,8 @@ const LATIN_NORMALIZE_RE = /[^a-z0-9]/gi;
 function normalizeArabic(text: string): string {
   return text
     .replace(ARABIC_NORMALIZE_RE, "")
+    // PDF extraction emits reversed/garbled brackets and quotes; drop them
+    .replace(/[()[\]{}"'«»]/g, "")
     // fold hamza/carried-alef variants so PDF spellings match DB spellings
     .replace(/[أإآ]/g, "ا")
     .replace(/ى/g, "ي")
@@ -52,7 +54,14 @@ function normalizeLatin(text: string): string {
 }
 
 function tokenSet(text: string): Set<string> {
-  return new Set(text.split(" ").filter(Boolean));
+  const out = new Set<string>();
+  for (const token of text.split(" ").filter(Boolean)) {
+    if (token === "و") continue; // standalone "and" carries no identity
+    // Canonical form: strip a leading waw before "ال"/"ل" so "والاستثمار"
+    // and "الاستثمار" (or the spaced "و الاستثمار") tokenize identically.
+    out.add(token.replace(/^و(?=ال|ل)/, ""));
+  }
+  return out;
 }
 
 function jaccard(a: Set<string>, b: Set<string>): number {
@@ -71,18 +80,17 @@ function containment(a: Set<string>, b: Set<string>): number {
 }
 
 // Pre-normalized map entries so lookups don't re-normalize keys per row.
-const AR_TICKER_ENTRIES: ReadonlyArray<readonly [string, string]> = Object.entries(
+const AR_TICKER_ENTRIES: ReadonlyArray<readonly [string, string, Set<string>]> = Object.entries(
   AR_TO_TICKER_MAP,
-).map(([key, ticker]) => [normalizeArabic(key), ticker] as const);
-
-// Substring fallback only applies when the contained side is at least this
-// many characters, so generic short names can't produce false matches.
-const MIN_SUBSTRING_LEN = 8;
+).map(([key, ticker]) => {
+  const normalized = normalizeArabic(key);
+  return [normalized, ticker, tokenSet(normalized)] as const;
+});
 
 /**
  * Maps an extracted Arabic company name to its EGX ticker.
- * Exact normalized match first; then substring fallback where the longest
- * (most specific) key wins.
+ * Exact normalized match first; then token containment where every key token
+ * appears in the extracted name — the longest (most specific) key wins.
  */
 function translateArabicToTicker(nameAr: string): string | null {
   const norm = normalizeArabic(nameAr);
@@ -92,14 +100,19 @@ function translateArabicToTicker(nameAr: string): string | null {
     if (key === norm) return ticker;
   }
 
+  const tokens = tokenSet(norm);
   let best: { ticker: string; keyLen: number } | null = null;
-  for (const [key, ticker] of AR_TICKER_ENTRIES) {
-    if (key.includes(norm) && norm.length >= MIN_SUBSTRING_LEN) {
-      if (!best || key.length > best.keyLen) best = { ticker, keyLen: key.length };
-      continue;
+  for (const [key, ticker, keyTokens] of AR_TICKER_ENTRIES) {
+    if (keyTokens.size === 0) continue;
+    let contained = true;
+    for (const t of keyTokens) {
+      if (!tokens.has(t)) {
+        contained = false;
+        break;
+      }
     }
-    if (norm.includes(key) && key.length >= MIN_SUBSTRING_LEN) {
-      if (!best || key.length > best.keyLen) best = { ticker, keyLen: key.length };
+    if (contained && (!best || key.length > best.keyLen)) {
+      best = { ticker, keyLen: key.length };
     }
   }
   return best?.ticker ?? null;
