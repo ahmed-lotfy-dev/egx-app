@@ -757,6 +757,84 @@
                             "roeFy",
                             "dividendYieldCurrent"
                           ]
+                        },
+                        "egxSnapshot": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "periodEnd": {
+                              "type": "string"
+                            },
+                            "close": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "listedShares": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "marketCap": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "paidCapital": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "peTrailing": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "dividendYield": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "netProfit": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "netProfitPeriodEnd": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "lastCoupon": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "exDate": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "documentId": {
+                              "type": "number"
+                            },
+                            "page": {
+                              "type": "integer"
+                            },
+                            "rowIndex": {
+                              "type": "integer"
+                            },
+                            "sourceDocument": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "periodEnd",
+                            "close",
+                            "listedShares",
+                            "marketCap",
+                            "paidCapital",
+                            "peTrailing",
+                            "dividendYield",
+                            "netProfit",
+                            "netProfitPeriodEnd",
+                            "lastCoupon",
+                            "exDate",
+                            "documentId",
+                            "page",
+                            "rowIndex",
+                            "sourceDocument"
+                          ]
                         }
                       },
                       "required": [
@@ -773,7 +851,8 @@
                         "isin",
                         "logoid",
                         "history",
-                        "fundamentals"
+                        "fundamentals",
+                        "egxSnapshot"
                       ]
                     },
                     "meta": {

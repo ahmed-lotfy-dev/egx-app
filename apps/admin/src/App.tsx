@@ -9,7 +9,7 @@ import "./index.css";
 import "./types/auth";
 
 export interface Document {
-  id: number;
+  id: string;
   sha256: string;
   filename: string;
   periodStart: string;
@@ -205,7 +205,7 @@ function DashboardLayout({
 
   const location = useLocation();
   const isDetail = location.pathname.startsWith("/documents/");
-  const docId = isDetail ? Number(location.pathname.split("/")[2]) : null;
+  const docId = isDetail ? location.pathname.split("/")[2] : null;
   const selectedDoc = documents.find((d) => d.id === docId);
 
   return (

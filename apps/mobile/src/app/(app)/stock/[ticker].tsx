@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 
 import { PriceChart } from "@/components/PriceChart";
 import { Screen } from "@/components/Screen";
+import { EgxSnapshotCard } from "@/components/EgxSnapshotCard";
 import { colors, tabular } from "@/constants/theme";
 import { api } from "@/lib/api";
 import { useChartModeStore } from "@/stores/chart-mode";
@@ -149,6 +150,7 @@ export default function StockScreen() {
   const lastBar = bars.length > 0 ? bars[bars.length - 1] : null;
   const previousBar = bars.length > 1 ? bars[bars.length - 2] : null;
   const fundamentals = detail?.fundamentals ?? null;
+  const egxSnapshot = detail?.egxSnapshot ?? null;
 
   const refresh = async () => {
     setRefreshing(true);
@@ -498,6 +500,8 @@ export default function StockScreen() {
         </View>
 
         <FundamentalsCard fundamentals={fundamentals} locale={locale} />
+
+        <EgxSnapshotCard snapshot={egxSnapshot} locale={locale} />
 
         <Pressable
           accessibilityRole="button"

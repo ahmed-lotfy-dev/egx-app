@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
   bigint,
-  bigserial,
   boolean,
   date,
   index,
@@ -13,6 +12,7 @@ import {
   text,
   timestamp,
   unique,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 const tz = { withTimezone: true } as const;
@@ -20,7 +20,7 @@ const tz = { withTimezone: true } as const;
 export const instruments = pgTable(
   "instruments",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     ticker: text("ticker").notNull().unique(),
     tvSymbol: text("tv_symbol").notNull().unique(),
     yahooSymbol: text("yahoo_symbol"),
@@ -48,7 +48,7 @@ export const instruments = pgTable(
 );
 
 export const latestQuotes = pgTable("latest_quotes", {
-  instrumentId: bigint("instrument_id", { mode: "number" })
+  instrumentId: uuid("instrument_id")
     .primaryKey()
     .references(() => instruments.id, { onDelete: "cascade" }),
   price: numeric("price", { precision: 18, scale: 4 }),
@@ -65,8 +65,8 @@ export const latestQuotes = pgTable("latest_quotes", {
 export const quoteSnapshots = pgTable(
   "quote_snapshots",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    instrumentId: bigint("instrument_id", { mode: "number" })
+    id: uuid("id").primaryKey().defaultRandom(),
+    instrumentId: uuid("instrument_id")
       .notNull()
       .references(() => instruments.id, { onDelete: "cascade" }),
     price: numeric("price", { precision: 18, scale: 4 }),
@@ -90,7 +90,7 @@ export const quoteSnapshots = pgTable(
 export const dailyBars = pgTable(
   "daily_bars",
   {
-    instrumentId: bigint("instrument_id", { mode: "number" })
+    instrumentId: uuid("instrument_id")
       .notNull()
       .references(() => instruments.id, { onDelete: "cascade" }),
     date: date("date", { mode: "string" }).notNull(),
@@ -114,7 +114,7 @@ export const dailyBars = pgTable(
 export const fundamentals = pgTable(
   "fundamentals",
   {
-    instrumentId: bigint("instrument_id", { mode: "number" })
+    instrumentId: uuid("instrument_id")
       .notNull()
       .references(() => instruments.id, { onDelete: "cascade" }),
     source: text("source").notNull(),
@@ -164,7 +164,7 @@ export const fundamentals = pgTable(
 export const newsItems = pgTable(
   "news_items",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     source: text("source").notNull(),
     lang: text("lang").notNull(),
     originalLang: text("original_lang"),
@@ -203,10 +203,10 @@ export const newsItems = pgTable(
 export const newsInstrumentLinks = pgTable(
   "news_instrument_links",
   {
-    newsId: bigint("news_id", { mode: "number" })
+    newsId: uuid("news_id")
       .notNull()
       .references(() => newsItems.id, { onDelete: "cascade" }),
-    instrumentId: bigint("instrument_id", { mode: "number" })
+    instrumentId: uuid("instrument_id")
       .notNull()
       .references(() => instruments.id, { onDelete: "cascade" }),
     matchType: text("match_type").notNull(),
@@ -224,7 +224,7 @@ export const newsInstrumentLinks = pgTable(
 export const ingestRuns = pgTable(
   "ingest_runs",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     job: text("job").notNull(),
     status: text("status").notNull().default("running"),
     provider: text("provider"),
@@ -241,8 +241,8 @@ export const ingestRuns = pgTable(
 export const newsProcessingQueue = pgTable(
   "news_processing_queue",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    newsId: bigint("news_id", { mode: "number" })
+    id: uuid("id").primaryKey().defaultRandom(),
+    newsId: uuid("news_id")
       .notNull()
       .references(() => newsItems.id, { onDelete: "cascade" }),
     status: text("status").notNull().default("pending"),
@@ -322,7 +322,7 @@ export const newsInstrumentLinkRelations = relations(
 export const watchlists = pgTable(
   "watchlists",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id").notNull(),
     name: text("name").notNull(),
     kind: text("kind").notNull().default("custom"), // "custom" | "egx30" | "sharia"
@@ -335,11 +335,11 @@ export const watchlists = pgTable(
 export const watchlistItems = pgTable(
   "watchlist_items",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    watchlistId: bigint("watchlist_id", { mode: "number" })
+    id: uuid("id").primaryKey().defaultRandom(),
+    watchlistId: uuid("watchlist_id")
       .notNull()
       .references(() => watchlists.id, { onDelete: "cascade" }),
-    instrumentId: bigint("instrument_id", { mode: "number" })
+    instrumentId: uuid("instrument_id")
       .notNull()
       .references(() => instruments.id, { onDelete: "cascade" }),
     position: integer("position").notNull().default(0),

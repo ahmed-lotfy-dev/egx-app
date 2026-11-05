@@ -93,10 +93,10 @@ export const EgxSnapshotSchema = z.object({
   netProfitPeriodEnd: z.string().nullable(),
   lastCoupon: z.number().nullable(),
   exDate: z.string().nullable(),
-  documentId: z.number(),
+  documentId: z.string().uuid(),
   page: z.number().int(),
   rowIndex: z.number().int(),
-  sourceDocument: z.number(),
+  sourceDocument: z.string().uuid(),
 }).nullable();
 
 export const InstrumentDetailSchema = InstrumentSummarySchema.extend({
@@ -240,7 +240,7 @@ export const DataStatusResponseSchema = z.object({
 export type DataStatusResponse = z.infer<typeof DataStatusResponseSchema>;
 
 export const NewsItemSchema = z.object({
-  id: z.number().int(),
+  id: z.string().uuid(),
   source: z.string(),
   lang: z.enum(["ar", "en"]),
   title: z.string(),
@@ -265,7 +265,7 @@ export type InstrumentNewsResponse = z.infer<
 >;
 
 export const FeedNewsItemSchema = z.object({
-  id: z.number().int(),
+  id: z.string().uuid(),
   source: z.string(),
   lang: z.enum(["ar", "en"]),
   title: z.string(),

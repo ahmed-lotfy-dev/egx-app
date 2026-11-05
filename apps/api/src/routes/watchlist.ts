@@ -29,7 +29,7 @@ async function getSessionUserId(c: { req: { raw: Request } }): Promise<string | 
 }
 
 type QuoteRow = {
-  id: number;
+  id: string;
   ticker: string;
   nameEn: string;
   nameAr: string | null;
@@ -151,7 +151,7 @@ async function buildCustomLists(userId: string): Promise<WatchlistPayload[]> {
     .where(inArray(watchlistItems.watchlistId, listIds))
     .orderBy(asc(watchlistItems.position), asc(watchlistItems.id));
 
-  const byList = new Map<number, typeof itemRows>();
+  const byList = new Map<string, typeof itemRows>();
   for (const row of itemRows) {
     const list = byList.get(row.watchlistId) ?? [];
     list.push(row);
@@ -241,7 +241,7 @@ const renameWatchlistRoute = createRoute({
   summary: "Rename a custom watchlist (owner only)",
   request: {
     params: z.object({
-      id: z.coerce.number().int().positive(),
+      id: z.string().uuid(),
     }),
     body: {
       content: {
@@ -286,7 +286,7 @@ const deleteWatchlistRoute = createRoute({
   summary: "Delete a custom watchlist (owner only)",
   request: {
     params: z.object({
-      id: z.coerce.number().int().positive(),
+      id: z.string().uuid(),
     }),
   },
   responses: {
@@ -324,7 +324,7 @@ const addWatchlistItemRoute = createRoute({
   summary: "Add a stock to a custom watchlist (owner only)",
   request: {
     params: z.object({
-      id: z.coerce.number().int().positive(),
+      id: z.string().uuid(),
     }),
     body: {
       content: {
@@ -369,7 +369,7 @@ const removeWatchlistItemRoute = createRoute({
   summary: "Remove a stock from a custom watchlist (owner only)",
   request: {
     params: z.object({
-      id: z.coerce.number().int().positive(),
+      id: z.string().uuid(),
       ticker: z.string().min(1).max(20),
     }),
   },
@@ -408,7 +408,7 @@ const reorderWatchlistItemsRoute = createRoute({
   summary: "Reorder items in a custom watchlist (owner only). Body is the full ordered ticker list.",
   request: {
     params: z.object({
-      id: z.coerce.number().int().positive(),
+      id: z.string().uuid(),
     }),
     body: {
       content: {
@@ -522,7 +522,7 @@ function invalidateUserWatchlists(userId: string): void {
   invalidateCache(`watchlists:custom:${userId}`);
 }
 
-async function requireOwnedWatchlist(userId: string, listId: number) {
+async function requireOwnedWatchlist(userId: string, listId: string) {
   const [list] = await db
     .select()
     .from(watchlists)

@@ -60,7 +60,7 @@ const newsFeedRoute = createRoute({
   },
 });
 
-type Cursor = { publishedAt: Date; id: number };
+type Cursor = { publishedAt: Date; id: string };
 
 function decodeCursor(raw: string): Cursor | null {
   let decoded: string;
@@ -78,13 +78,9 @@ function decodeCursor(raw: string): Cursor | null {
   }
 
   const publishedAt = new Date(decoded.slice(0, separator));
-  const id = Number(decoded.slice(separator + 1));
+  const id = decoded.slice(separator + 1);
 
-  if (
-    Number.isNaN(publishedAt.getTime()) ||
-    !Number.isInteger(id) ||
-    id <= 0
-  ) {
+  if (Number.isNaN(publishedAt.getTime()) || !id) {
     return null;
   }
 

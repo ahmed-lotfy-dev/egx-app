@@ -25,8 +25,9 @@ adminDocumentRoutes.post("/api/admin/documents/:id/extract", async (c) => {
   const admin = await getAdmin(c);
   if (!admin) return forbidden(c);
 
-  const id = Number(c.req.param("id"));
-  if (!Number.isInteger(id) || id <= 0) {
+  const id = c.req.param("id");
+  // UUID validation is done by Zod schema
+  if (!id) {
     return c.json(badRequest("Invalid document id"), 400);
   }
 
@@ -66,8 +67,9 @@ adminDocumentRoutes.delete("/api/admin/documents/:id", async (c) => {
   const admin = await getAdmin(c);
   if (!admin) return forbidden(c);
 
-  const id = Number(c.req.param("id"));
-  if (!Number.isInteger(id) || id <= 0) {
+  const id = c.req.param("id");
+  // UUID validation is done by Zod schema
+  if (!id) {
     return c.json(badRequest("Invalid document id"), 400);
   }
 
@@ -103,8 +105,9 @@ adminDocumentRoutes.post("/api/admin/documents/:id/publish", async (c) => {
   const admin = await getAdmin(c);
   if (!admin) return forbidden(c);
 
-  const id = Number(c.req.param("id"));
-  if (!Number.isInteger(id) || id <= 0) {
+  const id = c.req.param("id");
+  // UUID validation is done by Zod schema
+  if (!id) {
     return c.json(badRequest("Invalid document id"), 400);
   }
 
@@ -294,8 +297,9 @@ adminDocumentRoutes.get("/api/admin/documents/:id", async (c) => {
   const admin = await getAdmin(c);
   if (!admin) return forbidden(c);
 
-  const id = Number(c.req.param("id"));
-  if (!Number.isInteger(id) || id <= 0) {
+  const id = c.req.param("id");
+  // UUID validation is done by Zod schema
+  if (!id) {
     return c.json(badRequest("Invalid document id"), 400);
   }
 
@@ -311,7 +315,9 @@ adminDocumentRoutes.get("/api/admin/documents/:id", async (c) => {
 
   // Flat rows (snapshot fields + instrument identity) so the admin UI can read
   // instrumentId/reviewNote directly. LEFT JOIN keeps unmatched rows visible.
-  const rows = await db
+  // Postgres numeric columns arrive as strings; the admin contract says numbers.
+  const num = (v: string | null) => (v === null ? null : Number(v));
+  const rowsRaw = await db
     .select({
       id: stockSnapshots.id,
       instrumentId: stockSnapshots.instrumentId,
@@ -340,6 +346,18 @@ adminDocumentRoutes.get("/api/admin/documents/:id", async (c) => {
     .where(eq(stockSnapshots.documentId, id))
     .orderBy(stockSnapshots.page, stockSnapshots.rowIndex);
 
+  const rows = rowsRaw.map((r) => ({
+    ...r,
+    close: num(r.close),
+    listedShares: num(r.listedShares),
+    marketCap: num(r.marketCap),
+    paidCapital: num(r.paidCapital),
+    peTrailing: num(r.peTrailing),
+    dividendYield: num(r.dividendYield),
+    netProfit: num(r.netProfit),
+    lastCoupon: num(r.lastCoupon),
+  }));
+
   return c.json({ data: { document, rows } });
 });
 
@@ -347,7 +365,7 @@ adminDocumentRoutes.get("/api/admin/documents/:id/file", async (c) => {
   const admin = await getAdmin(c);
   if (!admin) return forbidden(c);
 
-  const id = Number(c.req.param("id"));
+  const id = c.req.param("id");
   const [document] = await db
     .select({
       sha256: sourceDocuments.sha256,
@@ -386,7 +404,7 @@ adminDocumentRoutes.get("/api/admin/documents/:id/events", async (c) => {
   const admin = await getAdmin(c);
   if (!admin) return forbidden(c);
 
-  const id = Number(c.req.param("id"));
+  const id = c.req.param("id");
   const [document] = await db
     .select({
       sha256: sourceDocuments.sha256,
@@ -439,8 +457,10 @@ adminDocumentRoutes.get("/api/admin/documents/:id/events", async (c) => {
           current.status === "published" ||
           current.status === "failed"
         ) {
-          controller.close();
-          closed = true;
+          if (!closed) {
+            controller.close();
+            closed = true;
+          }
         }
       };
 
@@ -448,8 +468,10 @@ adminDocumentRoutes.get("/api/admin/documents/:id/events", async (c) => {
       const timer = setInterval(() => {
         void tick().catch(() => {
           clearInterval(timer);
-          controller.close();
-          closed = true;
+          if (!closed) {
+            controller.close();
+            closed = true;
+          }
         });
       }, 1500);
 

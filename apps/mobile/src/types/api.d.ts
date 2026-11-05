@@ -297,6 +297,23 @@ export interface paths {
                                     roeFy: number | null;
                                     dividendYieldCurrent: number | null;
                                 } | null;
+                                egxSnapshot: {
+                                    periodEnd: string;
+                                    close: number | null;
+                                    listedShares: number | null;
+                                    marketCap: number | null;
+                                    paidCapital: number | null;
+                                    peTrailing: number | null;
+                                    dividendYield: number | null;
+                                    netProfit: number | null;
+                                    netProfitPeriodEnd: string | null;
+                                    lastCoupon: number | null;
+                                    exDate: string | null;
+                                    documentId: number;
+                                    page: number;
+                                    rowIndex: number;
+                                    sourceDocument: number;
+                                } | null;
                             };
                             meta: {
                                 /** Format: date-time */

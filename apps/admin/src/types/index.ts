@@ -1,5 +1,5 @@
 export interface Document {
-  id: number;
+  id: string;
   sha256: string;
   filename: string;
   periodStart: string;
@@ -13,8 +13,8 @@ export interface Document {
 }
 
 export interface SnapshotRow {
-  id: number;
-  instrumentId: number | null;
+  id: string;
+  instrumentId: string | null;
   periodEnd: string;
   close: number | null;
   listedShares: number | null;
@@ -26,7 +26,7 @@ export interface SnapshotRow {
   netProfitPeriodEnd: string | null;
   lastCoupon: number | null;
   exDate: string | null;
-  documentId: number;
+  documentId: string;
   page: number;
   rowIndex: number;
   status: string;

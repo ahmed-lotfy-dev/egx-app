@@ -1,15 +1,15 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
   date,
   index,
   integer,
   numeric,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 import { instruments } from "./market";
@@ -25,7 +25,7 @@ const tz = { withTimezone: true } as const;
 export const sourceDocuments = pgTable(
   "source_documents",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     sha256: text("sha256").notNull().unique(),
     filename: text("filename").notNull(),
     periodStart: date("period_start", { mode: "string" }).notNull(),
@@ -61,8 +61,8 @@ export const sourceDocuments = pgTable(
 export const stockSnapshots = pgTable(
   "stock_snapshots",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    instrumentId: bigint("instrument_id", { mode: "number" })
+    id: uuid("id").primaryKey().defaultRandom(),
+    instrumentId: uuid("instrument_id")
       .references(() => instruments.id, { onDelete: "cascade" }),
     periodEnd: date("period_end", { mode: "string" }).notNull(),
     close: numeric("close", { precision: 18, scale: 4 }),
@@ -75,7 +75,7 @@ export const stockSnapshots = pgTable(
     netProfitPeriodEnd: date("net_profit_period_end", { mode: "string" }),
     lastCoupon: numeric("last_coupon", { precision: 18, scale: 4 }),
     exDate: date("ex_date", { mode: "string" }),
-    documentId: bigint("document_id", { mode: "number" })
+    documentId: uuid("document_id")
       .notNull()
       .references(() => sourceDocuments.id, { onDelete: "cascade" }),
     page: integer("page").notNull(),
@@ -102,8 +102,8 @@ export const stockSnapshots = pgTable(
 export const documentPages = pgTable(
   "document_pages",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    documentId: bigint("document_id", { mode: "number" })
+    id: uuid("id").primaryKey().defaultRandom(),
+    documentId: uuid("document_id")
       .notNull()
       .references(() => sourceDocuments.id, { onDelete: "cascade" }),
     pageNo: integer("page_no").notNull(),
