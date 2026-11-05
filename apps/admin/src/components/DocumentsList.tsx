@@ -5,8 +5,44 @@ const OCI_API_BASE = "https://egx-api.alotfy.site";
 
 interface Props {
   documents: Document[];
+  isLoading: boolean;
   onRefresh: () => void;
   onSelect: (doc: Document) => void;
+}
+
+/**
+ * Extract period dates from EGX filename.
+ * Expected format: DiscDoc_ID{ID}_{DD-MMM-YYYY}_ARB.pdf
+ * Example: DiscDoc_ID55542_30-Sep-2026_ARB.pdf
+ * Period: 2026-07-01 to 2026-09-30 (quarter ending on the date in filename)
+ */
+function extractDatesFromFilename(filename: string): { periodStart: string; periodEnd: string } | null {
+  // Match pattern: DiscDoc_ID<number>_<DD-MMM-YYYY>_ARB.pdf
+  const match = filename.match(/DiscDoc_ID\d+_(\d{1,2})-([A-Za-z]{3})-(\d{4})_ARB\.pdf$/i);
+  if (!match) return null;
+
+  const day = parseInt(match[1], 10);
+  const monthStr = match[2];
+  const year = parseInt(match[3], 10);
+
+  const monthMap: Record<string, number> = {
+    jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+    jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+  };
+
+  const month = monthMap[monthStr.toLowerCase()];
+  if (!month) return null;
+
+  // The date in filename is the quarter END date
+  const periodEnd = new Date(year, month - 1, day);
+  const periodStart = new Date(year, month - 3, 1); // Quarter start = 3 months before, 1st day
+
+  const formatDate = (d: Date) => d.toISOString().split("T")[0];
+
+  return {
+    periodStart: formatDate(periodStart),
+    periodEnd: formatDate(periodEnd),
+  };
 }
 
 const statusColors: Record<string, string> = {
@@ -29,7 +65,7 @@ const statusLabels: Record<string, string> = {
   published: "منشور",
 };
 
-export function DocumentsList({ documents, onRefresh, onSelect }: Props) {
+export function DocumentsList({ documents, isLoading, onRefresh, onSelect }: Props) {
   const [showUpload, setShowUpload] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [periodStart, setPeriodStart] = useState("");
@@ -122,7 +158,19 @@ export function DocumentsList({ documents, onRefresh, onSelect }: Props) {
                 <input
                   type="file"
                   accept=".pdf"
-                  onChange={(e) => e.target.files && setFile(e.target.files[0])}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      const selectedFile = e.target.files[0];
+                      setFile(selectedFile);
+                      
+                      // Auto-extract dates from filename
+                      const dates = extractDatesFromFilename(selectedFile.name);
+                      if (dates) {
+                        setPeriodStart(dates.periodStart);
+                        setPeriodEnd(dates.periodEnd);
+                      }
+                    }
+                  }}
                   required
                   disabled={uploading}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -207,43 +255,53 @@ export function DocumentsList({ documents, onRefresh, onSelect }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {documents.length === 0 && (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      <span>جاري تحميل التقارير...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : documents.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
                     لا توجد تقارير مرفوعة بعد
                   </td>
                 </tr>
+              ) : (
+                documents.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onSelect(doc)}>
+                    <td className="px-4 py-3 text-sm text-gray-900">{doc.id}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700 truncate max-w-xs">{doc.filename}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {doc.periodStart} → {doc.periodEnd}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{doc.pages || "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColors[doc.status] || "bg-gray-100 text-gray-700"}`}>
+                        {statusLabels[doc.status] || doc.status}
+                      </span>
+                      {doc.error && (
+                        <span className="ml-2 text-xs text-red-600">⚠ {doc.error}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{doc.uploadedBy}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {new Date(doc.uploadedAt).toLocaleDateString("ar-EG")}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onSelect(doc); }}
+                        className="px-3 py-1 text-sm bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
+                      >
+                        عرض
+                      </button>
+                    </td>
+                  </tr>
+                ))
               )}
-              {documents.map((doc) => (
-                <tr key={doc.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onSelect(doc)}>
-                  <td className="px-4 py-3 text-sm text-gray-900">{doc.id}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700 truncate max-w-xs">{doc.filename}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    {doc.periodStart} → {doc.periodEnd}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{doc.pages || "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColors[doc.status] || "bg-gray-100 text-gray-700"}`}>
-                      {statusLabels[doc.status] || doc.status}
-                    </span>
-                    {doc.error && (
-                      <span className="ml-2 text-xs text-red-600">⚠ {doc.error}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{doc.uploadedBy}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    {new Date(doc.uploadedAt).toLocaleDateString("ar-EG")}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onSelect(doc); }}
-                      className="px-3 py-1 text-sm bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
-                    >
-                      عرض
-                    </button>
-                  </td>
-                </tr>
-              ))}
             </tbody>
           </table>
         </div>

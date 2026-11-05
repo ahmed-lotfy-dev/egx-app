@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { DocumentsList } from "./components/DocumentsList";
 import { DocumentDetail } from "./components/DocumentDetail";
 import { LoginScreen } from "./components/LoginScreen";
@@ -27,52 +28,57 @@ interface SessionData {
 
 const OCI_API_BASE = "https://egx-api.alotfy.site";
 
-const api = (path: string, options?: RequestInit) =>
-  fetch(`${OCI_API_BASE}/api${path}`, {
-    ...options,
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+async function fetchWithAuth<T>(path: string): Promise<T> {
+  const res = await fetch(`${OCI_API_BASE}/api${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-  }).then(async (r) => {
-    if (!r.ok) {
-      const err = await r.json().catch(() => ({ error: { message: r.statusText } }));
-      throw new Error(err.error?.message || r.statusText);
-    }
-    return r.json();
+    headers: { "Content-Type": "application/json" },
   });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: { message: res.statusText } }));
+    throw new Error(err.error?.message || res.statusText);
+  }
+  return res.json();
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<SessionData | null>(null);
-  const [checking, setChecking] = useState(true);
+  const { data: session, isLoading, error } = useQuery<SessionData | null>({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
+        credentials: "include",
+      }).then((r) => r.json());
+      const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
+      return user?.isAdmin ? (data as SessionData) : null;
+    },
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
-          credentials: "include",
-        }).then((r) => r.json());
-        const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
-        if (user?.isAdmin) {
-          setSession(data as SessionData);
-        } else {
-          setSession(null);
-          navigate("/login", { state: { from: location }, replace: true });
-        }
-      } catch {
-        setSession(null);
-        navigate("/login", { state: { from: location }, replace: true });
-      } finally {
-        setChecking(false);
-      }
-    };
-    checkAuth();
-  }, [navigate, location]);
+    if (!isLoading && session === null && !error) {
+      navigate("/login", { state: { from: location }, replace: true });
+    }
+  }, [isLoading, session, error, navigate, location]);
 
-  if (checking) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50" dir="rtl">
         <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <p className="mt-4 text-gray-500 text-sm">جاري التحقق من الجلسة...</p>
       </div>
     );
   }
@@ -81,18 +87,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const [documents, setDocuments] = useState<Document[]>([]);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const loadDocuments = async () => {
-    try {
-      const data = await api("/admin/documents");
-      setDocuments(data.data);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل التحميل");
-    }
-  };
+  const { data: documents, isLoading: docsLoading, refetch } = useQuery<Document[]>({
+    queryKey: ["documents"],
+    queryFn: () => fetchWithAuth<{ data: Document[] }>("/admin/documents").then((d) => d.data),
+    staleTime: 30_000,
+  });
 
   const handleSendCode = (email: string) => {
     navigate("/otp", { state: { email } });
@@ -100,10 +102,9 @@ function AppRoutes() {
 
   const handleVerify = async (_email: string, _otp: string) => {
     setError(null);
-    // OTPScreen already exchanged the code for a session cookie;
-    // ProtectedRoute will pick it up on the next render.
-    // Force a re-check by navigating to root (triggers ProtectedRoute checkAuth).
-    navigate("/", { replace: true });
+    // OTPScreen already exchanged the code for a session cookie
+    queryClient.invalidateQueries({ queryKey: ["session"] });
+    queryClient.invalidateQueries({ queryKey: ["documents"] });
   };
 
   const handleSelect = (doc: Document) => {
@@ -119,8 +120,8 @@ function AppRoutes() {
     } catch {
       // ignore
     }
-    // ProtectedRoute will detect signed-out session and redirect to login
-    navigate("/", { replace: true });
+    queryClient.clear();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -142,12 +143,13 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardLayout
-              documents={documents}
+              documents={documents ?? []}
+              isLoading={docsLoading}
               error={error}
               onSetError={setError}
               onSelect={handleSelect}
               onSignOut={handleSignOut}
-              onRefresh={loadDocuments}
+              onRefresh={refetch}
             />
           </ProtectedRoute>
         }
@@ -157,12 +159,13 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardLayout
-              documents={documents}
+              documents={documents ?? []}
+              isLoading={docsLoading}
               error={error}
               onSetError={setError}
               onSelect={handleSelect}
               onSignOut={handleSignOut}
-              onRefresh={loadDocuments}
+              onRefresh={refetch}
             />
           </ProtectedRoute>
         }
@@ -173,6 +176,7 @@ function AppRoutes() {
 
 function DashboardLayout({
   documents,
+  isLoading,
   error,
   onSetError,
   onSelect,
@@ -180,30 +184,32 @@ function DashboardLayout({
   onRefresh,
 }: {
   documents: Document[];
+  isLoading: boolean;
   error: string | null;
   onSetError: (error: string | null) => void;
   onSelect: (doc: Document) => void;
   onSignOut: () => void;
   onRefresh: () => void;
 }) {
-  const [session, setSession] = useState<SessionData | null>(null);
+  const { data: session } = useQuery<SessionData | null>({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const data = await fetch(`${OCI_API_BASE}/api/auth/get-session`, {
+        credentials: "include",
+      }).then((r) => r.json());
+      const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
+      return user?.isAdmin ? (data as SessionData) : null;
+    },
+    staleTime: 5 * 60_000,
+  });
+
   const location = useLocation();
   const isDetail = location.pathname.startsWith("/documents/");
   const docId = isDetail ? Number(location.pathname.split("/")[2]) : null;
   const selectedDoc = documents.find((d) => d.id === docId);
 
-  useEffect(() => {
-    fetch(`${OCI_API_BASE}/api/auth/get-session`, { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => {
-        const user = data?.user as { isAdmin?: boolean; email?: string } | undefined;
-        if (user?.isAdmin) setSession(data as SessionData);
-      })
-      .catch(() => {});
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir="rtl">
       <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">لوحة تحكم EGX</h1>
@@ -237,6 +243,7 @@ function DashboardLayout({
         ) : (
           <DocumentsList
             documents={documents}
+            isLoading={isLoading}
             onRefresh={onRefresh}
             onSelect={onSelect}
           />
@@ -248,8 +255,10 @@ function DashboardLayout({
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
