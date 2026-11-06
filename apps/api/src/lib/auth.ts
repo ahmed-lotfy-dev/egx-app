@@ -6,6 +6,8 @@ import { env } from "../config/env";
 import { db } from "../db/client";
 import * as schema from "../db/schema";
 
+const isProd = env.NODE_ENV === "production";
+
 export const auth = betterAuth({
   appName: "EGX",
   baseURL: env.BETTER_AUTH_URL,
@@ -22,9 +24,14 @@ export const auth = betterAuth({
   ],
   advanced: {
     defaultCookieAttributes: {
-      sameSite: env.NODE_ENV === "production" ? "none" : "lax",
-      secure: env.NODE_ENV === "production",
-      domain: env.NODE_ENV === "production" ? ".alotfy.site" : undefined,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
+      // No domain in development - allows cookie sharing across localhost ports
+      domain: isProd ? ".alotfy.site" : undefined,
+    },
+    crossSubDomainCookies: {
+      enabled: isProd,
+      domain: isProd ? ".alotfy.site" : undefined,
     },
   },
   emailAndPassword: {
@@ -46,7 +53,7 @@ export const auth = betterAuth({
           google: {
             clientId: env.GOOGLE_CLIENT_ID,
             clientSecret: env.GOOGLE_CLIENT_SECRET,
-            // Must point to the API callback, Better Auth handles the redirect
+            // API's callback endpoint (where Google redirects after OAuth)
             callbackURL: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
           },
         },
@@ -55,6 +62,10 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24 * 30,
+    },
   },
   rateLimit: {
     enabled: true,
