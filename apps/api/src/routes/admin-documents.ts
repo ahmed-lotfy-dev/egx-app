@@ -5,7 +5,10 @@ import { z } from "zod";
 import { db } from "../db/client";
 import { instruments, sourceDocuments, stockSnapshots } from "../db/schema";
 import { getAdmin } from "../lib/admin";
-import { readDocumentFile, readDocumentLog, savePdfUpload } from "../lib/documents";
+import { readDocumentFile, readDocumentLog, savePdfUpload, incomingPath, incomingFilePath, documentPath, documentsRoot } from "../lib/documents";
+import { readdir, stat, copyFile, mkdir, readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { join } from "node:path";
 import { logger } from "../lib/logger";
 
 export const adminDocumentRoutes = new Hono();
@@ -279,6 +282,143 @@ adminDocumentRoutes.post("/api/admin/documents", async (c) => {
 
   return c.json({ data: created }, 201);
 });
+
+/**
+ * Scan the local incoming folder for PDFs and auto-detect dates from filenames.
+ * Returns list of detected PDFs with parsed period dates.
+ */
+adminDocumentRoutes.get("/api/admin/documents/scan", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const incoming = incomingPath();
+  await mkdir(incoming, { recursive: true });
+
+  const entries = await readdir(incoming).catch(() => []);
+  const pdfs = entries.filter((f) => f.toLowerCase().endsWith(".pdf"));
+
+  const results = [];
+  for (const filename of pdfs) {
+    const filePath = incomingFilePath(filename);
+    const fileStat = await stat(filePath).catch(() => null);
+    if (!fileStat) continue;
+
+    const bytes = new Uint8Array(await readFile(filePath));
+    const sha256 = createHash("sha256").update(bytes).digest("hex");
+
+    // Check if already in DB
+    const existing = await db
+      .select({ id: sourceDocuments.id, status: sourceDocuments.status })
+      .from(sourceDocuments)
+      .where(eq(sourceDocuments.sha256, sha256))
+      .limit(1);
+
+    // Extract dates from filename
+    const dates = extractDatesFromFilename(filename);
+
+    results.push({
+      filename,
+      sha256,
+      size: fileStat.size,
+      modifiedAt: fileStat.mtime.toISOString(),
+      alreadyUploaded: existing.length > 0,
+      existingStatus: existing[0]?.status,
+      periodStart: dates?.periodStart,
+      periodEnd: dates?.periodEnd,
+    });
+  }
+
+  return c.json({ data: results });
+});
+
+/**
+ * Import a PDF from the incoming folder into the documents system.
+ * Copies file to documents folder, creates DB record with uploaded status.
+ */
+adminDocumentRoutes.post("/api/admin/documents/import", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const body = await c.req.json().catch(() => null);
+  if (!body?.filename) return c.json(badRequest("filename required"), 400);
+
+  const { filename, periodStart, periodEnd } = body;
+  if (!periodStart || !periodEnd) return c.json(badRequest("periodStart and periodEnd required"), 400);
+
+  const incoming = incomingPath();
+  const srcPath = incomingFilePath(filename);
+  const exists = await stat(srcPath).then(() => true).catch(() => false);
+  if (!exists) return c.json({ error: { code: "not_found", message: "File not found in incoming folder" } }, 404);
+
+  const bytes = new Uint8Array(await readFile(srcPath));
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+
+  // Check duplicate
+  const existing = await db
+    .select({ id: sourceDocuments.id })
+    .from(sourceDocuments)
+    .where(eq(sourceDocuments.sha256, sha256))
+    .limit(1);
+  if (existing[0]) {
+    return c.json(
+      { error: { code: "duplicate_document", message: "This file was already uploaded" }, documentId: existing[0].id },
+      409,
+    );
+  }
+
+  // Copy to documents folder
+  const destPath = documentPath(sha256);
+  await mkdir(join(documentsRoot(), "documents"), { recursive: true });
+  await copyFile(srcPath, destPath);
+
+  const [created] = await db
+    .insert(sourceDocuments)
+    .values({
+      sha256,
+      filename,
+      periodStart,
+      periodEnd,
+      storagePath: destPath,
+      uploadedBy: admin.email,
+      status: "uploaded",
+    })
+    .returning();
+
+  if (!created) {
+    return c.json({ error: { code: "insert_failed", message: "Could not save document" } }, 500);
+  }
+
+  logger.info({ documentId: created.id, sha256, bytes: bytes.length }, "admin document imported from local folder");
+
+  return c.json({ data: created }, 201);
+});
+
+// Helper function to extract dates from EGX filename
+function extractDatesFromFilename(filename: string): { periodStart: string; periodEnd: string } | null {
+  const match = filename.match(/DiscDoc_ID\d+_(\d{1,2})-([A-Za-z]{3})-(\d{4})_ARB\.pdf$/i);
+  if (!match || !match[1] || !match[2] || !match[3]) return null;
+
+  const day = parseInt(match[1], 10);
+  const monthStr = match[2];
+  const year = parseInt(match[3], 10);
+
+  if (!monthStr) return null;
+
+  const monthMap: Record<string, number> = {
+    jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+    jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+  };
+
+  const month = monthMap[monthStr.toLowerCase()];
+  if (!month) return null;
+
+  const periodEnd = new Date(year, month - 1, day);
+  const periodStart = new Date(year, month - 3, 1);
+
+  const formatDate = (d: Date): string => d.toISOString().split("T")[0] ?? "";
+
+  return { periodStart: formatDate(periodStart), periodEnd: formatDate(periodEnd) };
+}
 
 adminDocumentRoutes.get("/api/admin/documents", async (c) => {
   const admin = await getAdmin(c);

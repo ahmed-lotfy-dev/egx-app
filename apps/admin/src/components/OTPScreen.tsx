@@ -116,7 +116,7 @@ export function OTPScreen({ email, onVerify, onBack, error }: Props) {
             return (
               <div
                 key={index}
-                className={`h-14 w-12 items-center justify-center rounded-xl border bg-gray-50 ${
+                className={`flex h-14 w-12 items-center justify-center rounded-xl border bg-gray-50 ${
                   isActive ? "border-amber-500" : "border-gray-200"
                 }`}
               >

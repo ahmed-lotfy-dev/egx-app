@@ -28,6 +28,14 @@ export function documentPath(sha256: string): string {
   return join(documentsRoot(), "documents", `${sha256}.pdf`);
 }
 
+export function incomingPath(): string {
+  return join(documentsRoot(), "incoming");
+}
+
+export function incomingFilePath(filename: string): string {
+  return join(incomingPath(), filename);
+}
+
 export function extractionPath(sha256: string): string {
   return join(documentsRoot(), "extractions", `${sha256}.json`);
 }

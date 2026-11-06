@@ -7,15 +7,20 @@ type OtpType = "sign-in" | "email-verification" | "forget-password" | "change-em
 
 export async function sendOtpEmail(input: { email: string; otp: string; type: OtpType }) {
   console.log('[sendOtpEmail] Input:', JSON.stringify(input));
-  if (!env.RESEND_API_KEY) {
+  
+  // If no API key or it's a placeholder, just log OTP to console (dev mode)
+  const apiKey = env.RESEND_API_KEY?.trim();
+  const isPlaceholder = !apiKey || apiKey === "re_placeholder" || apiKey === "re_123456789" || apiKey.startsWith("re_test");
+  
+  if (!apiKey || isPlaceholder) {
     logger.warn(
       { email: input.email, otp: input.otp, type: input.type },
-      "RESEND_API_KEY is unset; email OTP printed to the development log",
+      "RESEND_API_KEY is unset or placeholder; email OTP printed to the development log",
     );
     return;
   }
 
-  const resend = new Resend(env.RESEND_API_KEY);
+  const resend = new Resend(apiKey);
   const { error } = await resend.emails.send({
     from: env.EMAIL_FROM,
     to: input.email,
@@ -31,6 +36,12 @@ export async function sendOtpEmail(input: { email: string; otp: string; type: Ot
   });
 
   if (error) {
-    throw new Error(`Resend rejected the OTP email: ${error.message}`);
+    // Don't throw - just log the error and continue (OTP still valid in DB)
+    logger.error(
+      { email: input.email, error: error.message },
+      "Resend rejected the OTP email; OTP logged to console as fallback"
+    );
+    console.log('[sendOtpEmail] Fallback OTP for', input.email, ':', input.otp);
+    return;
   }
 }

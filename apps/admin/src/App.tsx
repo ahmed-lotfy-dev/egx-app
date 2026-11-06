@@ -105,6 +105,7 @@ function AppRoutes() {
     // OTPScreen already exchanged the code for a session cookie
     queryClient.invalidateQueries({ queryKey: ["session"] });
     queryClient.invalidateQueries({ queryKey: ["documents"] });
+    navigate("/", { replace: true });
   };
 
   const handleSelect = (doc: Document) => {

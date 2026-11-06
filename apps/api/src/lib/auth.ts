@@ -24,6 +24,7 @@ export const auth = betterAuth({
     defaultCookieAttributes: {
       sameSite: env.NODE_ENV === "production" ? "none" : "lax",
       secure: env.NODE_ENV === "production",
+      domain: env.NODE_ENV === "production" ? ".alotfy.site" : undefined,
     },
   },
   emailAndPassword: {
