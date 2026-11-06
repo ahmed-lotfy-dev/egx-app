@@ -10,7 +10,10 @@ export async function sendOtpEmail(input: { email: string; otp: string; type: Ot
   
   // If no API key or it's a placeholder, just log OTP to console (dev mode)
   const apiKey = env.RESEND_API_KEY?.trim();
-  const isPlaceholder = !apiKey || apiKey === "re_placeholder" || apiKey === "re_123456789" || apiKey.startsWith("re_test");
+  const isPlaceholder = !apiKey || 
+    apiKey.startsWith("re_placeholder") || 
+    apiKey.startsWith("re_123456789") || 
+    apiKey.startsWith("re_test");
   
   if (!apiKey || isPlaceholder) {
     logger.warn(
