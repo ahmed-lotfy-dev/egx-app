@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { DocumentsList } from "./components/DocumentsList";
-import { DocumentDetail } from "./components/DocumentDetail";
 import { LoginScreen } from "./components/LoginScreen";
-import { OTPScreen } from "./components/OTPScreen";
 import "./index.css";
 import "./types/auth";
 
@@ -87,7 +85,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const { data: documents, isLoading: docsLoading, refetch } = useQuery<Document[]>({
@@ -96,49 +93,13 @@ function AppRoutes() {
     staleTime: 30_000,
   });
 
-  const handleSendCode = (email: string) => {
-    navigate("/otp", { state: { email } });
-  };
-
-  const handleVerify = async (_email: string, _otp: string) => {
-    setError(null);
-    // OTPScreen already exchanged the code for a session cookie
-    queryClient.invalidateQueries({ queryKey: ["session"] });
-    queryClient.invalidateQueries({ queryKey: ["documents"] });
-    navigate("/", { replace: true });
-  };
-
   const handleSelect = (doc: Document) => {
     navigate(`/documents/${doc.id}`);
   };
 
-  const handleSignOut = async () => {
-    try {
-      await fetch(`${OCI_API_BASE}/api/auth/sign-out`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch {
-      // ignore
-    }
-    queryClient.clear();
-    navigate("/login", { replace: true });
-  };
-
   return (
     <Routes>
-      <Route path="/login" element={<LoginScreen onLogin={handleSendCode} error={error} />} />
-      <Route
-        path="/otp"
-        element={
-          <OTPScreen
-            email={useLocation().state?.email ?? ""}
-            onVerify={handleVerify}
-            onBack={() => navigate("/login", { replace: true })}
-            error={error}
-          />
-        }
-      />
+      <Route path="/login" element={<LoginScreen />} />
       <Route
         path="/"
         element={
@@ -146,10 +107,7 @@ function AppRoutes() {
             <DashboardLayout
               documents={documents ?? []}
               isLoading={docsLoading}
-              error={error}
-              onSetError={setError}
               onSelect={handleSelect}
-              onSignOut={handleSignOut}
               onRefresh={refetch}
             />
           </ProtectedRoute>
@@ -162,10 +120,7 @@ function AppRoutes() {
             <DashboardLayout
               documents={documents ?? []}
               isLoading={docsLoading}
-              error={error}
-              onSetError={setError}
               onSelect={handleSelect}
-              onSignOut={handleSignOut}
               onRefresh={refetch}
             />
           </ProtectedRoute>
@@ -178,18 +133,12 @@ function AppRoutes() {
 function DashboardLayout({
   documents,
   isLoading,
-  error,
-  onSetError,
   onSelect,
-  onSignOut,
   onRefresh,
 }: {
   documents: Document[];
   isLoading: boolean;
-  error: string | null;
-  onSetError: (error: string | null) => void;
   onSelect: (doc: Document) => void;
-  onSignOut: () => void;
   onRefresh: () => void;
 }) {
   const { data: session } = useQuery<SessionData | null>({
@@ -204,10 +153,20 @@ function DashboardLayout({
     staleTime: 5 * 60_000,
   });
 
-  const location = useLocation();
-  const isDetail = location.pathname.startsWith("/documents/");
-  const docId = isDetail ? location.pathname.split("/")[2] : null;
-  const selectedDoc = documents.find((d) => d.id === docId);
+  const handleSignOut = async () => {
+    try {
+      await fetch(`${OCI_API_BASE}/api/auth/sign-out`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // ignore
+    }
+    queryClient.clear();
+    navigate("/login", { replace: true });
+  };
+
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
@@ -219,7 +178,7 @@ function DashboardLayout({
               <span className="text-sm text-gray-500">{session.user.email}</span>
             )}
             <button
-              onClick={onSignOut}
+              onClick={handleSignOut}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition text-sm font-medium"
             >
               تسجيل الخروج
@@ -227,34 +186,19 @@ function DashboardLayout({
           </div>
         </div>
       </header>
-
-      <main className="max-w-7xl mx-auto px-6 py-6">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center justify-between">
-            <span>{error}</span>
-            <button onClick={() => onSetError(null)} className="text-red-500 hover:text-red-700">×</button>
-          </div>
-        )}
-
-        {isDetail && selectedDoc ? (
-          <DocumentDetail
-            document={selectedDoc}
-            onRefresh={onRefresh}
-          />
-        ) : (
-          <DocumentsList
-            documents={documents}
-            isLoading={isLoading}
-            onRefresh={onRefresh}
-            onSelect={onSelect}
-          />
-        )}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <DocumentsList
+          documents={documents}
+          isLoading={isLoading}
+          onRefresh={onRefresh}
+          onSelect={onSelect}
+        />
       </main>
     </div>
   );
 }
 
-export default function App() {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -263,3 +207,5 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
+export default App;
