@@ -1,0 +1,2 @@
+[allowlist]
+paths = ["apps/api/src/lib/email.ts"]
