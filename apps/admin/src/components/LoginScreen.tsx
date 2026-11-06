@@ -13,13 +13,19 @@ export function LoginScreen({ error = null }: { error?: string | null }) {
     setLocalError(null);
 
     try {
+      // Use production dashboard URL in prod, local dashboard URL in dev
+      const isProd = window.location.hostname.includes("alotfy.site");
+      const callbackURL = isProd 
+        ? "https://egx-app.alotfy.site" 
+        : `${window.location.origin}`;
+      
       const res = await fetch(`${OCI_API_BASE}/api/auth/sign-in/social`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: "google",
-          callbackURL: "https://egx-app.alotfy.site",
+          callbackURL,
         }),
       });
       const data = await res.json();
