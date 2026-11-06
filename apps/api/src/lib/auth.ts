@@ -14,7 +14,12 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
-  trustedOrigins: env.trustedOrigins,
+  trustedOrigins: [
+    ...env.trustedOrigins,
+    "http://localhost:5173",
+    "https://egx-app.alotfy.site",
+    "https://egx.alotfy.site",
+  ],
   advanced: {
     defaultCookieAttributes: {
       sameSite: env.NODE_ENV === "production" ? "none" : "lax",
@@ -41,7 +46,8 @@ export const auth = betterAuth({
           google: {
             clientId: env.GOOGLE_CLIENT_ID,
             clientSecret: env.GOOGLE_CLIENT_SECRET,
-            callbackURL: "https://egx.alotfy.site",
+            // Must point to the API callback, Better Auth handles the redirect
+            callbackURL: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
           },
         },
       }

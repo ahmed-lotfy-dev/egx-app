@@ -19,7 +19,7 @@ export function LoginScreen({ error = null }: { error?: string | null }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: "google",
-          callbackURL: `${window.location.origin}/login`,
+          callbackURL: "https://egx-app.alotfy.site",
         }),
       });
       const data = await res.json();
