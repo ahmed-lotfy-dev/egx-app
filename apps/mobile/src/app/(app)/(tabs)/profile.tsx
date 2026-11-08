@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
+import { router } from "expo-router";
 import { Alert, I18nManager, Pressable, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -37,6 +38,9 @@ export default function ProfileScreen() {
   const email = session?.user.email ?? "";
   const displayName = session?.user.name?.trim() || email.split("@")[0] || "EGX";
   const initial = displayName.charAt(0).toUpperCase();
+  // `isAdmin` is a Better Auth additional field; the mobile client is not
+  // generated from the server types, so read it through a narrow cast.
+  const isAdmin = Boolean((session?.user as { isAdmin?: boolean } | undefined)?.isAdmin);
   const online = status.data?.database === "up";
   const statusLabel = status.isPending
     ? t("profile.checking")
@@ -62,6 +66,12 @@ export default function ProfileScreen() {
     queryClient.clear();
   }
 
+  async function refreshSession() {
+    // Force re-fetch session from server to pick up updated additional fields (e.g. isAdmin)
+    await authClient.getSession({ fetchOptions: { cache: "no-store" } });
+    queryClient.invalidateQueries({ queryKey: ["status"] });
+  }
+
   function confirmSignOut() {
     Alert.alert(t("profile.signOutTitle"), t("profile.signOutBody"), [
       { text: t("common.cancel"), style: "cancel" },
@@ -84,6 +94,34 @@ export default function ProfileScreen() {
               <Text className="mt-1 font-body text-[13px] text-text-secondary">{email}</Text>
             </View>
           </View>
+        </View>
+
+        {isAdmin ? (
+          <View className="mt-6 px-5">
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push("/admin/documents")}
+              className="min-h-12 flex-row items-center justify-center gap-2 rounded-2xl bg-gold active:opacity-80"
+            >
+              <Ionicons name="document-text-outline" size={18} color={colors.canvas} />
+              <Text className="font-title text-[14px] text-canvas">
+                {t("profile.adminPanel")}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        <View className="mt-3 px-5">
+          <Pressable
+            accessibilityRole="button"
+            onPress={refreshSession}
+            className="min-h-10 flex-row items-center justify-center gap-2 rounded-xl border border-border bg-surface active:opacity-80"
+          >
+            <Ionicons name="refresh-outline" size={16} color={colors.textSecondary} />
+            <Text className="font-body text-[13px] text-text-secondary">
+              تحديث الجلسة
+            </Text>
+          </Pressable>
         </View>
 
         <View className="mt-6 px-5">

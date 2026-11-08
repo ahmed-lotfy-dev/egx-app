@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import {
-  type ComponentRef,
   useCallback,
   useMemo,
   useRef,
@@ -16,6 +15,7 @@ import {
   ScrollView,
   Text,
   View,
+  type ScrollViewInstance,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -585,7 +585,7 @@ function MoverRow({ item, locale }: { item: Instrument; locale: Locale }) {
 
 function SectorStrip({ sectors }: { sectors: Sector[] }) {
   const locale = useLocaleStore((state) => state.locale);
-  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const aligned = useRef(false);
 
   return (

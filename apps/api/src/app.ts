@@ -5,7 +5,6 @@ import { requestId } from "hono/request-id";
 import { env } from "./config/env";
 import { auth } from "./lib/auth";
 import { logger } from "./lib/logger";
-import { serveStatic } from "hono/bun";
 import { OPENAPI_CONFIG } from "./openapi";
 import { adminDocumentRoutes } from "./routes/admin-documents";
 import { aiRoutes } from "./routes/ai";
@@ -67,10 +66,6 @@ app.route("/", newsRoutes);
 app.route("/", watchlistRoutes);
 app.route("/", aiRoutes);
 app.route("/", adminDocumentRoutes);
-
-// Serve admin dashboard
-app.use("/admin/*", serveStatic({ root: "./public/admin" }));
-app.get("/admin/*", serveStatic({ path: "./public/admin/index.html" }));
 
 app.doc31("/openapi.json", OPENAPI_CONFIG);
 

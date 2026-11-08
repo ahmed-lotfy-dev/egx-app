@@ -8,7 +8,7 @@ Last updated: 2026-11-03
 ┌─────────────────┐   HTTPS    ┌──────────────────────────────┐
 │ apps/mobile     │ ─────────► │ apps/api (Bun + Hono)        │
 │ Expo / RN       │            │  /api/*   public + auth      │
-│ Arabic-first    │            │  /admin   admin SPA          │
+│ Arabic-first    │            │  /api/admin/*  admin (app)   │
 └─────────────────┘            └──────────┬───────────────────┘
                                           │ Drizzle
                                    ┌──────▼──────┐

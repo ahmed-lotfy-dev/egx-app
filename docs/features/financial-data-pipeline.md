@@ -97,15 +97,17 @@ silently dropped and nothing is auto-approved.
 `31/12/2025`), not the quarter. `net_profit_period_end` is stored with it. Neither
 the UI nor the AI may call it "quarterly profit".
 
-## 4. Dashboard
+## 4. Admin screens
 
-`apps/admin` (Vite + React + Tailwind, Arabic-first RTL) served by the API at
-`/admin`, same origin so the Better Auth cookie works. Login is the normal email
-OTP flow; access requires `is_admin`.
+Admin work happens inside the Expo app, behind a button on the Profile tab that
+is only rendered when the signed-in user has `is_admin`. There is no separate web
+dashboard and no `/admin` route on the API.
 
-Screens: document list → upload → document detail (PDF page image beside staged
-rows, confidence, failed checks, edit/confirm ticker, approve/reject, publish) →
-revision diff. A live log panel streams the per-document JSONL log over SSE.
+Screens: document list (summary counts, incoming-folder scan/import, PDF upload
+with period auto-filled from the filename) → document detail (status, matched /
+unmatched / flagged counts, publish, re-extract, delete, per-row ticker, method
+and failing checks). Publishing only writes matched rows; unmatched rows stay
+staged for review.
 
 ## 5. AI integration
 

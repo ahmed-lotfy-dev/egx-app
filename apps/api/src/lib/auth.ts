@@ -18,9 +18,6 @@ export const auth = betterAuth({
   }),
   trustedOrigins: [
     ...env.trustedOrigins,
-    "http://localhost:5173",
-    "https://egx-app.alotfy.site",
-    "https://egx.alotfy.site",
   ],
   advanced: {
     defaultCookieAttributes: {

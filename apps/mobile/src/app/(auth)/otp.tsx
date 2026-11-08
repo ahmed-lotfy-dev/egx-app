@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState, type ComponentRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,6 +8,7 @@ import {
   Text,
   TextInput,
   View,
+  type TextInputInstance,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -26,7 +27,7 @@ export default function OtpScreen() {
   const params = useLocalSearchParams<{ email?: string }>();
   const email = Array.isArray(params.email) ? params.email[0] : (params.email ?? "");
 
-  const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);

@@ -30,8 +30,6 @@ if (!parsed.success) {
  * list, so a browser origin can never pass one check and fail the other.
  */
 const WEB_TRUSTED_ORIGINS = [
-  "https://egx.alotfy.site",
-  "https://egx-app.vercel.app",
   "https://egx-api.alotfy.site",
 ];
 

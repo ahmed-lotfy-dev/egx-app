@@ -6,7 +6,7 @@ Arabic-first EGX market app. Read this before changing anything.
 
 ```
 apps/mobile        Expo SDK 58 + expo-router + Uniwind (NativeWind). Arabic-first, RTL.
-apps/api           Bun + Hono + Drizzle + Better Auth. Serves /api and /admin.
+apps/api           Bun + Hono + Drizzle + Better Auth. Serves /api.
 apps/worker        Ingestion CLI + long-running scheduler (TradingView, Yahoo, RSS, NIM).
 packages/contracts Shared Zod schemas + generated OpenAPI + mobile API types.
 docs/              Architecture, feature docs, specs and plans.

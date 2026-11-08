@@ -23,6 +23,7 @@ export default function AppLayout() {
     >
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="stock/[ticker]" />
+      <Stack.Screen name="admin" />
     </Stack>
   );
 }

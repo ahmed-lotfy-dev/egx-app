@@ -16,11 +16,12 @@ COPY packages/contracts ./packages/contracts
 # normally; the extra dev deps are small compared to the base image.)
 RUN bun install
 
+WORKDIR /app/apps/api
+
 # Migrations are committed under src/db/migrations and applied at container
 # start. Never regenerate them during the build: drizzle hashes migration
 # files, and regenerating changes those hashes, which makes the production
 # migrator replay already-applied migrations.
-WORKDIR /app/apps/api
 
 # Production stage
 FROM oven/bun:1.3-alpine AS runner

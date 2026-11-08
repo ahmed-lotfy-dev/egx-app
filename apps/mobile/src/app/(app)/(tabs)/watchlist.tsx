@@ -40,6 +40,19 @@ type InstrumentSearchResult =
 
 const WATCHLIST_SELECTION_KEY = "egx.watchlistSelectedId";
 
+/**
+ * Custom lists are exposed to the client as `custom:<uuid>` so they can never
+ * collide with the `default:*` ids. The API routes take the bare uuid.
+ */
+const toRouteId = (id: string): string => {
+    const uuid = id.replace(/^custom:/, "");
+    // Validate it's a UUID (not a default:* id)
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid)) {
+      throw new Error("Not a custom watchlist");
+    }
+    return uuid;
+  };
+
 export default function WatchlistScreen() {
   const { t } = useTranslation();
   const locale = useLocaleStore((state) => state.locale);
@@ -130,16 +143,15 @@ export default function WatchlistScreen() {
       const created = fresh.data.find((l) => l.name === name && l.kind === "custom");
       if (created) selectList(created.id);
     },
-    onError: () => {
-      Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+    onError: (error: Error) => {
+      Alert.alert(t("watchlist.errorTitle"), error.message || t("watchlist.signinRequired"));
     },
   });
 
   const renameList = useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      const numericId = Number(id.replace("custom:", ""));
       const { error } = await api.PATCH("/api/watchlists/{id}", {
-        params: { path: { id: numericId } },
+        params: { path: { id: toRouteId(id) } },
         body: { name },
       });
       if (error) throw new Error("rename failed");
@@ -148,16 +160,15 @@ export default function WatchlistScreen() {
       setRenameModalVisible(false);
       void invalidate();
     },
-    onError: () => {
-      Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+    onError: (error: Error) => {
+      Alert.alert(t("watchlist.errorTitle"), error.message || t("watchlist.signinRequired"));
     },
   });
 
   const deleteList = useMutation({
     mutationFn: async (id: string) => {
-      const numericId = Number(id.replace("custom:", ""));
       const { error } = await api.DELETE("/api/watchlists/{id}", {
-        params: { path: { id: numericId } },
+        params: { path: { id: toRouteId(id) } },
       });
       if (error) throw new Error("delete failed");
     },
@@ -165,18 +176,17 @@ export default function WatchlistScreen() {
       setSelectedId(null);
       void invalidate();
     },
-    onError: () => {
-      Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+    onError: (error: Error) => {
+      Alert.alert(t("watchlist.errorTitle"), error.message || t("watchlist.signinRequired"));
     },
   });
 
   // Multi-add: sequential so server-side positions follow the picked order
   const addItems = useMutation({
     mutationFn: async ({ id, tickers }: { id: string; tickers: string[] }) => {
-      const numericId = Number(id.replace("custom:", ""));
       for (const ticker of tickers) {
         const { error } = await api.POST("/api/watchlists/{id}/items", {
-          params: { path: { id: numericId } },
+          params: { path: { id: toRouteId(id) } },
           body: { ticker },
         });
         if (error) throw new Error("add failed");
@@ -188,30 +198,28 @@ export default function WatchlistScreen() {
       setPicked([]);
       void invalidate();
     },
-    onError: () => {
-      Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+    onError: (error: Error) => {
+      Alert.alert(t("watchlist.errorTitle"), error.message || t("watchlist.signinRequired"));
     },
   });
 
   const removeItem = useMutation({
     mutationFn: async ({ id, ticker }: { id: string; ticker: string }) => {
-      const numericId = Number(id.replace("custom:", ""));
       const { error } = await api.DELETE("/api/watchlists/{id}/items/{ticker}", {
-        params: { path: { id: numericId, ticker } },
+        params: { path: { id: toRouteId(id), ticker } },
       });
       if (error) throw new Error("remove failed");
     },
     onSuccess: () => void invalidate(),
-    onError: () => {
-      Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+    onError: (error: Error) => {
+      Alert.alert(t("watchlist.errorTitle"), error.message || t("watchlist.signinRequired"));
     },
   });
 
   const reorderItems = useMutation({
     mutationFn: async ({ id, tickers }: { id: string; tickers: string[] }) => {
-      const numericId = Number(id.replace("custom:", ""));
       const { error } = await api.PUT("/api/watchlists/{id}/items/order", {
-        params: { path: { id: numericId } },
+        params: { path: { id: toRouteId(id) } },
         body: { tickers },
       });
       if (error) throw new Error("reorder failed");
@@ -243,7 +251,7 @@ export default function WatchlistScreen() {
       if (context?.previous) {
         queryClient.setQueryData(["watchlists"], context.previous);
       }
-      Alert.alert(t("watchlist.errorTitle"), t("watchlist.signinRequired"));
+      Alert.alert(t("watchlist.errorTitle"), _error.message || t("watchlist.signinRequired"));
     },
     onSettled: () => void queryClient.invalidateQueries({ queryKey: ["watchlists"] }),
   });
