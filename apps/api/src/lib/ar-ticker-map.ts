@@ -1,11 +1,14 @@
 /**
- * Arabic name → EGX ticker mapping for disclosure-document matching.
+ * Arabic name → EGX ticker mapping for disclosure-document matching AND
+ * free-text chat grounding (the API reads this via `@egx/api/ar-ticker-map`).
  *
  * Sources (in priority order):
  *   1. TradingView Arabic `description` field (ground truth — exact ticker match)
  *   2. instruments.name_ar from production DB (used where TV has no Arabic)
  *   3. Known PDF name variants for stocks whose TV/DB name diverges from
  *      the name printed in EGX disclosure documents
+ *   4. Colloquial/user spellings (كورة، كورا، قره…) for stocks with no
+ *      Arabic name in the universe at all
  *
  * Keys are normalized at lookup time (diacritics/hamza folded, whitespace
  * collapsed) — see translateArabicToTicker() in jobs/stage-document.ts.
@@ -327,14 +330,24 @@ export const AR_TO_TICKER_MAP: Record<string, string> = {
   "اكرومصر للشدات والسقالات المعدنية": "AKOM",
   "جولدن كوست السخنة للاستثمار السياحى": "GSSC",
   "كريستمارك للمقاولات والتطوير العقاري": "CRST",
+
+  // — Colloquial/user spellings for the in-app chat ground —
+  // "كورة للاستثمار والمواقع والتسويق الالكتروني" has no Arabic name in the
+  // universe sync, and users type short variants (regardless of spelling).
+  "كورة المواقع والتسويق الالكتروني": "KORA",
+  "كورة للاستثمار والمواقع": "KORA",
+  "كوره": "KORA",
+  "كورا": "KORA",
+  "قره": "KORA",
+  "قوره": "KORA",
 };
 
 export function translateArabicToTicker(name: string): string | null {
   const norm = normalizeArabic(name);
 
   // 1. Exact match
-  if (AR_TO_TICKER_MAP[norm]) {
-    return AR_TO_TICKER_MAP[norm];
+  for (const [key, ticker] of NORM_ENTRIES) {
+    if (key === norm) return ticker;
   }
 
   // 2. Token-containment fallback (longest key wins)
@@ -342,22 +355,32 @@ export function translateArabicToTicker(name: string): string | null {
   let best: string | null = null;
   let bestLen = 0;
 
-  for (const [mapName, ticker] of Object.entries(AR_TO_TICKER_MAP)) {
-    const mapTokens = tokenSet(mapName);
-    if (tokens.size === 0 || mapTokens.size === 0) continue;
-
-    let contained = 0;
-    for (const t of mapTokens) {
-      if (tokens.has(t)) contained++;
+  for (const [key, ticker, keyTokens] of NORM_ENTRIES) {
+    if (tokens.size === 0 || keyTokens.size === 0) continue;
+    let contained = true;
+    for (const t of keyTokens) {
+      if (![...tokens].some((m) => tokenMatch(m, t))) {
+        contained = false;
+        break;
+      }
     }
-    if (contained === mapTokens.size && mapName.length > bestLen) {
+    if (contained && key.length > bestLen) {
       best = ticker;
-      bestLen = mapName.length;
+      bestLen = key.length;
     }
   }
 
   return best;
 }
+
+// Entries normalized once at module load — raw keys contain ة/أ/ى which never
+// survive lookup normalization, so both exact and containment matching must
+// compare against the folded form.
+const NORM_ENTRIES: ReadonlyArray<readonly [string, string, ReadonlySet<string>]> =
+  Object.entries(AR_TO_TICKER_MAP).map(([key, ticker]) => {
+    const norm = normalizeArabic(key);
+    return [norm, ticker, tokenSet(norm)] as const;
+  });
 
 function normalizeArabic(s: string): string {
   return s
@@ -375,7 +398,22 @@ function tokenSet(s: string): Set<string> {
   return new Set(
     s
       .split(/\s+/)
-      .map((t) => t.replace(/^و/, "")) // drop leading waw
-      .filter((t) => t.length > 1) // drop standalone 'و'
+      .map((t) =>
+        t
+          // drop a leading waw ("والاستثمار" → "الاستثمار")
+          .replace(/^و(?=(ال|ل)?)/, "")
+          // definite-article + double-lam insensitive so "للاسمدة"/"لاسمدة" and
+          // "البنك…"/"بنك…" canonicalize to the same stem
+          .replace(/^ال/, "")
+          .replace(/^ل+/, "")
+          .replace(/^ال/, ""),
+      )
+      .filter((t) => t.length > 1),
   );
+}
+
+/** Token match with prefix tolerance for Arabic plural/spelling variants ("ثمار" ↔ "ثمارة"). */
+function tokenMatch(a: string, b: string): boolean {
+  if (a === b) return true;
+  return a.length >= 3 && b.length >= 3 && (a.startsWith(b) || b.startsWith(a));
 }

@@ -4,7 +4,7 @@ import { and, eq, sql, type SQL } from "drizzle-orm";
 import { pgTable, bigint, numeric, date, text, integer, timestamp } from "drizzle-orm/pg-core";
 
 import { logDocument } from "../lib/doc-log";
-import { AR_TO_TICKER_MAP } from "../lib/ar-ticker-map";
+import { AR_TO_TICKER_MAP } from "@egx/api/ar-ticker-map";
 import { readFile } from "node:fs/promises";
 import { extractionPath } from "@egx/api/documents";
 import { type ExtractionArtifact, type ExtractedRow } from "./extract-document";

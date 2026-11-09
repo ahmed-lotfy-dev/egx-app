@@ -5,6 +5,7 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().min(1),
   NVIDIA_API_KEY: z.string().optional(),
   NVIDIA_NIM_MODEL: z.string().default("nvidia/nemotron-3-ultra-550b-a55b"),
+  NVIDIA_NIM_EMBEDDING_MODEL: z.string().default("nvidia/nemotron-3-embed-1b"),
 });
 
 const parsed = EnvSchema.safeParse(process.env);

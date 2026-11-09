@@ -9,7 +9,8 @@
     "./schema": "./src/db/schema/index.ts",
     "./text": "./src/lib/text.ts",
     "./tradingview-history": "./src/lib/tradingview-history.ts",
-    "./documents": "./src/lib/documents.ts"
+    "./documents": "./src/lib/documents.ts",
+    "./ar-ticker-map": "./src/lib/ar-ticker-map.ts"
   },
   "scripts": {
     "dev": "bun --env-file=../../.env --hot src/index.ts",

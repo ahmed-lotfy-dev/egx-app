@@ -28,30 +28,6 @@ export type EmbedOptions = {
   limit?: number;
 };
 
-async function getPendingPages(options: EmbedOptions): Promise<Array<PageRow>> {
-  const filters: any[] = [eq(documentPages.embeddingStatus, "pending")];
-
-  if (options.id !== undefined) {
-    filters.push(eq(documentPages.documentId, options.id));
-  }
-
-  const limit = options.limit ?? 1000;
-
-  const rows = await db
-    .select({
-      id: documentPages.id,
-      documentId: documentPages.documentId,
-      pageNo: documentPages.pageNo,
-      text: documentPages.text,
-    })
-    .from(documentPages)
-    .where(and(...filters))
-    .orderBy(documentPages.pageNo)
-    .limit(limit);
-
-  return rows;
-}
-
 async function generateEmbeddings(texts: string[]): Promise<number[][]> {
   const apiKey = process.env.NVIDIA_API_KEY;
   if (!apiKey) {
@@ -65,7 +41,7 @@ async function generateEmbeddings(texts: string[]): Promise<number[][]> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.NVIDIA_NIM_EMBEDDING_MODEL || "nvidia/nv-embed-v2",
+      model: process.env.NVIDIA_NIM_EMBEDDING_MODEL || "nvidia/nemotron-3-embed-1b",
       input: texts,
       input_type: "passage",
       truncate: "END",
@@ -204,7 +180,7 @@ if (import.meta.main) {
     if (args[i] === "--id") {
       options.id = args[++i];
     } else if (args[i] === "--limit") {
-      options.limit = parseInt(args[++i], 10);
+      options.limit = parseInt(args[++i] ?? "1", 10);
     }
   }
 
