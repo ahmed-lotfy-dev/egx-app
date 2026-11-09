@@ -251,6 +251,16 @@ function wholeWord(token: string, haystack: string | null): boolean {
   return new RegExp(`(^|\\s)${escapeRegex(token)}(\\s|$)`).test(haystack);
 }
 
+/** Precomputed once so aliases always compare post-normalization. */
+const TICKER_ALIASES: Record<string, string> = Object.fromEntries(
+  Object.entries({
+    // Colloquial names the universe sync has no Arabic name for.
+    كوره: "KORA", // كورة للاستثمار والمواقع والتسويق الالكتروني
+    كورا: "KORA",
+    korra: "KORA",
+  } satisfies Record<string, string>).map(([alias, ticker]) => [normalizeSearch(alias), ticker]),
+);
+
 /**
  * Finds the instrument a free-text message is asking about, so a market-wide
  * chat can still be grounded on the right stock. Matches an explicit ticker
@@ -261,6 +271,20 @@ function wholeWord(token: string, haystack: string | null): boolean {
 export async function resolveMentionedTicker(text: string): Promise<string | null> {
   const trimmed = text.trim();
   if (!trimmed) return null;
+
+  // 0) Known aliases for colloquial company names. The DB name search can't
+  // catch these (empty/unmatched `search_name_ar`), and falling through to
+  // the market overview afterwards grounds the answer on the wrong stock.
+  const normalizedText = normalizeSearch(trimmed);
+  for (const [alias, aliasTicker] of Object.entries(TICKER_ALIASES)) {
+    if (
+      normalizedText === alias ||
+      normalizedText.startsWith(`${alias} `) ||
+      normalizedText.includes(` ${alias} `)
+    ) {
+      return aliasTicker;
+    }
+  }
 
   // 1) Explicit ticker symbol (Latin, 2–8 chars, standalone word).
   const tickerTokens = Array.from(

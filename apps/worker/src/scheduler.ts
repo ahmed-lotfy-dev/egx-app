@@ -3,6 +3,9 @@ import { closeDb } from "@egx/api/db";
 import { syncMacro } from "./jobs/macro";
 import { syncBars } from "./jobs/bars";
 import { extractDocuments } from "./jobs/extract-document";
+import { parseDocumentPages } from "./jobs/parse-document-pages";
+import { stageDocument } from "./jobs/stage-document";
+import { embedDocuments } from "./jobs/embed-document";
 import { syncFundamentals } from "./jobs/fundamentals";
 import { processAnalysisQueue, syncNews } from "./jobs/news";
 import { syncQuotes } from "./jobs/quotes";
@@ -85,6 +88,7 @@ const state = {
   lastNewsAt: 0,
   lastAnalysisAt: 0,
   lastExtractAt: 0,
+  lastEmbedAt: 0,
   lastUniverseDate: "",
   lastBarsDate: "",
   lastFundamentalsDate: "",
@@ -168,10 +172,28 @@ async function tick(now: Date): Promise<void> {
     runHeavyJob("news:analyze", () => processAnalysisQueue(15));
   }
 
-  // Admin PDFs: extract one pending document per tick.
+  // Admin PDFs: extract → parse pages → stage one pending document per tick.
+  // Run outside heavy queue so it doesn't get blocked by long-running news jobs.
   if (Date.now() - state.lastExtractAt >= EXTRACT_INTERVAL_MS) {
     state.lastExtractAt = Date.now();
-    runHeavyJob("extract-document", () => extractDocuments({ limit: 1 }));
+    void runJob("extract+parse+stage", async () => {
+      const ext = await extractDocuments({ limit: 1 });
+      if (ext.extracted > 0 && ext.documentIds.length > 0) {
+        for (const docId of ext.documentIds) {
+          await parseDocumentPages({ id: docId, limit: 1 });
+          await stageDocument(docId);
+        }
+      }
+    });
+  }
+
+  // Embed published documents that don't have embeddings yet.
+  // Run every 60s outside heavy queue.
+  if (Date.now() - state.lastEmbedAt >= EXTRACT_INTERVAL_MS) {
+    state.lastEmbedAt = Date.now();
+    void runJob("embed-documents", async () => {
+      await embedDocuments({ limit: 5 });
+    });
   }
 
   // Once-daily jobs.

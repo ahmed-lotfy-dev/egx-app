@@ -309,10 +309,12 @@ export interface paths {
                                     netProfitPeriodEnd: string | null;
                                     lastCoupon: number | null;
                                     exDate: string | null;
-                                    documentId: number;
+                                    /** Format: uuid */
+                                    documentId: string;
                                     page: number;
                                     rowIndex: number;
-                                    sourceDocument: number;
+                                    /** Format: uuid */
+                                    sourceDocument: string;
                                 } | null;
                             };
                             meta: {
@@ -479,7 +481,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             data: {
-                                id: number;
+                                /** Format: uuid */
+                                id: string;
                                 source: string;
                                 /** @enum {string} */
                                 lang: "ar" | "en";
@@ -760,7 +763,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             data: {
-                                id: number;
+                                /** Format: uuid */
+                                id: string;
                                 source: string;
                                 /** @enum {string} */
                                 lang: "ar" | "en";
@@ -982,7 +986,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1039,7 +1043,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1111,7 +1115,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1188,7 +1192,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                     ticker: string;
                 };
                 cookie?: never;
@@ -1257,7 +1261,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };

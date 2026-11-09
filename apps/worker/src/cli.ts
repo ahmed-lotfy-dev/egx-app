@@ -1,6 +1,7 @@
 import { closeDb } from "@egx/api/db";
 
 import { syncBars, type BarsOptions } from "./jobs/bars";
+import { embedDocuments } from "./jobs/embed-document";
 import { extractDocuments } from "./jobs/extract-document";
 import { stageDocument } from "./jobs/stage-document";
 import { syncFundamentals } from "./jobs/fundamentals";
@@ -119,6 +120,15 @@ async function main(): Promise<void> {
         await stageDocument(parseUUID("id")!),
       );
       break;
+    case "embed-document":
+      print(
+        "embed-document",
+        await embedDocuments({
+          id: parseUUID("id"),
+          limit: positiveNumber("limit") ?? 1000,
+        }),
+      );
+      break;
     case "extract-and-stage":
       print(
         "extract-and-stage",
@@ -150,7 +160,7 @@ async function main(): Promise<void> {
     default:
       console.error(
         [
-          "Usage: bun src/cli.ts <universe|quotes|macro|bars|symbols|fundamentals|news|news:analyze|news:full|extract-document|stage-document|extract-and-stage|all|schedule> [options]",
+          "Usage: bun src/cli.ts <universe|quotes|macro|bars|symbols|fundamentals|news|news:analyze|news:full|extract-document|parse-document-pages|stage-document|extract-and-stage|all|schedule> [options]",
           "",
           "Bars options:",
           "  --tickers COMI,HRHO   limit to specific tickers",
@@ -165,6 +175,10 @@ async function main(): Promise<void> {
           "",
           "Stage options:",
           "  --id <uuid>           stage one document by id",
+          "",
+          "Embed options:",
+          "  --id <uuid>           embed one document by id",
+          "  --limit 1000          max pages to embed",
           "",
           "Extract + Stage:",
           "  --id <uuid>           extract and stage one document by id",

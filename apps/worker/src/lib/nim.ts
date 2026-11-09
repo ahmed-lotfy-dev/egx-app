@@ -2,6 +2,9 @@ import { env } from "../config/env";
 
 const NIM_BASE_URL = "https://integrate.api.nvidia.com/v1";
 const NIM_MODEL = env.NVIDIA_NIM_MODEL ?? "nvidia/nemotron-3-ultra-550b-a55b";
+const NIM_EMBEDDING_MODEL = env.NVIDIA_NIM_EMBEDDING_MODEL ?? "nvidia/nv-embed-v1";
+
+export { NIM_EMBEDDING_MODEL };
 
 export interface NIMMessage {
   role: "system" | "user" | "assistant";

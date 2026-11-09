@@ -24,7 +24,6 @@ import {
   adminApi,
   datesFromFilename,
   type AdminDocument,
-  type AdminIncomingFile,
 } from "@/lib/admin-api";
 import { formatDateWithYear } from "@/lib/format";
 
@@ -81,7 +80,6 @@ export default function AdminDocumentsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [scanResults, setScanResults] = useState<AdminIncomingFile[] | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [pickedFile, setPickedFile] = useState<{
     uri: string;
@@ -110,39 +108,26 @@ export default function AdminDocumentsScreen() {
     { total: 0, validated: 0, published: 0, failed: 0 },
   );
 
-  const scanMutation = useMutation({
-    mutationFn: () => adminApi.scan(),
-    onSuccess: (res) => setScanResults(res.data),
-    onError: (error: Error) =>
-      Alert.alert(t("admin.documents.failed"), error.message),
-  });
-
-  const importMutation = useMutation({
-    mutationFn: (file: AdminIncomingFile) =>
-      adminApi.importFile({
-        filename: file.filename,
-        periodStart: file.periodStart!,
-        periodEnd: file.periodEnd!,
-      }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin", "documents"] });
-      // Refresh the incoming list too; a failed rescan must not hide the success.
-      scanMutation.mutate();
-      Alert.alert(t("admin.documents.done"), t("admin.documents.imported"));
-    },
-    onError: (error: Error) =>
-      Alert.alert(t("admin.documents.failed"), error.message),
-  });
-
   const uploadMutation = useMutation({
     mutationFn: () =>
       adminApi.upload(pickedFile!, { periodStart, periodEnd }),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       await queryClient.invalidateQueries({ queryKey: ["admin", "documents"] });
       setUploadOpen(false);
       setPickedFile(null);
       setPeriodStart("");
       setPeriodEnd("");
+      
+      // Auto-trigger extraction after upload
+      const documentId = result.data?.id;
+      if (documentId) {
+        try {
+          await adminApi.extract(documentId);
+        } catch (e) {
+          console.warn("Auto-extract failed:", e);
+        }
+      }
+      
       Alert.alert(t("admin.documents.done"), t("admin.documents.uploaded"));
     },
     onError: (error: Error) =>
@@ -197,25 +182,6 @@ export default function AdminDocumentsScreen() {
     uploadMutation.mutate();
   }
 
-  function confirmImport(file: AdminIncomingFile) {
-    if (!file.periodStart || !file.periodEnd) {
-      Alert.alert(t("admin.documents.failed"), t("admin.documents.noDates"));
-      return;
-    }
-
-    Alert.alert(
-      t("admin.documents.importTitle"),
-      `${file.filename}\n${file.periodStart} → ${file.periodEnd}`,
-      [
-        { text: t("admin.documents.cancel"), style: "cancel" },
-        {
-          text: t("admin.documents.import"),
-          onPress: () => importMutation.mutate(file),
-        },
-      ],
-    );
-  }
-
   return (
     <Screen>
       <ScreenHeader
@@ -268,74 +234,6 @@ export default function AdminDocumentsScreen() {
             tone={counts.failed > 0 ? "text-down" : "text-text-muted"}
           />
         </View>
-
-        <View className="mx-5 mt-5 flex-row items-center justify-between">
-          <View className="flex-1 pr-3">
-            <Text className="font-title text-[14px] text-text">
-              {t("admin.documents.scan")}
-            </Text>
-            <Text className="mt-0.5 font-body text-[11px] leading-4 text-text-muted">
-              {t("admin.documents.scanHint")}
-            </Text>
-          </View>
-          <Button
-            label={t("admin.documents.scanAction")}
-            variant="secondary"
-            loading={scanMutation.isPending}
-            onPress={() => scanMutation.mutate()}
-          />
-        </View>
-
-        {scanResults ? (
-          <View className="mx-5 mt-4 overflow-hidden rounded-2xl border border-border bg-surface">
-            <Text className="border-b border-border px-4 py-3 font-label text-[10px] uppercase tracking-[0.14em] text-text-muted">
-              {t("admin.documents.incoming")}
-            </Text>
-
-            {scanResults.length === 0 ? (
-              <Text className="px-4 py-5 font-body text-[13px] text-text-secondary">
-                {t("admin.documents.incomingEmpty")}
-              </Text>
-            ) : (
-              scanResults.map((file, index) => (
-                <View
-                  key={file.sha256}
-                  className={`flex-row items-center px-4 py-3 ${
-                    index > 0 ? "border-t border-border/60" : ""
-                  }`}
-                >
-                  <View className="flex-1 pr-3">
-                    <Text className="font-body text-[12px] text-text" numberOfLines={1}>
-                      {file.filename}
-                    </Text>
-                    <Text className="mt-0.5 font-body text-[10px] text-text-muted">
-                      {file.periodStart && file.periodEnd
-                        ? `${file.periodStart} → ${file.periodEnd}`
-                        : t("admin.documents.noDates")}
-                    </Text>
-                  </View>
-
-                  {file.alreadyUploaded ? (
-                    <Text className="font-body text-[11px] text-text-muted">
-                      {t("admin.documents.alreadyImported")}
-                    </Text>
-                  ) : (
-                    <Pressable
-                      accessibilityRole="button"
-                      disabled={importMutation.isPending}
-                      onPress={() => confirmImport(file)}
-                      className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-1.5 active:opacity-80"
-                    >
-                      <Text className="font-title text-[11px] text-gold">
-                        {t("admin.documents.import")}
-                      </Text>
-                    </Pressable>
-                  )}
-                </View>
-              ))
-            )}
-          </View>
-        ) : null}
 
         <View className="mx-5 mt-6">
           <Text className="font-label text-[10px] uppercase tracking-[0.14em] text-text-muted">
@@ -490,8 +388,7 @@ function DocumentCard({
   document: AdminDocument;
   onPress: () => void;
 }) {
-  const { t, i18n } = useTranslation();
-  const locale = i18n.language === "ar" ? "ar" : "en";
+  const { t } = useTranslation();
 
   return (
     <Pressable
@@ -513,8 +410,9 @@ function DocumentCard({
           </View>
 
           <Text className="mt-2 font-body text-[11px] text-text-muted" style={tabular}>
-            {formatDateWithYear(document.periodStart, locale)} →{" "}
-            {formatDateWithYear(document.periodEnd, locale)}
+            {document.periodStart && document.periodEnd
+              ? `${document.periodStart} → ${document.periodEnd}`
+              : "—"}
           </Text>
         </View>
 

@@ -108,6 +108,10 @@ export const documentPages = pgTable(
       .references(() => sourceDocuments.id, { onDelete: "cascade" }),
     pageNo: integer("page_no").notNull(),
     text: text("text").notNull(),
+    embedding: text("embedding"), // halfvec(1536) - pgvector embedding
+    embeddingStatus: text("embedding_status").notNull().default("pending"),
+    embeddingError: text("embedding_error"),
+    embeddedAt: timestamp("embedded_at", tz),
     createdAt: timestamp("created_at", tz).defaultNow().notNull(),
   },
   (table) => [

@@ -35,6 +35,7 @@ export const instruments = pgTable(
     kind: text("kind").notNull().default("stock"),
     currency: text("currency").notNull().default("EGP"),
     isActive: boolean("is_active").notNull().default(true),
+    listedAt: date("listed_at", { mode: "string" }),
     createdAt: timestamp("created_at", tz).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", tz)
       .defaultNow()

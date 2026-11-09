@@ -1,8 +1,9 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { AiChatRequestSchema, AiChatResponseSchema, ErrorResponseSchema } from "@egx/contracts";
 
-import { buildCatalog, buildMarketContext, buildTickerContext, resolveMentionedTicker } from "../lib/ai-context";
+import { buildMarketContext, buildTickerContext, resolveMentionedTicker } from "../lib/ai-context";
 import { aiConfigured, chat as nimChat, type NIMMessage } from "../lib/nim";
+import { searchRagForChat, formatRagContext } from "../lib/ai-rag";
 
 /**
  * Market assistant. Every request is grounded: the system prompt carries a
@@ -11,8 +12,10 @@ import { aiConfigured, chat as nimChat, type NIMMessage } from "../lib/nim";
  * invent numbers. Stateless — the client sends the conversation each time.
  */
 
-const MAX_CONTEXT_MESSAGES = 12;
-const MAX_MESSAGE_CHARS = 2000;
+// Prefill dominates latency on the 550B NIM model — keep history tight or the
+// request healthily exceeds any sane timeout (observed 90s+ 503s).
+const MAX_CONTEXT_MESSAGES = 8;
+const MAX_MESSAGE_CHARS = 1200;
 
 /** Tiny per-IP limiter so a runaway client can't burn the NIM quota. */
 const RATE_LIMIT = { windowMs: 60_000, max: 12 } as const;
@@ -35,17 +38,24 @@ function rateLimited(ip: string): boolean {
   return false;
 }
 
-const SYSTEM_PROMPT_BASE = `You are "مساعد EGX" — the in-app financial assistant of an Egyptian stock market app. You help retail investors and traders understand the Egyptian Exchange (EGX), macro indicators, and the news the app ingests.
+const SYSTEM_PROMPT_BASE = `You are "مساعد EGX" — the in-app financial analyst for Egyptian stock market investors. You provide data-grounded, actionable investment analysis combining live market data, company fundamentals, news sentiment, AND official EGX disclosure documents (RAG).
 
 Rules:
 - Reply in Arabic when locale=ar (clear Egyptian-friendly Modern Standard Arabic) and in English when locale=en.
-- Ground EVERY number in the MARKET DATA block provided below. Never invent prices, percentages, dates, or news. If the data block lacks something, say so plainly.
-- If the user asks about a stock that is NOT in the MARKET DATA block, do NOT claim it does not exist. Say you can only see the data the app gave you for this turn and ask them to open that stock's screen (or give its ticker) so the app loads its data — then answer from that.
-- EGX quotes are delayed ~15–20 minutes by the exchange; respect the asOf timestamps and mention freshness when it matters.
-- Be concise: at most ~180 words, prefer short bullet points, always use ticker symbols (e.g. COMI, EAST).
-- You may explain general financial concepts (P/E, support/resistance, dividend yield) without data.
-- Frame everything as analysis and education, never as a guaranteed prediction or an instruction to trade.
-- End every answer with one short line reminding the user this is not investment advice (in the reply language).`;
+- Ground EVERY number in the MARKET DATA and RAG CONTEXT blocks below. Never invent prices, percentages, dates, or news. If data is missing, say so plainly.
+- EGX quotes are delayed ~15–20 minutes by the exchange; respect the asOf timestamps.
+- Be concise but thorough: ~250 words max, use bullet points, always use ticker symbols (e.g. COMI, EAST).
+- Provide a CLEAR INVESTMENT VERDICT: 🟢 BUY / 🟡 HOLD / 🔴 SELL with reasoning.
+- Structure your answer:
+  1. **Quick Verdict** (Buy/Hold/Sell + 1-line reason)
+  2. **Fundamental Health** (Profitability, Valuation, Dividends, Balance Sheet)
+  3. **Technical / Price Action** (Trend, Support/Resistance, Volume)
+  4. **News & Catalysts** (Recent news sentiment, upcoming events)
+  5. **Disclosure Insights** (Key findings from EGX filings/RAG)
+  6. **Risk Factors** (What could go wrong)
+  7. **Final Recommendation** with price targets if applicable
+- Frame as analysis/education, not guaranteed prediction. End with "هذا تحليل تعليمي وليس توصية استثمارية." (or English equivalent).
+- When the user gives their own trades, compute the average cost as NET cost basis: total money spent minus money received from sales, divided by shares currently held. Verify the division explicitly.`;
 
 const chatRoute = createRoute({
   method: "post",
@@ -139,17 +149,8 @@ aiRoutes.openapi(chatRoute, async (c) => {
   const mentioned = lastUser ? await resolveMentionedTicker(lastUser.content) : null;
   const effectiveTicker = mentioned ?? ticker;
 
-  // Market-wide chats carry the full listing catalog so the model can map a
-  // user's phrasing (Arabic names we have no nameAr for, transliterations,
-  // typos) onto a ticker and ask for a grounded re-run via [[GROUND:TICKER]].
-  const catalog = effectiveTicker ? null : await buildCatalog();
-
-  const systemPromptFor = (groundingText: string, withCatalog: boolean) =>
-    `${SYSTEM_PROMPT_BASE}\n\nlocale=${locale}\n\nMARKET DATA (app snapshot, may be delayed):\n${groundingText}${
-      withCatalog
-        ? `\n\nINSTRUMENT CATALOG (every listing the app has, ticker=English name | Arabic name):\n${catalog}\n\nIf the user asks about a stock that is in the CATALOG but NOT in MARKET DATA above, reply with exactly [[GROUND:TICKER]] (the ticker from the catalog) and nothing else — the app will then load that stock's data and ask you again. This is an internal protocol; never mention it to the user.`
-        : ""
-    }`;
+  const systemPromptFor = (groundingText: string, ragContext: string) =>
+    `${SYSTEM_PROMPT_BASE}\n\nlocale=${locale}\n\nMARKET DATA (app snapshot, may be delayed):\n${groundingText}${ragContext ? `\n\n${ragContext}` : ""}`;
 
   let grounding: Awaited<ReturnType<typeof buildMarketContext>>;
   if (effectiveTicker) {
@@ -161,31 +162,51 @@ aiRoutes.openapi(chatRoute, async (c) => {
     grounding = await buildMarketContext();
   }
 
-  const callModel = (groundingText: string, withCatalog: boolean) =>
+  // RAG: ALWAYS search document pages for relevant context from uploaded EGX disclosure documents
+  const lastUserMessage = lastUser?.content ?? "";
+  let ragContext = "";
+  
+  try {
+    const { context: ragContextText, results } = await searchRagForChat(lastUserMessage, {
+      limit: 8,
+      similarityThreshold: 0.15,
+    });
+    ragContext = formatRagContext(results);
+  } catch (e) {
+    console.warn("[ai] RAG search failed:", e);
+  }
+
+  const callModel = (groundingText: string, ragText: string, maxTokens: number, timeoutMs: number) =>
     nimChat({
-      messages: [{ role: "system", content: systemPromptFor(groundingText, withCatalog) }, ...history],
-      maxTokens: 1200,
-      temperature: 0.4,
-      timeoutMs: 60_000,
+      messages: [{ role: "system", content: systemPromptFor(groundingText, ragText) }, ...history],
+      maxTokens,
+      temperature: 0.3,
+      timeoutMs,
     });
 
   try {
-    let response = await callModel(grounding.text, catalog !== null);
+    let response: Awaited<ReturnType<typeof nimChat>>;
+    try {
+      // Full attempt: RAG + full history. Generation on nemotron-3-ultra-550b
+      // regularly takes 60–120s, so give it real headroom before killing it.
+      response = await callModel(grounding.text, ragContext, 1800, 150_000);
+    } catch (firstError) {
+      // One compact retry without RAG context so the user gets an answer even
+      // when the full prompt blows the latency budget (was 503 elbow).
+      console.warn(
+        "[ai] chat attempt 1 failed, falling back to compact prompt:",
+        firstError instanceof Error ? firstError.message : firstError,
+      );
+      response = await callModel(
+        grounding.text,
+        "",
+        700,
+        120_000,
+      );
+    }
     let groundedTicker = grounding.ticker;
 
-    // The model asked for a different stock than the one we grounded — load
-    // its data and answer for real. One re-ground pass, no loops.
-    const requested = response.content.match(/\[\[GROUND:([A-Za-z0-9]{1,10})\]\]/);
-    if (requested && requested[1]!.toUpperCase() !== groundedTicker) {
-      const wanted = requested[1]!.toUpperCase();
-      const context = await buildTickerContext(wanted);
-      if (context) {
-        response = await callModel(context.text, false);
-        groundedTicker = context.ticker;
-      }
-    }
-
-    const content = response.content.replace(/\[\[GROUND:[A-Za-z0-9]+\]\]/g, "").trim();
+    const content = response.content.trim();
     if (!content) {
       return c.json(
         { error: { code: "AI_EMPTY", message: "The assistant returned an empty answer." } },

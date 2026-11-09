@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client";
 import { apiBaseUrl } from "@/lib/config";
+import { File } from "expo-file-system";
 
 /**
  * Admin endpoints are intentionally outside the public OpenAPI contract, so the
@@ -145,12 +146,16 @@ export const adminApi = {
     periodStart: string;
     periodEnd: string;
   }) => {
+    // Use expo-file-system's File class which implements Blob interface
+    // This is the correct way to upload files in Expo/React Native per Expo docs
+    const fsFile = new File(file.uri);
+    
+    // Build filename with period dates: originalName_YYYY-MM-DD_YYYY-MM-DD.pdf
+    const baseName = file.name.replace(/\.pdf$/i, "");
+    const uploadFileName = `${baseName}_${dates.periodStart}_${dates.periodEnd}.pdf`;
+    
     const form = new FormData();
-    form.append("file", {
-      uri: file.uri,
-      name: file.name,
-      type: file.mimeType || "application/pdf",
-    });
+    form.append("file", fsFile, uploadFileName);
     form.append("periodStart", dates.periodStart);
     form.append("periodEnd", dates.periodEnd);
 
@@ -185,6 +190,24 @@ export const adminApi = {
   extract: (id: string) =>
     adminFetch<{ data: unknown }>(
       `/api/admin/documents/${encodeURIComponent(id)}/extract`,
+      { method: "POST" },
+    ),
+
+  parsePages: (id: string) =>
+    adminFetch<{ data: unknown }>(
+      `/api/admin/documents/${encodeURIComponent(id)}/parse`,
+      { method: "POST" },
+    ),
+
+  stage: (id: string) =>
+    adminFetch<{ data: unknown }>(
+      `/api/admin/documents/${encodeURIComponent(id)}/stage`,
+      { method: "POST" },
+    ),
+
+  embed: (id: string) =>
+    adminFetch<{ data: unknown }>(
+      `/api/admin/documents/${encodeURIComponent(id)}/embed`,
       { method: "POST" },
     ),
 

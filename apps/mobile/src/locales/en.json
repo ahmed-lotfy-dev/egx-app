@@ -335,7 +335,22 @@
       "noRows": "No extracted rows yet. Run extraction first.",
       "done": "Done",
       "failed": "Something went wrong",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "parsePages": "Parse Pages",
+      "parsing": "Parsing…",
+      "parseTitle": "Parse Pages?",
+      "parseBody": "Parse extracted pages and prepare for semantic search.",
+      "parsePagesStarted": "Started parsing pages",
+      "stage": "Stage",
+      "staging": "Staging…",
+      "stageTitle": "Stage Data?",
+      "stageBody": "Validate extracted rows, match instruments, and create review notes.",
+      "stageStarted": "Started staging",
+      "embed": "Embed",
+      "embedding": "Embedding…",
+      "embedTitle": "Embed for Semantic Search?",
+      "embedBody": "Generate vector embeddings for pages to enable semantic search.",
+      "embedStarted": "Started embedding"
     }
   },
   "newsTab": {

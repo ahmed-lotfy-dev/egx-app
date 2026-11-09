@@ -806,7 +806,8 @@
                               "nullable": true
                             },
                             "documentId": {
-                              "type": "number"
+                              "type": "string",
+                              "format": "uuid"
                             },
                             "page": {
                               "type": "integer"
@@ -815,7 +816,8 @@
                               "type": "integer"
                             },
                             "sourceDocument": {
-                              "type": "number"
+                              "type": "string",
+                              "format": "uuid"
                             }
                           },
                           "required": [
@@ -1247,7 +1249,8 @@
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                           },
                           "source": {
                             "type": "string"
@@ -2046,7 +2049,8 @@
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                           },
                           "source": {
                             "type": "string"
@@ -2614,9 +2618,8 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
             "name": "id",
@@ -2737,9 +2740,8 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
             "name": "id",
@@ -2843,9 +2845,8 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
             "name": "id",
@@ -2968,9 +2969,8 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
             "name": "id",
@@ -3084,9 +3084,8 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
             "name": "id",

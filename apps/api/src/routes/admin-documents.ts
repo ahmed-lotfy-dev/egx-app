@@ -5,11 +5,12 @@ import { z } from "zod";
 import { db } from "../db/client";
 import { instruments, sourceDocuments, stockSnapshots } from "../db/schema";
 import { getAdmin } from "../lib/admin";
-import { readDocumentFile, readDocumentLog, savePdfUpload, incomingPath, incomingFilePath, documentPath, documentsRoot } from "../lib/documents";
-import { readdir, stat, copyFile, mkdir, readFile } from "node:fs/promises";
+import { readDocumentFile, readDocumentLog, savePdfUpload, incomingPath, incomingFilePath, documentPath, extractionPath, documentLogPath, documentsRoot } from "../lib/documents";
+import { readdir, stat, copyFile, mkdir, readFile, unlink } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { logger } from "../lib/logger";
+import { spawn } from "node:child_process";
 
 export const adminDocumentRoutes = new Hono();
 
@@ -58,10 +59,113 @@ adminDocumentRoutes.post("/api/admin/documents/:id/extract", async (c) => {
     })
     .where(eq(sourceDocuments.id, id));
 
-  logger.info({ documentId: id }, "admin document re-extract triggered");
+  // Clean up old extraction artifact and log (keep PDF - same SHA256)
+  const extractionFilePath = extractionPath(document.sha256);
+  const logPath = documentLogPath(document.sha256);
+  await Promise.allSettled([unlink(extractionFilePath), unlink(logPath)]);
+
+  logger.info({ documentId: id, sha256: document.sha256 }, "admin document re-extract triggered (old extraction cleared)");
 
   return c.json({ data: { id, status: "uploaded" } }, 200);
 });
+
+/**
+ * Parse document pages for RAG after extraction.
+ */
+adminDocumentRoutes.post("/api/admin/documents/:id/parse", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const id = c.req.param("id");
+  if (!id) return c.json(badRequest("Invalid document id"), 400);
+
+  const [document] = await db
+    .select()
+    .from(sourceDocuments)
+    .where(eq(sourceDocuments.id, id))
+    .limit(1);
+
+  if (!document) {
+    return c.json({ error: { code: "not_found", message: "Document not found" } }, 404);
+  }
+
+  if (document.status !== "extracted") {
+    return c.json(badRequest("Document must be extracted first"), 409);
+  }
+
+  await db
+    .update(sourceDocuments)
+    .set({ status: "validating" })
+    .where(eq(sourceDocuments.id, id));
+
+  logger.info({ documentId: id }, "admin document parse triggered");
+
+  return c.json({ data: { id, status: "validating" } }, 200);
+});
+
+/**
+ * Stage document: validate and match extracted rows to instruments.
+ */
+adminDocumentRoutes.post("/api/admin/documents/:id/stage", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const id = c.req.param("id");
+  if (!id) return c.json(badRequest("Invalid document id"), 400);
+
+  const [document] = await db
+    .select()
+    .from(sourceDocuments)
+    .where(eq(sourceDocuments.id, id))
+    .limit(1);
+
+  if (!document) {
+    return c.json({ error: { code: "not_found", message: "Document not found" } }, 404);
+  }
+
+  if (document.status !== "validating" && document.status !== "extracted") {
+    return c.json(badRequest("Document must be parsed first"), 409);
+  }
+
+  await db
+    .update(sourceDocuments)
+    .set({ status: "validating" })
+    .where(eq(sourceDocuments.id, id));
+
+  logger.info({ documentId: id }, "admin document stage triggered");
+
+  return c.json({ data: { id, status: "validating" } }, 200);
+});
+
+/**
+ * Embed document: generate vector embeddings for RAG.
+ */
+adminDocumentRoutes.post("/api/admin/documents/:id/embed", async (c) => {
+  const admin = await getAdmin(c);
+  if (!admin) return forbidden(c);
+
+  const id = c.req.param("id");
+  if (!id) return c.json(badRequest("Invalid document id"), 400);
+
+  const [document] = await db
+    .select()
+    .from(sourceDocuments)
+    .where(eq(sourceDocuments.id, id))
+    .limit(1);
+
+  if (!document) {
+    return c.json({ error: { code: "not_found", message: "Document not found" } }, 404);
+  }
+
+  if (document.status !== "published") {
+    return c.json(badRequest("Document must be published first"), 409);
+  }
+
+  logger.info({ documentId: id }, "admin document embed triggered");
+
+  return c.json({ data: { id, status: "published" } }, 200);
+});
+
 
 /**
  * Delete a document (and its staged snapshots).
@@ -91,7 +195,17 @@ adminDocumentRoutes.delete("/api/admin/documents/:id", async (c) => {
   // Delete document pages
   await db.delete(sourceDocuments).where(eq(sourceDocuments.id, id));
 
-  logger.info({ documentId: id, filename: document.filename }, "admin document deleted");
+  // Clean up files on disk (PDF, extraction JSON, logs)
+  const pdfPath = documentPath(document.sha256);
+  const extractionFilePath = extractionPath(document.sha256);
+  const logPath = documentLogPath(document.sha256);
+  await Promise.allSettled([
+    unlink(pdfPath),
+    unlink(extractionFilePath),
+    unlink(logPath),
+  ]);
+
+  logger.info({ documentId: id, filename: document.filename, sha256: document.sha256 }, "admin document deleted (files removed)");
 
   return c.json({ data: { id, deleted: true } }, 200);
 });
@@ -187,6 +301,15 @@ adminDocumentRoutes.post("/api/admin/documents/:id/publish", async (c) => {
     },
     "admin document published",
   );
+
+  // Fire-and-forget: spawn embed job for the published document
+  const workerDir = join(process.cwd(), "apps", "worker");
+  const embedProcess = spawn("bun", ["run", "src/cli.ts", "embed-document", "--id", id], {
+    cwd: workerDir,
+    detached: true,
+    stdio: "ignore",
+  });
+  embedProcess.unref();
 
   return c.json(
     {

@@ -127,6 +127,7 @@ type InstrumentRow = {
   nameEnNorm: string;
   nameArTokens: Set<string>;
   nameEnTokens: Set<string>;
+  listedAt: string | null;
 };
 
 type MatchResult = {
@@ -156,6 +157,7 @@ async function loadInstruments(): Promise<InstrumentRow[]> {
       ticker: instruments.ticker,
       nameAr: instruments.nameAr,
       nameEn: instruments.nameEn,
+      listedAt: instruments.listedAt,
     })
     .from(instruments);
 
@@ -401,7 +403,7 @@ async function stageOne(
   const checks = validateRow(row, match);
   const reviewNote = buildReviewNote(checks);
 
-  const toNull = (v: number | string | null | undefined) => (v === null || v === undefined ? null : v);
+  const toNull = (v: number | string | null | undefined) => (v === null || v === undefined || v === "" ? null : v);
   
   // Use raw SQL to avoid TypeScript inference issues with nullable instrumentId
   await db.execute(sql`
@@ -454,7 +456,7 @@ export async function stageDocument(documentId: string): Promise<{
     throw new Error(`Document ${documentId} not found`);
   }
 
-  if (document.status !== "extracted") {
+  if (!["extracted", "validating"].includes(document.status)) {
     throw new Error(`Document ${documentId} is not extracted (status: ${document.status})`);
   }
 
@@ -517,6 +519,25 @@ export async function stageDocument(documentId: string): Promise<{
         instrumentId: match.instrumentId,
       });
       continue;
+    }
+
+    // Skip if the instrument wasn't listed yet at the document's period end
+    const matchedInstrument = instruments.find((i) => i.id === match.instrumentId);
+    if (match.instrumentId && matchedInstrument?.listedAt) {
+      const listedAt = new Date(matchedInstrument.listedAt);
+      const periodEndDate = new Date(document.periodEnd);
+      if (listedAt > periodEndDate) {
+        await logDocument(sha, "warn", "Stock not listed yet at document period, skipping", {
+          documentId,
+          page: row.page,
+          rowIndex: row.rowIndex,
+          nameAr: row.nameAr,
+          ticker: matchedInstrument.ticker,
+          listedAt: matchedInstrument.listedAt,
+          periodEnd: document.periodEnd,
+        });
+        continue;
+      }
     }
 
     const checks = validateRow(row, match);

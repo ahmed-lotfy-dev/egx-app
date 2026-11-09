@@ -254,11 +254,17 @@ async function fail(sha: string, id: string, message: string): Promise<void> {
  * Processes up to `limit` documents. Returns a small summary for the CLI and
  * the scheduler.
  */
-export async function extractDocuments(options: ExtractOptions = {}) {
+export async function extractDocuments(options: ExtractOptions = {}): Promise<{
+  processed: number;
+  extracted: number;
+  failed: number;
+  documentIds: string[];
+}> {
   const limit = Math.max(1, options.limit ?? 1);
   let processed = 0;
   let extracted = 0;
   let failed = 0;
+  const documentIds: string[] = [];
 
   for (let index = 0; index < limit; index += 1) {
     const document = await claimNext(options);
@@ -268,8 +274,12 @@ export async function extractDocuments(options: ExtractOptions = {}) {
 
     try {
       const status = await extractOne(document);
-      if (status === "extracted") extracted += 1;
-      else failed += 1;
+      if (status === "extracted") {
+        extracted += 1;
+        documentIds.push(document.id);
+      } else {
+        failed += 1;
+      }
     } catch (error) {
       failed += 1;
       const message = error instanceof Error ? error.message : String(error);
@@ -277,5 +287,5 @@ export async function extractDocuments(options: ExtractOptions = {}) {
     }
   }
 
-  return { processed, extracted, failed };
+  return { processed, extracted, failed, documentIds };
 }
